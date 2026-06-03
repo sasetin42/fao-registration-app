@@ -202,39 +202,107 @@
     </div>
   </footer>
 
-  <!-- Success Registration Modal for Virtual Attendees -->
-  <div class="tc-modal-overlay" id="successModal" hidden role="dialog" aria-modal="true" aria-labelledby="successModalTitle" style="z-index: 2200;">
-    <div class="tc-modal" style="max-width: 650px;">
-      <div class="tc-modal__header">
-        <h3 class="tc-modal__title" id="successModalTitle">REGISTRATION SUCCESSFUL!</h3>
-        <button type="button" class="tc-modal__close" id="successModalClose" aria-label="Close">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
+   <!-- ═══════════════════════════════════════════════════════════
+       SUCCESS REGISTRATION MODAL  — Enhanced Premium Version
+       Shown for both Online/Virtual and In-Person attendees.
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="tc-modal-overlay" id="successModal" hidden role="dialog" aria-modal="true" aria-labelledby="successModalTitle" style="z-index: 2200; align-items: flex-start; padding: 24px 16px; overflow-y: auto;">
 
-      <div class="tc-modal__body" id="successModalBody">
-        <div style="text-align: center; margin-bottom: var(--spacing-lg);">
-          <div class="confirmation-icon" style="margin: 0 auto 12px; background-color: var(--color-success); border-color: var(--color-success); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+    <div class="tc-modal" style="max-width: 700px; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 64px rgba(17,106,171,0.22); margin: auto;">
+
+      <!-- ── Modal Header Banner ── -->
+      <div id="successModalHeader" style="background: linear-gradient(135deg, #1C4767 0%, #116AAB 60%, #5792C9 100%); padding: 28px 28px 22px; position: relative; overflow: hidden;">
+        <!-- Decorative circles -->
+        <div aria-hidden="true" style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
+        <div aria-hidden="true" style="position:absolute;bottom:-20px;left:40px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"></div>
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+          <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;">
+            <!-- Animated checkmark badge -->
+            <div id="successCheckBadge" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:successPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both;" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <h3 id="successModalTitle" style="font-size:18px;font-weight:700;color:#ffffff;margin:0 0 4px;line-height:1.3;">Registration Successful!</h3>
+              <p id="successModalSubtitle" style="font-size:12.5px;color:rgba(255,255,255,0.8);margin:0;line-height:1.4;">APSAM 2026 · Asia-Pacific Conference on Sustainable Agricultural Mechanization</p>
+            </div>
           </div>
-          <h4 style="font-size: 18px; font-weight: 700; color: var(--color-primary-dark); margin-bottom: 4px;">Zoom Meetings & Calendar Access</h4>
-          <p style="font-size: 13.5px; color: var(--color-text-muted);">You are registered for the online sessions listed below. Please save these details.</p>
+          <button type="button" id="successModalClose" aria-label="Close registration details" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s;color:#fff;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
 
-        <div id="successModalZoomContainer" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
-          <!-- Dynamic cards injected here -->
+        <!-- Attendee summary row -->
+        <div id="successAttendeeRow" style="margin-top:18px;padding:12px 14px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+          <!-- Populated by JS -->
         </div>
       </div>
 
-      <div class="tc-modal__footer">
-        <button type="button" class="btn-primary" id="successModalDismiss" style="padding: 10px 24px; font-size: 13px;">View QR Code</button>
+      <!-- ── Modal Body ── -->
+      <div id="successModalBody" style="padding:0;max-height:60vh;overflow-y:auto;">
+
+        <!-- Section title -->
+        <div id="successModalSectionLabel" style="padding:16px 24px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <h4 style="font-size:14px;font-weight:700;color:var(--color-primary-dark);text-transform:uppercase;letter-spacing:0.6px;display:flex;align-items:center;gap:7px;margin:0;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg>
+            <span id="successSessionsLabel">Your Registered Sessions</span>
+          </h4>
+          <!-- Add All to Calendar button (virtual only) -->
+          <button type="button" id="successAddAllCalBtn" hidden style="background:var(--color-success);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Add All to Google Calendar
+          </button>
+        </div>
+
+        <!-- Dynamic Zoom / event cards -->
+        <div id="successModalZoomContainer" style="padding:12px 24px 8px;display:flex;flex-direction:column;gap:14px;">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Important notice bar -->
+        <div id="successImportantNotice" style="margin:4px 24px 16px;padding:12px 14px;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;font-size:12.5px;color:#5D4037;display:flex;align-items:flex-start;gap:9px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E65100" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="successNoticeText">Please save or screenshot this information. A confirmation has also been sent to your registered email address.</span>
+        </div>
       </div>
+
+      <!-- ── Modal Footer ── -->
+      <div style="padding:14px 24px;background:var(--color-bg);border-top:1px solid var(--color-border-light);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <button type="button" id="successPrintBtn" style="background:none;border:1.5px solid var(--color-border);border-radius:6px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--color-text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / Save as PDF
+        </button>
+        <div style="display:flex;gap:10px;">
+          <button type="button" id="successModalDismiss" style="background:var(--color-primary);color:#fff;border:none;border-radius:6px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 9 15 9"/><polyline points="9 12 15 12"/><polyline points="9 15 13 15"/></svg>
+            View My QR Code
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
+
+  <!-- Keyframe for badge pop-in animation -->
+  <style>
+    @keyframes successPop {
+      0%   { transform: scale(0); opacity: 0; }
+      70%  { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    #successModal .tc-modal::-webkit-scrollbar { width: 5px; }
+    #successModal .tc-modal::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+    #successModalBody::-webkit-scrollbar { width: 5px; }
+    #successModalBody::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+    .success-zoom-card { transition: box-shadow 0.2s, transform 0.2s; }
+    .success-zoom-card:hover { box-shadow: 0 6px 24px rgba(17,106,171,0.13); transform: translateY(-1px); }
+    .success-action-btn { transition: all 0.2s; }
+    .success-action-btn:hover { opacity: 0.87; transform: translateY(-1px); }
+    #successPrintBtn:hover { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary-dark); }
+    #successModalClose:hover { background: rgba(255,255,255,0.28); }
+    #successModalDismiss:hover { background: var(--color-primary-dark); }
+    #successAddAllCalBtn:hover { background: #1B5E20; }
+  </style>
 
   <script src="/assets/confirmation.js"></script>
 </body>
