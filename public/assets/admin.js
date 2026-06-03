@@ -1,0 +1,921 @@
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const API_BASE = '/v1/admin';
+    let allRegistrations = [];
+
+    // --- Authentication ---
+    const getToken = () => localStorage.getItem('admin_token');
+    const setToken = (token) => localStorage.setItem('admin_token', token);
+    const clearToken = () => localStorage.removeItem('admin_token');
+
+    // --- Login Logic ---
+    const loginForm = document.getElementById('adminLoginForm');
+    if (loginForm) {
+        if (getToken()) {
+            window.location.href = '/pages/admin-dashboard.php';
+            return;
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            const loader = document.getElementById('loginLoader');
+
+            loader.classList.remove('hidden');
+            errorDiv.textContent = '';
+
+            try {
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    setToken(data.token);
+                    window.location.href = '/pages/admin-dashboard.php';
+                } else {
+                    errorDiv.textContent = data.message || 'Login failed.';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Server error. Please try again.';
+            } finally {
+                loader.classList.add('hidden');
+            }
+        });
+    }
+
+    // --- Dashboard Logic ---
+    const dashboardBody = document.querySelector('.dashboard-body');
+    if (dashboardBody) {
+        if (!getToken()) {
+            window.location.href = '/pages/admin-login.php';
+            return;
+        }
+
+        // Navigation
+        const navLinks = document.querySelectorAll('.nav-links li');
+        const sections = document.querySelectorAll('.content-section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.forEach(l => l.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                link.classList.add('active');
+                document.getElementById(link.dataset.target).classList.add('active');
+            });
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            clearToken();
+            window.location.href = '/pages/admin-login.php';
+        });
+
+        // Fetch Data
+        const authHeaders = {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json'
+        };
+
+        const loadDashboard = async () => {
+            try {
+                // Fetch Stats
+                const statsRes = await fetch(`${API_BASE}/stats`, { headers: authHeaders });
+                if (statsRes.status === 401) throw new Error('Unauthorized');
+                const statsData = await statsRes.json();
+                
+                if (statsData.success) {
+                    document.getElementById('statTotal').textContent = statsData.data.total;
+                    document.getElementById('statApproved').textContent = statsData.data.approved;
+                    document.getElementById('statPending').textContent = statsData.data.pending;
+                    document.getElementById('statInPerson').textContent = statsData.data.inPerson;
+                    document.getElementById('statVirtual').textContent = statsData.data.virtual;
+                }
+
+                // Fetch Registrations
+                const regRes = await fetch(`${API_BASE}/registrations`, { headers: authHeaders });
+                const regData = await regRes.json();
+
+                if (regData.success) {
+                    allRegistrations = regData.data;
+                    renderTable();
+                    renderCharts();
+                }
+
+            } catch (err) {
+                if (err.message === 'Unauthorized') {
+                    clearToken();
+                    window.location.href = '/pages/admin-login.php';
+                } else {
+                    console.error('Error loading dashboard data', err);
+                }
+            }
+        };
+
+        // Render Analytics Charts
+        const renderCharts = () => {
+            const modeChart = document.getElementById('modeChart');
+            const typeChart = document.getElementById('typeChart');
+            if (!modeChart || !typeChart) return;
+
+            // Mode Breakdown counts
+            let inPersonCount = 0;
+            let onlineCount = 0;
+            allRegistrations.forEach(r => {
+                if (r.attendance_mode === 'in-person') inPersonCount++;
+                else if (r.attendance_mode === 'online') onlineCount++;
+            });
+            const modeTotal = inPersonCount + onlineCount || 1;
+            const inPersonPct = Math.round((inPersonCount / modeTotal) * 100);
+            const onlinePct = Math.round((onlineCount / modeTotal) * 100);
+
+            modeChart.innerHTML = `
+                <div class="chart-row">
+                    <div class="chart-label-group">
+                        <span class="chart-label">In-Person</span>
+                        <span class="chart-count">${inPersonCount} (${inPersonPct}%)</span>
+                    </div>
+                    <div class="chart-bar-bg">
+                        <div class="chart-bar-fill bg-primary" style="width: ${inPersonPct}%"></div>
+                    </div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-label-group">
+                        <span class="chart-label">Virtual</span>
+                        <span class="chart-count">${onlineCount} (${onlinePct}%)</span>
+                    </div>
+                    <div class="chart-bar-bg">
+                        <div class="chart-bar-fill bg-success" style="width: ${onlinePct}%"></div>
+                    </div>
+                </div>
+            `;
+
+            // Type Breakdown counts
+            const types = {};
+            allRegistrations.forEach(r => {
+                const t = r.registration_type || 'other';
+                types[t] = (types[t] || 0) + 1;
+            });
+
+            const typeTotal = allRegistrations.length || 1;
+            let typeHtml = '';
+            const colors = ['bg-primary', 'bg-success', 'bg-warning', 'bg-purple', 'bg-rose'];
+            let colorIdx = 0;
+
+            Object.entries(types).forEach(([type, count]) => {
+                const pct = Math.round((count / typeTotal) * 100);
+                const colorClass = colors[colorIdx % colors.length];
+                colorIdx++;
+
+                typeHtml += `
+                    <div class="chart-row">
+                        <div class="chart-label-group">
+                            <span class="chart-label">${type}</span>
+                            <span class="chart-count">${count} (${pct}%)</span>
+                        </div>
+                        <div class="chart-bar-bg">
+                            <div class="chart-bar-fill ${colorClass}" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            typeChart.innerHTML = typeHtml || '<p class="placeholder-text">No registrations data available.</p>';
+        };
+
+        // Render Table
+        const renderTable = () => {
+            const tbody = document.getElementById('registrationsBody');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filterMode = document.getElementById('filterMode').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            tbody.innerHTML = '';
+            
+            // Reset Select All
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            updateBatchActionsBar();
+
+            const filtered = allRegistrations.filter(r => {
+                const name = `${r.first_name || ''} ${r.last_name || ''}`.toLowerCase();
+                const email = (r.email || '').toLowerCase();
+                const matchSearch = name.includes(search) || email.includes(search);
+                
+                const rMode = r.attendance_mode || 'none';
+                const matchMode = filterMode === 'all' || rMode === filterMode;
+
+                const rStatus = r.approval_status !== undefined ? String(r.approval_status) : "0";
+                const matchStatus = filterStatus === 'all' || rStatus === filterStatus;
+
+                return matchSearch && matchMode && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No records found.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                
+                let statusBadge = '';
+                if (r.approval_status === 1) statusBadge = '<span class="badge badge-success">Approved</span>';
+                else if (r.approval_status === -1) statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                else statusBadge = '<span class="badge badge-warning">Pending</span>';
+
+                let modeBadge = r.attendance_mode === 'in-person' 
+                                ? '<span class="badge badge-info">In-Person</span>' 
+                                : '<span class="badge badge-info">Virtual</span>';
+
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="row-checkbox" data-id="${r.id}"></td>
+                    <td>${r.first_name} ${r.last_name}</td>
+                    <td>${r.email}</td>
+                    <td><span style="text-transform: capitalize;">${r.registration_type}</span></td>
+                    <td>${modeBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="action-dropdown">
+                            <button class="dropdown-trigger" data-id="${r.id}">
+                                Actions
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div class="dropdown-menu" id="dropdown-${r.id}">
+                                <button class="dropdown-item view-btn" data-id="${r.id}">View Details</button>
+                                ${r.approval_status !== 1 ? `<button class="dropdown-item text-success approve-btn" data-id="${r.id}">Approve</button>` : ''}
+                                ${r.approval_status !== -1 ? `<button class="dropdown-item text-warning reject-btn" data-id="${r.id}">Reject</button>` : ''}
+                                <button class="dropdown-item text-danger del-btn" data-id="${r.id}">Delete</button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Attach events for Dropdowns
+            document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = trigger.dataset.id;
+                    const menu = document.getElementById(`dropdown-${id}`);
+                    
+                    // Close all others first
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        if (m !== menu) m.classList.remove('show');
+                    });
+                    
+                    menu.classList.toggle('show');
+                });
+            });
+
+            // Close dropdowns on document click
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            });
+
+            // Attach events for Actions
+            document.querySelectorAll('.view-btn').forEach(b => b.addEventListener('click', handleView));
+            document.querySelectorAll('.approve-btn').forEach(b => b.addEventListener('click', handleApprove));
+            document.querySelectorAll('.reject-btn').forEach(b => b.addEventListener('click', handleReject));
+            document.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', handleDelete));
+
+            // Attach events for Checkboxes
+            document.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateBatchActionsBar);
+            });
+        };
+
+        // Select All Checkbox Handler
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', () => {
+                const checked = selectAllCheckbox.checked;
+                document.querySelectorAll('.row-checkbox').forEach(cb => {
+                    cb.checked = checked;
+                });
+                updateBatchActionsBar();
+            });
+        }
+
+        // Update Batch Actions Bar State
+        function updateBatchActionsBar() {
+            const selectedCbs = document.querySelectorAll('.row-checkbox:checked');
+            const count = selectedCbs.length;
+            const bar = document.getElementById('batchActionsBar');
+            const text = document.getElementById('selectedCountText');
+
+            if (!bar || !text) return;
+
+            if (count > 0) {
+                text.textContent = `${count} participant${count > 1 ? 's' : ''} selected`;
+                bar.classList.remove('hidden');
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+
+        // --- Batch Actions ---
+        const getSelectedIds = () => {
+            return Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.dataset.id));
+        };
+
+        const handleBatchStatus = async (status) => {
+            const ids = getSelectedIds();
+            if (ids.length === 0) return;
+            const label = status === 1 ? 'approve' : 'reject';
+            if (!confirm(`Are you sure you want to ${label} the ${ids.length} selected registration(s)?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/registrations/batch-status`, {
+                    method: 'PUT',
+                    headers: authHeaders,
+                    body: JSON.stringify({ ids, status })
+                });
+                if (res.ok) {
+                    ids.forEach(id => {
+                        const idx = allRegistrations.findIndex(r => r.id === id);
+                        if (idx > -1) allRegistrations[idx].approval_status = status;
+                    });
+                    loadDashboard();
+                }
+            } catch (err) {
+                alert('Error processing batch update');
+            }
+        };
+
+        const handleBatchDelete = async () => {
+            const ids = getSelectedIds();
+            if (ids.length === 0) return;
+            if (!confirm(`Are you sure you want to permanently delete the ${ids.length} selected registration(s)?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/registrations/batch-delete`, {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify({ ids })
+                });
+                if (res.ok) {
+                    allRegistrations = allRegistrations.filter(r => !ids.includes(r.id));
+                    loadDashboard();
+                }
+            } catch (err) {
+                alert('Error processing batch delete');
+            }
+        };
+
+        // Attach Batch buttons events
+        const batchApproveBtn = document.getElementById('batchApproveBtn');
+        const batchRejectBtn = document.getElementById('batchRejectBtn');
+        const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+
+        if (batchApproveBtn) batchApproveBtn.addEventListener('click', () => handleBatchStatus(1));
+        if (batchRejectBtn) batchRejectBtn.addEventListener('click', () => handleBatchStatus(-1));
+        if (batchDeleteBtn) batchDeleteBtn.addEventListener('click', handleBatchDelete);
+
+        // --- CSV Export ---
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        if (exportCsvBtn) {
+            exportCsvBtn.addEventListener('click', () => {
+                if (allRegistrations.length === 0) {
+                    alert('No registration data to export.');
+                    return;
+                }
+
+                // Get currently filtered list or fallback to all
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const filterMode = document.getElementById('filterMode').value;
+                const filterStatus = document.getElementById('filterStatus').value;
+
+                const filtered = allRegistrations.filter(r => {
+                    const name = `${r.first_name || ''} ${r.last_name || ''}`.toLowerCase();
+                    const email = (r.email || '').toLowerCase();
+                    const matchSearch = name.includes(search) || email.includes(search);
+                    const rMode = r.attendance_mode || 'none';
+                    const matchMode = filterMode === 'all' || rMode === filterMode;
+                    const rStatus = r.approval_status !== undefined ? String(r.approval_status) : "0";
+                    const matchStatus = filterStatus === 'all' || rStatus === filterStatus;
+                    return matchSearch && matchMode && matchStatus;
+                });
+
+                const headers = ['ID', 'Full Name', 'Email', 'Phone', 'Registration Type', 'Speaker Type', 'Attendance Mode', 'Attendance Days', 'Nationality', 'Company/Affiliation', 'Designation', 'Status', 'Registered At'];
+                const csvRows = [headers.join(',')];
+
+                filtered.forEach(r => {
+                    let statusLabel = 'Pending';
+                    if (r.approval_status === 1) statusLabel = 'Approved';
+                    else if (r.approval_status === -1) statusLabel = 'Rejected';
+
+                    const row = [
+                        r.id,
+                        `"${(r.full_name || r.first_name + ' ' + r.last_name).replace(/"/g, '""')}"`,
+                        `"${(r.email || '').replace(/"/g, '""')}"`,
+                        `"${(r.phone || '').replace(/"/g, '""')}"`,
+                        `"${(r.registration_type || '').replace(/"/g, '""')}"`,
+                        `"${(r.speaker_type || '').replace(/"/g, '""')}"`,
+                        `"${(r.attendance_mode || '').replace(/"/g, '""')}"`,
+                        `"${(r.attendance_days || '').replace(/"/g, '""')}"`,
+                        `"${(r.nationality || '').replace(/"/g, '""')}"`,
+                        `"${(r.company || r.affiliation || '').replace(/"/g, '""')}"`,
+                        `"${(r.designation || '').replace(/"/g, '""')}"`,
+                        `"${statusLabel}"`,
+                        `"${r.created_at || ''}"`
+                    ];
+                    csvRows.push(row.join(','));
+                });
+
+                const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `fao_registrations_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
+        // --- Actions ---
+        const handleView = (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const user = allRegistrations.find(r => r.id === id);
+            if (!user) return;
+
+            const content = `
+                <div class="detail-row"><div class="detail-label">Full Name</div><div class="detail-value">${user.full_name || user.first_name + ' ' + user.last_name}</div></div>
+                <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${user.email}</div></div>
+                <div class="detail-row"><div class="detail-label">Registration Type</div><div class="detail-value" style="text-transform: capitalize;">${user.registration_type}</div></div>
+                <div class="detail-row"><div class="detail-label">Attendance Mode</div><div class="detail-value" style="text-transform: capitalize;">${user.attendance_mode}</div></div>
+                <div class="detail-row"><div class="detail-label">Company/Affiliation</div><div class="detail-value">${user.company || user.affiliation}</div></div>
+                <div class="detail-row"><div class="detail-label">Designation</div><div class="detail-value">${user.designation || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Phone</div><div class="detail-value">${user.phone || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Gender</div><div class="detail-value" style="text-transform: capitalize;">${user.gender || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Zoom Meeting ID</div><div class="detail-value">${user.zoom_meeting_id || 'N/A'}</div></div>
+            `;
+            document.getElementById('modalBodyContent').innerHTML = content;
+            document.getElementById('detailsModal').classList.remove('hidden');
+        };
+
+        const handleApprove = async (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            if (!confirm('Approve this registration?')) return;
+            await updateStatus(id, 1);
+        };
+
+        const handleReject = async (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            if (!confirm('Reject this registration?')) return;
+            await updateStatus(id, -1);
+        };
+
+        const handleDelete = async (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            if (!confirm('Are you sure you want to permanently delete this registration?')) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/registrations/${id}`, {
+                    method: 'DELETE',
+                    headers: authHeaders
+                });
+                if (res.ok) {
+                    allRegistrations = allRegistrations.filter(r => r.id !== id);
+                    loadDashboard(); // Refresh stats
+                }
+            } catch (err) {
+                alert('Error deleting registration');
+            }
+        };
+
+        const updateStatus = async (id, status) => {
+            try {
+                const res = await fetch(`${API_BASE}/registrations/${id}/status`, {
+                    method: 'PUT',
+                    headers: authHeaders,
+                    body: JSON.stringify({ status })
+                });
+                if (res.ok) {
+                    const idx = allRegistrations.findIndex(r => r.id === id);
+                    if (idx > -1) allRegistrations[idx].approval_status = status;
+                    loadDashboard(); // Refresh stats
+                }
+            } catch (err) {
+                alert('Error updating status');
+            }
+        };
+
+        // Modal close
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            document.getElementById('detailsModal').classList.add('hidden');
+        });
+        document.getElementById('modalCloseBtn').addEventListener('click', () => {
+            document.getElementById('detailsModal').classList.add('hidden');
+        });
+
+        // === ZOOM INTEGRATION SCRIPTS ===
+
+        // Settings Elements
+        const zoomSettingsForm = document.getElementById('zoomSettingsForm');
+        const settingsSaveStatus = document.getElementById('settingsSaveStatus');
+        
+        // Configured Meetings Elements
+        const configMeetingForm = document.getElementById('configMeetingForm');
+        const configMeetingsBody = document.getElementById('configMeetingsBody');
+        
+        // Live Meetings Elements
+        const refreshLiveMeetingsBtn = document.getElementById('refreshLiveMeetingsBtn');
+        const liveMeetingsBody = document.getElementById('liveMeetingsBody');
+        
+        // Zoom inspect modal Elements
+        const zoomInspectModal = document.getElementById('zoomInspectModal');
+        const zoomInspectBodyContent = document.getElementById('zoomInspectBodyContent');
+        const zoomInspectTitle = document.getElementById('zoomInspectTitle');
+        const closeZoomInspectModalBtn = document.getElementById('closeZoomInspectModalBtn');
+        const zoomInspectCloseBtn = document.getElementById('zoomInspectCloseBtn');
+
+        // Load credentials from database/env
+        const loadZoomSettings = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/zoom/settings`, { headers: authHeaders });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('zoomAccountId').value = data.data.account_id || '';
+                    document.getElementById('zoomClientId').value = data.data.client_id || '';
+                    document.getElementById('zoomClientSecret').value = data.data.client_secret || '';
+                    document.getElementById('zoomSecretToken').value = data.data.secret_token || '';
+                }
+            } catch (err) {
+                console.error('Error loading Zoom settings', err);
+            }
+        };
+
+        // Save Credentials
+        zoomSettingsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            settingsSaveStatus.className = 'status-indicator';
+            settingsSaveStatus.textContent = 'Saving...';
+
+            const account_id = document.getElementById('zoomAccountId').value;
+            const client_id = document.getElementById('zoomClientId').value;
+            const client_secret = document.getElementById('zoomClientSecret').value;
+            const secret_token = document.getElementById('zoomSecretToken').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/zoom/settings`, {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify({ account_id, client_id, client_secret, secret_token })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    settingsSaveStatus.className = 'status-indicator success';
+                    settingsSaveStatus.textContent = 'Settings saved successfully!';
+                    setTimeout(() => { settingsSaveStatus.textContent = ''; }, 3000);
+                } else {
+                    settingsSaveStatus.className = 'status-indicator error';
+                    settingsSaveStatus.textContent = 'Failed to save settings.';
+                }
+            } catch (err) {
+                settingsSaveStatus.className = 'status-indicator error';
+                settingsSaveStatus.textContent = 'Connection error.';
+            }
+        });
+
+        // Load Configured Meetings (Dropdown selections)
+        const loadConfigMeetings = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/zoom/config`, { headers: authHeaders });
+                const data = await res.json();
+                if (data.success) {
+                    renderConfigMeetingsTable(data.data);
+                }
+            } catch (err) {
+                console.error('Error loading config meetings', err);
+            }
+        };
+
+        const renderConfigMeetingsTable = (meetings) => {
+            configMeetingsBody.innerHTML = '';
+            if (meetings.length === 0) {
+                configMeetingsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No sessions configured. Add one above!</td></tr>';
+                return;
+            }
+
+            meetings.forEach(m => {
+                const tr = document.createElement('tr');
+                const badge = m.is_active 
+                    ? '<span class="badge badge-success">Active</span>' 
+                    : '<span class="badge badge-warning">Inactive</span>';
+
+                tr.innerHTML = `
+                    <td>${m.meeting_id}</td>
+                    <td>${m.topic}</td>
+                    <td>${m.display_name}</td>
+                    <td>${badge}</td>
+                    <td class="action-btns">
+                        <button class="btn-ghost btn-small toggle-active-btn" data-id="${m.meeting_id}" data-active="${m.is_active ? '0' : '1'}">
+                            ${m.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button class="btn-danger btn-small delete-config-btn" data-id="${m.meeting_id}">Delete</button>
+                    </td>
+                `;
+                configMeetingsBody.appendChild(tr);
+            });
+
+            // Attach events
+            document.querySelectorAll('.toggle-active-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const meeting_id = e.target.dataset.id;
+                    const is_active = e.target.dataset.active === '1';
+                    const meeting = meetings.find(m => m.meeting_id === meeting_id);
+                    if (!meeting) return;
+
+                    try {
+                        const res = await fetch(`${API_BASE}/zoom/config`, {
+                            method: 'POST',
+                            headers: authHeaders,
+                            body: JSON.stringify({
+                                meeting_id,
+                                topic: meeting.topic,
+                                display_name: meeting.display_name,
+                                is_active
+                            })
+                        });
+                        if (res.ok) loadConfigMeetings();
+                    } catch (err) {
+                        alert('Error toggling session status');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-config-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const meetingId = e.target.dataset.id;
+                    if (!confirm('Are you sure you want to remove this session from the registration form?')) return;
+                    try {
+                        const res = await fetch(`${API_BASE}/zoom/config/${meetingId}`, {
+                            method: 'DELETE',
+                            headers: authHeaders
+                        });
+                        if (res.ok) loadConfigMeetings();
+                    } catch (err) {
+                        alert('Error deleting session');
+                    }
+                });
+            });
+        };
+
+        // Add Config Meeting Form
+        configMeetingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const meeting_id = document.getElementById('configMeetingId').value.trim();
+            const topic = document.getElementById('configTopic').value.trim();
+            const display_name = document.getElementById('configDisplayName').value.trim();
+
+            try {
+                const res = await fetch(`${API_BASE}/zoom/config`, {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify({ meeting_id, topic, display_name, is_active: true })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('configMeetingId').value = '';
+                    document.getElementById('configTopic').value = '';
+                    document.getElementById('configDisplayName').value = '';
+                    loadConfigMeetings();
+                } else {
+                    alert(data.message || 'Error saving session config');
+                }
+            } catch (err) {
+                alert('Connection error');
+            }
+        });
+
+        // Load Live Zoom Account Meetings
+        const loadLiveZoomMeetings = async () => {
+            liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Retrieving live scheduled meetings from Zoom API...</td></tr>';
+            try {
+                const res = await fetch(`${API_BASE}/zoom/meetings`, { headers: authHeaders });
+                const data = await res.json();
+                if (data.success) {
+                    renderLiveMeetingsTable(data.data);
+                } else {
+                    liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger-color);">Error fetching live meetings. Check credentials.</td></tr>';
+                }
+            } catch (err) {
+                liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger-color);">Connection error while syncing with Zoom.</td></tr>';
+            }
+        };
+
+        const renderLiveMeetingsTable = (meetings) => {
+            liveMeetingsBody.innerHTML = '';
+            if (meetings.length === 0) {
+                liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No scheduled Zoom meetings found in this account.</td></tr>';
+                return;
+            }
+
+            meetings.forEach(m => {
+                const tr = document.createElement('tr');
+                const startTime = m.start_time ? new Date(m.start_time).toLocaleString() : 'N/A';
+                const duration = m.duration ? `${m.duration} mins` : 'N/A';
+                const type = m.type === 2 ? 'Scheduled' : 'Recurring';
+
+                tr.innerHTML = `
+                    <td><strong>${m.id}</strong></td>
+                    <td>${m.topic}</td>
+                    <td>${startTime}</td>
+                    <td>${duration}</td>
+                    <td>${type}</td>
+                    <td>
+                        <button class="btn-primary btn-small inspect-btn" data-id="${m.id}">Inspect Details</button>
+                    </td>
+                `;
+                liveMeetingsBody.appendChild(tr);
+            });
+
+            // Inspect Detail button handler
+            document.querySelectorAll('.inspect-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const meetingId = e.target.dataset.id;
+                    await showZoomMeetingDetails(meetingId);
+                });
+            });
+        };
+
+        const showZoomMeetingDetails = async (meetingId) => {
+            zoomInspectTitle.textContent = `Syncing details for Meeting ${meetingId}...`;
+            zoomInspectBodyContent.innerHTML = '<div style="text-align:center; padding:2rem;"><div class="loader" style="margin:0 auto 1rem auto; width:30px; height:30px;"></div>Loading real-time registrant and participant data...</div>';
+            zoomInspectModal.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${API_BASE}/zoom/meetings/${meetingId}`, { headers: authHeaders });
+                const data = await res.json();
+                
+                if (data.success) {
+                    const info = data.data;
+                    const d = info.details;
+                    
+                    zoomInspectTitle.textContent = `Inspect: ${d.topic}`;
+                    
+                    let registrantsRows = '';
+                    if (info.registrants && info.registrants.length > 0) {
+                        info.registrants.forEach(r => {
+                            const createTime = new Date(r.create_time).toLocaleString();
+                            registrantsRows += `
+                                <tr>
+                                    <td>${r.first_name} ${r.last_name}</td>
+                                    <td>${r.email}</td>
+                                    <td>${r.status}</td>
+                                    <td>${createTime}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        registrantsRows = '<tr><td colspan="4" style="text-align:center;">No registrants registered for this Zoom session.</td></tr>';
+                    }
+
+                    let participantsRows = '';
+                    if (info.participants && info.participants.length > 0) {
+                        info.participants.forEach(p => {
+                            const joinTime = new Date(p.join_time).toLocaleString();
+                            const leaveTime = p.leave_time ? new Date(p.leave_time).toLocaleString() : 'N/A';
+                            const duration = p.duration ? `${Math.round(p.duration / 60)} mins` : 'N/A';
+                            participantsRows += `
+                                <tr>
+                                    <td>${p.name}</td>
+                                    <td>${p.user_email || 'N/A'}</td>
+                                    <td>${joinTime}</td>
+                                    <td>${leaveTime}</td>
+                                    <td>${duration}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        participantsRows = '<tr><td colspan="5" style="text-align:center;">No attendee participation logs found yet.</td></tr>';
+                    }
+
+                    zoomInspectBodyContent.innerHTML = `
+                        <div class="inspect-details-section">
+                            <div class="inspect-stats-grid">
+                                <div class="inspect-stat-card">
+                                    <h4>Zoom Meeting ID</h4>
+                                    <div class="val">${d.id}</div>
+                                </div>
+                                <div class="inspect-stat-card">
+                                    <h4>Total Registrants</h4>
+                                    <div class="val">${info.registrants.length}</div>
+                                </div>
+                                <div class="inspect-stat-card">
+                                    <h4>Live/Past Attendees</h4>
+                                    <div class="val">${info.participants.length}</div>
+                                </div>
+                                <div class="inspect-stat-card">
+                                    <h4>Status</h4>
+                                    <div class="val" style="text-transform: capitalize;">${d.status || 'Scheduled'}</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="inspect-sub-table-header">
+                                    <h3>Registrants Details</h3>
+                                    <span>Zoom Portal Sync</span>
+                                </div>
+                                <div class="table-responsive" style="max-height: 200px; border: 1px solid var(--surface-border); border-radius: 8px;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Status</th>
+                                                <th>Registered At</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${registrantsRows}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="inspect-sub-table-header">
+                                    <h3>Realtime Participant & Live Logs</h3>
+                                    <span>Live Attendance</span>
+                                </div>
+                                <div class="table-responsive" style="max-height: 200px; border: 1px solid var(--surface-border); border-radius: 8px;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Join Time</th>
+                                                <th>Leave Time</th>
+                                                <th>Duration</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${participantsRows}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                } else {
+                    zoomInspectBodyContent.innerHTML = `<div style="color:var(--danger-color); text-align:center; padding:2rem;">Error: ${data.message}</div>`;
+                }
+            } catch (err) {
+                zoomInspectBodyContent.innerHTML = '<div style="color:var(--danger-color); text-align:center; padding:2rem;">Connection failed to retrieve Zoom API data.</div>';
+            }
+        };
+
+        // Hook Zoom Sync button
+        refreshLiveMeetingsBtn.addEventListener('click', loadLiveZoomMeetings);
+
+        // Modal Close triggers
+        const hideZoomInspectModal = () => { zoomInspectModal.classList.add('hidden'); };
+        closeZoomInspectModalBtn.addEventListener('click', hideZoomInspectModal);
+        zoomInspectCloseBtn.addEventListener('click', hideZoomInspectModal);
+
+        // Initialize Zoom Section
+        const initZoomSection = () => {
+            loadZoomSettings();
+            loadConfigMeetings();
+            loadLiveZoomMeetings();
+        };
+
+        // Hook into sidebar tab load
+        const zoomTab = document.querySelector('[data-target="zoom-section"]');
+        if (zoomTab) {
+            zoomTab.addEventListener('click', initZoomSection);
+        }
+
+        // Realtime Clock
+        const updateClock = () => {
+            const clockEl = document.getElementById('realtimeClock');
+            if (!clockEl) return;
+            const now = new Date();
+            const options = { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            };
+            clockEl.textContent = now.toLocaleDateString('en-US', options);
+        };
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Initialize
+        loadDashboard();
+    }
+});

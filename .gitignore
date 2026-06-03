@@ -1,0 +1,6 @@
+/vendor/
+.env
+/config/zoom_settings.json
+/config/zoom_meetings.json
+/config/zoom_settings.json.backup
+*.log

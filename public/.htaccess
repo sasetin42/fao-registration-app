@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Root → registration page
+RewriteRule ^$ pages/registration.php [L]
+
+# Clean page URLs
+RewriteRule ^confirmation$ pages/confirmation.php [L]
+
+# Everything else → Slim (API routes)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

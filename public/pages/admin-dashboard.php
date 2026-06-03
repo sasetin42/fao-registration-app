@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAO Registration - Admin Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/admin.css">
+</head>
+<body class="dashboard-body">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-panel">
+        <div class="sidebar-header">
+            <h2>FAO Admin</h2>
+        </div>
+        <ul class="nav-links">
+            <li class="active" data-target="dashboard-section">
+                <svg class="nav-icon color-primary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Dashboard Overview</span>
+            </li>
+            <li data-target="registrations-section">
+                <svg class="nav-icon color-success" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>Registrations</span>
+            </li>
+            <li data-target="zoom-section">
+                <svg class="nav-icon color-warning" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7a2 2 0 0 0-2-2h-4v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7z"></path><path d="M17 11H3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14v-8z"></path><path d="M3 7h10V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2z"></path></svg>
+                <span>Zoom Settings & Live</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logoutBtn" class="btn-ghost">
+                <svg class="nav-icon color-danger" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="topbar glass-panel">
+            <div class="topbar-left">
+                <h1>Backend Admin Panel</h1>
+                <div id="realtimeClock" class="realtime-clock"></div>
+            </div>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar">A</div>
+            </div>
+        </header>
+
+        <!-- Persistent Top KPI Stats Grid -->
+        <div class="global-stats-container">
+            <div class="stats-grid">
+                <div class="stat-card glass-panel info-tint">
+                    <div class="stat-icon-wrapper color-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Registrations</h3>
+                        <div class="stat-val" id="statTotal">0</div>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel success-tint">
+                    <div class="stat-icon-wrapper color-success">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Approved</h3>
+                        <div class="stat-val" id="statApproved">0</div>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel warning-tint">
+                    <div class="stat-icon-wrapper color-warning">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Pending</h3>
+                        <div class="stat-val" id="statPending">0</div>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel primary-tint">
+                    <div class="stat-icon-wrapper color-info">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>In-Person</h3>
+                        <div class="stat-val" id="statInPerson">0</div>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel purple-tint">
+                    <div class="stat-icon-wrapper color-purple">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7a2 2 0 0 0-2-2h-4v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7z"></path><path d="M17 11H3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14v-8z"></path><path d="M3 7h10V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2z"></path></svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Virtual</h3>
+                        <div class="stat-val" id="statVirtual">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-section active">
+            <div class="analytics-grid">
+                <div class="chart-card glass-panel">
+                    <h3>Attendance Mode Breakdown</h3>
+                    <div class="chart-container" id="modeChart"></div>
+                </div>
+                <div class="chart-card glass-panel">
+                    <h3>Registration Type Breakdown</h3>
+                    <div class="chart-container" id="typeChart"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Registrations Section -->
+        <section id="registrations-section" class="content-section">
+            <div class="glass-panel table-container">
+                <div class="table-header">
+                    <h2>Manage Registrations</h2>
+                    <div class="table-actions">
+                        <input type="text" id="searchInput" placeholder="Search by name or email..." class="search-input">
+                        <select id="filterMode" class="filter-select">
+                            <option value="all">All Modes</option>
+                            <option value="in-person">In-Person</option>
+                            <option value="online">Virtual</option>
+                        </select>
+                        <select id="filterStatus" class="filter-select">
+                            <option value="all">All Status</option>
+                            <option value="1">Approved</option>
+                            <option value="0">Pending</option>
+                            <option value="-1">Rejected</option>
+                        </select>
+                        <button id="exportCsvBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Batch Actions Toolbar -->
+                <div id="batchActionsBar" class="batch-actions-bar hidden">
+                    <span id="selectedCountText">0 items selected</span>
+                    <div class="batch-btns">
+                        <button id="batchApproveBtn" class="btn-success btn-small">Approve Selected</button>
+                        <button id="batchRejectBtn" class="btn-warning btn-small">Reject Selected</button>
+                        <button id="batchDeleteBtn" class="btn-danger btn-small">Delete Selected</button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table" id="registrationsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Mode</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrationsBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Zoom Settings & Live Section -->
+        <section id="zoom-section" class="content-section">
+            <div class="zoom-grid">
+                
+                <!-- Left: Zoom Credentials Setting Form -->
+                <div class="glass-panel zoom-card">
+                    <div class="card-header">
+                        <h2>Zoom API Credentials</h2>
+                        <p class="subtitle-text">Configure Server-to-Server OAuth credentials for Zoom registration</p>
+                    </div>
+                    <form id="zoomSettingsForm" class="zoom-form">
+                        <div class="input-group">
+                            <label for="zoomAccountId">Account ID</label>
+                            <input type="text" id="zoomAccountId" required placeholder="e.g. OaQYfmqZSDSwx2MJupR82Q">
+                        </div>
+                        <div class="input-group">
+                            <label for="zoomClientId">Client ID</label>
+                            <input type="text" id="zoomClientId" required placeholder="e.g. wrMigNw7SKiu8wy7WbxT_w">
+                        </div>
+                        <div class="input-group">
+                            <label for="zoomClientSecret">Client Secret</label>
+                            <input type="password" id="zoomClientSecret" required placeholder="Enter Zoom Client Secret">
+                        </div>
+                        <div class="input-group">
+                            <label for="zoomSecretToken">Secret Token</label>
+                            <input type="text" id="zoomSecretToken" placeholder="Zoom Webhook Secret Token (optional)">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Settings</button>
+                            <span id="settingsSaveStatus" class="status-indicator"></span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right: Configured Zoom Meetings List (for frontend Registration dropdown) -->
+                <div class="glass-panel zoom-card">
+                    <div class="card-header">
+                        <h2>Registration Dropdown Sessions</h2>
+                        <p class="subtitle-text">Manage Zoom sessions available to users in the registration form</p>
+                    </div>
+                    
+                    <form id="configMeetingForm" class="inline-zoom-form">
+                        <div class="input-row">
+                            <input type="text" id="configMeetingId" required placeholder="Meeting ID (numbers only)" style="flex: 2;">
+                            <input type="text" id="configTopic" required placeholder="Session Topic" style="flex: 3;">
+                            <input type="text" id="configDisplayName" placeholder="Display Name (optional)" style="flex: 3;">
+                            <button type="submit" class="btn-primary" style="flex: 1.5;">Add / Update</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive mt-15">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Meeting ID</th>
+                                    <th>Topic</th>
+                                    <th>Display Name</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="configMeetingsBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom: Live Realtime Data Panel (direct from Zoom account API) -->
+            <div class="glass-panel table-container mt-20">
+                <div class="table-header">
+                    <div>
+                        <h2>Realtime Zoom Account Meetings</h2>
+                        <p class="subtitle-text" style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">
+                            Live scheduled meetings retrieved dynamically from your Zoom Account. Click "Inspect Details" to view live attendees and participant records.
+                        </p>
+                    </div>
+                    <button id="refreshLiveMeetingsBtn" class="btn-ghost" style="display:flex; align-items:center; gap:8px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        Sync Zoom Account
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table" id="liveMeetingsTable">
+                        <thead>
+                            <tr>
+                                <th>Meeting ID</th>
+                                <th>Topic</th>
+                                <th>Start Time</th>
+                                <th>Duration</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="liveMeetingsBody">
+                            <tr><td colspan="6" style="text-align:center;">Click "Sync Zoom Account" to retrieve live meetings.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for viewing details -->
+    <div class="modal-overlay hidden" id="detailsModal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Registration Details</h2>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBodyContent">
+                <!-- Details injected here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="modalCloseBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Zoom Meeting Inspection -->
+    <div class="modal-overlay hidden" id="zoomInspectModal">
+        <div class="modal-content glass-panel" style="max-width: 800px; width: 90%;">
+            <div class="modal-header">
+                <h2 id="zoomInspectTitle">Zoom Meeting Live Details</h2>
+                <button class="close-modal" id="closeZoomInspectModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="zoomInspectBodyContent" style="max-height: 70vh;">
+                <!-- Live statistics, lists of registrants, and participants injected here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="zoomInspectCloseBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/admin.js"></script>
+</body>
+</html>

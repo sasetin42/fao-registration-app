@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Onsite Registration — FAO Event</title>
+
+  <!-- FAO Primary Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+
+  <!-- intl-tel-input CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.5.3/build/css/intlTelInput.css" />
+
+  <link rel="stylesheet" href="/assets/index.css" />
+
+  
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════ -->
+  <header class="fao-header" role="banner">
+    <div class="fao-header__inner">
+      <a href="#" class="fao-header__logo" aria-label="FAO Home">
+        <span class="fao-logo-emblem-crop" aria-hidden="true">
+          <img src="/assets/fao-logo.svg" alt="" class="fao-logo-img" />
+        </span>
+        <div class="fao-logo-text">
+          <span class="fao-logo-text__title">FAO</span>
+          <span class="fao-logo-text__subtitle">Food and Agriculture Organization</span>
+        </div>
+      </a>
+      <nav class="fao-header__nav" aria-label="Main navigation">
+        <a href="#">About</a>
+        <a href="#">Events</a>
+        <a href="#">Publications</a>
+        <a href="#">Contact</a>
+      </nav>
+      <!-- Hamburger (mobile only) -->
+      <button
+        class="nav-toggle"
+        id="navToggle"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="mobileNav"
+      >
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+    <!-- Mobile nav drawer -->
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" hidden>
+      <a href="#" class="mobile-nav__link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        About
+      </a>
+      <a href="#" class="mobile-nav__link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Events
+      </a>
+      <a href="#" class="mobile-nav__link">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Publications
+      </a>
+      <a href="#" class="mobile-nav__link">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.03 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        Contact
+      </a>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+       PAGE HERO
+  ═══════════════════════════════════════ -->
+  <section class="page-hero" aria-label="Page header">
+    <div class="page-hero__inner">
+      <span class="page-hero__label">Event Registration</span>
+      <div class="page-hero__rule" aria-hidden="true"></div>
+      <h1 class="page-hero__title">Asia-Pacific Conference on Sustainable Agricultural Mechanization</h1>
+      <p class="page-hero__theme">Modernize. Scale. Sustain.</p>
+      <div class="page-hero__meta" aria-label="Conference details">
+        <span class="page-hero__meta-item page-hero__meta-item--venue">
+          <svg class="page-hero__meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+          </svg>
+          Manila, Philippines
+        </span>
+        <span class="page-hero__meta-item">
+          <svg class="page-hero__meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          23-26 November 2026
+        </span>
+      </div>
+      <div class="page-hero__about">
+        <p>The Food and Agriculture Organization of the United Nations and the Philippines Department of Agriculture is organizing the Asia-Pacific Conference on Sustainable Agricultural Mechanization (APSAM) to take place from 23 to 26 November 2026 in Manila, Philippines, in hybrid format. <a href="#">Read more</a></p>
+        <p>This conference will serve as a platform bringing together FAO members, government officials, farmers, academia, development partners, civil society, and private sector for dialogues, knowledge exchange to ensure fit-for-purpose agricultural mechanization contributing to agrifood systems transformation.</p>
+      </div>
+      <p class="page-hero__subtitle">
+        By completing this registration form, you are confirming your participation in the 1st&nbsp;APSAM&nbsp;2026.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+  <main class="page-main" id="main-content">
+    <div class="registration-card" role="region" aria-label="Registration form">
+
+      <!-- Card Header -->
+      <div class="registration-card__header">
+        <h2 class="registration-card__title">Participant Information</h2>
+        <p class="registration-card__desc">
+          Your information will be used for event coordination and badge preparation only.
+          Please ensure all details are accurate.
+        </p>
+      </div>
+
+      <!-- ─── REGISTRATION FORM ─── -->
+      <form id="registrationForm" novalidate aria-label="Registration form">
+        <div class="form-fields">
+
+          <div class="form-group">
+            <label class="form-label" for="registrationType">
+              Registration Type <span class="required" aria-hidden="true">*</span>
+            </label>
+            <select
+              id="registrationType"
+              name="registrationType"
+              class="form-select"
+              aria-required="true"
+              aria-describedby="registrationType-error"
+            >
+              <option value="" disabled selected>Select registration type</option>
+              <option value="participant">Participant</option>
+              <option value="speaker">Speaker</option>
+              <option value="moderator">Moderator</option>
+              <option value="exhibitor">Exhibitor</option>
+              <option value="media">Media</option>
+              <option value="working-committee">Working Committee</option>
+            </select>
+            <div class="form-error" id="registrationType-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please select your registration type.
+            </div>
+          </div>
+
+          <!-- Working Committee redirect notice -->
+          <div class="wc-notice" id="workingCommitteeNotice" hidden>
+            <div class="wc-notice__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3 class="wc-notice__title">Working Committee Registration</h3>
+            <p class="wc-notice__body">Working Committee members are registered through a dedicated process managed directly by the <strong>APSAM Secretariat</strong>. To ensure proper coordination and access, please complete your registration via the official Working Committee portal.</p>
+            <a href="#" class="wc-notice__btn" target="_blank" rel="noopener noreferrer">
+              Proceed to Working Committee Registration
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </a>
+            <p class="wc-notice__note">If you believe you have received this message in error, please select a different registration type above or contact the APSAM Secretariat.</p>
+          </div>
+
+          <div id="mainFormFields">
+
+          <div class="form-group" id="speakerTypeGroup" hidden>
+            <label class="form-label" for="speakerType">
+              Type of Speaker <span class="required" aria-hidden="true">*</span>
+            </label>
+            <select
+              id="speakerType"
+              name="speakerType"
+              class="form-select"
+              aria-required="false"
+              aria-describedby="speakerType-error"
+            >
+              <option value="" disabled selected>Select speaker type</option>
+              <option value="plenary-speaker">Plenary Speaker</option>
+              <option value="poster-presenter">Poster Presenter</option>
+              <option value="paper-presenter">Paper Presenter</option>
+            </select>
+            <div class="form-error" id="speakerType-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please select the type of speaker.
+            </div>
+          </div>
+
+          <div id="mediaSection" hidden>
+            <p class="media-note" id="mediaNote">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Media have limited access within the premises and are only permitted during the specific date and time provided by the FAO Admin.
+            </p>
+
+            <div class="form-group" id="mediaQueriesGroup">
+              <label class="form-label" for="mediaQueries">
+                Media Queries for Press Conference
+              </label>
+              <textarea
+                id="mediaQueries"
+                name="mediaQueries"
+                class="form-textarea"
+                rows="4"
+                placeholder="Please share any questions or topics you would like to raise during the press conference."
+                aria-required="false"
+                aria-describedby="mediaQueries-error"
+              ></textarea>
+              <div class="form-error" id="mediaQueries-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please enter your media queries.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" id="attendanceModeSection">
+            <p class="form-label" id="attendanceMode-label">
+              Attendance Mode <span class="required" aria-hidden="true">*</span>
+            </p>
+            <div class="form-radio-group" id="attendanceModeGroup" role="radiogroup" aria-labelledby="attendanceMode-label" aria-describedby="attendanceMode-error">
+              <label class="form-radio">
+                <input type="radio" name="attendanceMode" value="in-person" class="form-radio__input" />
+                <span class="form-radio__mark"></span>
+                In-Person
+              </label>
+              <label class="form-radio">
+                <input type="radio" name="attendanceMode" value="online" class="form-radio__input" />
+                <span class="form-radio__mark"></span>
+                Online / Virtual
+              </label>
+            </div>
+            <div class="form-error" id="attendanceMode-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please select your attendance mode.
+            </div>
+          </div>
+
+          <div class="form-group" id="attendanceDaysSection">
+            <p class="form-label" id="attendanceDays-label">
+              Attendance Days <span class="required" aria-hidden="true">*</span>
+            </p>
+            <div class="form-check-group" id="attendanceDaysGroup" role="group" aria-labelledby="attendanceDays-label" aria-describedby="attendanceDays-error">
+              <label class="form-check-item">
+                <input type="checkbox" id="attendanceAllDays" name="attendanceDays[]" value="all-days" class="form-check-item__input" />
+                <span>All Days</span>
+              </label>
+              <label class="form-check-item">
+                <input type="checkbox" name="attendanceDays[]" value="day-1" class="form-check-item__input attendance-day" />
+                <span>Day 1</span>
+              </label>
+              <label class="form-check-item">
+                <input type="checkbox" name="attendanceDays[]" value="day-2" class="form-check-item__input attendance-day" />
+                <span>Day 2</span>
+              </label>
+              <label class="form-check-item">
+                <input type="checkbox" name="attendanceDays[]" value="day-3" class="form-check-item__input attendance-day" />
+                <span>Day 3</span>
+              </label>
+            </div>
+            <div class="form-error" id="attendanceDays-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please select at least one attendance day.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prefix">Prefix</label>
+            <select
+              id="prefix"
+              name="prefix"
+              class="form-select"
+              aria-required="false"
+              autocomplete="honorific-prefix"
+            >
+              <option value="">None</option>
+              <option value="mr">Mr.</option>
+              <option value="mrs">Mrs.</option>
+              <option value="ms">Ms.</option>
+              <option value="dr">Dr.</option>
+              <option value="prof">Prof.</option>
+              <option value="he">H.E.</option>
+              <option value="engr">Engr.</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">
+                First Name <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                class="form-input"
+                placeholder="e.g. Juan"
+                autocomplete="given-name"
+                aria-required="true"
+                aria-describedby="firstName-error"
+              />
+              <div class="form-error" id="firstName-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please enter your first name.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="middleInitial">Middle Initial</label>
+              <input
+                type="text"
+                id="middleInitial"
+                name="middleInitial"
+                class="form-input"
+                placeholder="e.g. B."
+                maxlength="3"
+                autocomplete="additional-name"
+                aria-required="false"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="lastName">
+                Last Name <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                class="form-input"
+                placeholder="e.g. Dela Cruz"
+                autocomplete="family-name"
+                aria-required="true"
+                aria-describedby="lastName-error"
+              />
+              <div class="form-error" id="lastName-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please enter your last name.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="suffix">Suffix</label>
+              <input
+                type="text"
+                id="suffix"
+                name="suffix"
+                class="form-input"
+                placeholder="e.g. Jr., Sr., III"
+                maxlength="20"
+                autocomplete="honorific-suffix"
+                aria-required="false"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="email">
+                Email Address <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-input"
+                placeholder="e.g. juan@example.com"
+                autocomplete="email"
+                aria-required="true"
+                aria-describedby="email-error"
+              />
+              <div class="form-error" id="email-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please enter a valid email address.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="emailConfirm">
+                Confirm Email <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="email"
+                id="emailConfirm"
+                name="emailConfirm"
+                class="form-input"
+                placeholder="Re-enter your email address"
+                autocomplete="off"
+                aria-required="true"
+                aria-describedby="emailConfirm-error"
+              />
+              <div class="form-error" id="emailConfirm-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Email addresses do not match.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="phone">
+                Mobile Number <span class="required" aria-hidden="true">*</span>
+              </label>
+              <div class="phone-wrapper" id="phoneWrapper">
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  class="form-input"
+                  placeholder="e.g. 917 123 4567"
+                  autocomplete="tel"
+                  aria-required="true"
+                  aria-describedby="phone-error phone-helper"
+                />
+              </div>
+              <div class="form-error" id="phone-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please enter a valid mobile number for the selected country.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ageRange">
+                Age <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select
+                id="ageRange"
+                name="ageRange"
+                class="form-select"
+                aria-required="true"
+                aria-describedby="ageRange-error"
+              >
+                <option value="" disabled selected>Select age range</option>
+                <option value="18-35">18-35</option>
+                <option value="36-45">36-45</option>
+                <option value="46-59">46-59</option>
+                <option value="60-above">60 and above</option>
+              </select>
+              <div class="form-error" id="ageRange-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please select your age range.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="gender">
+                Gender <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                class="form-select"
+                aria-required="true"
+                aria-describedby="gender-error"
+              >
+                <option value="" disabled selected>Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+              </select>
+              <div class="form-error" id="gender-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please select your gender.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="nationality">
+                Country of Nationality <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select
+                id="nationality"
+                name="nationality"
+                class="form-select"
+                aria-required="true"
+                aria-describedby="nationality-error"
+              >
+                <option value="" disabled selected>Select nationality</option>
+              </select>
+              <div class="form-error" id="nationality-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please select your nationality.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-address">
+            <p class="form-label form-label--group">Affiliation <span class="required" aria-hidden="true">*</span></p>
+
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="affiliation">Affiliation Type</label>
+              <select
+                id="affiliation"
+                name="affiliation"
+                class="form-select"
+                aria-required="true"
+                aria-describedby="affiliation-error"
+              >
+                <option value="" disabled selected>Select affiliation</option>
+                <option value="government">Government</option>
+                <option value="academe">Academe</option>
+                <option value="non-government-organization">Non Government Organization</option>
+                <option value="private-industries">Private Industries</option>
+                <option value="farmers-organization">Farmers Organization</option>
+                <option value="international-organization">International Organization</option>
+              </select>
+              <div class="form-error" id="affiliation-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please select your affiliation.
+              </div>
+            </div>
+
+            <div class="form-group" id="affiliationSubGroup" hidden>
+              <label class="form-label form-label--sub" for="affiliationSub">Affiliation Category</label>
+              <select
+                id="affiliationSub"
+                name="affiliationSub"
+                class="form-select"
+                aria-required="false"
+                aria-describedby="affiliationSub-error"
+              >
+                <option value="" disabled selected>Select category</option>
+              </select>
+              <div class="form-error" id="affiliationSub-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please select an affiliation category.
+              </div>
+            </div>
+
+            <div class="form-group" id="designationGroup" hidden>
+              <label class="form-label form-label--sub" for="designation">
+                Designation <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                id="designation"
+                name="designation"
+                class="form-input"
+                placeholder="e.g. Director, Senior Officer"
+                aria-required="false"
+                aria-describedby="designation-error"
+              />
+              <div class="form-error" id="designation-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please enter your designation.
+              </div>
+            </div>
+
+            <div class="form-group" id="affiliationSpecifyGroup" hidden>
+              <label class="form-label form-label--sub" for="affiliationSpecify">Please specify</label>
+              <input
+                type="text"
+                id="affiliationSpecify"
+                name="affiliationSpecify"
+                class="form-input"
+                placeholder="Enter organization or details"
+                autocomplete="organization"
+                aria-required="false"
+                aria-describedby="affiliationSpecify-error"
+              />
+              <div class="form-error" id="affiliationSpecify-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please specify your affiliation.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="addrCountry">Country of Affiliation</label>
+              <select
+                id="addrCountry"
+                name="addrCountry"
+                class="form-select"
+                autocomplete="country-name"
+                aria-required="true"
+                aria-describedby="addrCountry-error"
+              >
+                <option value="" disabled selected>Select country</option>
+              </select>
+              <div class="form-error" id="addrCountry-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+                Please select your country of affiliation.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input
+                type="checkbox"
+                id="visaAssistance"
+                name="visaAssistance"
+                class="form-checkbox__input"
+                aria-describedby="visa-helper"
+              />
+              <label class="form-checkbox__label" for="visaAssistance">I need visa assistance</label>
+            </div>
+            <p class="form-helper" id="visa-helper">
+              Assistance is available only within 60 days before the event. After this deadline, assistance is no longer available.
+            </p>
+          </div>
+
+          <div class="form-group" id="zoomMeetingGroup" hidden>
+            <p class="form-label" id="zoomMeeting-label">
+              Zoom Meeting Sessions <span class="required" aria-hidden="true">*</span>
+            </p>
+            <p class="form-helper" style="margin-bottom: 0.75rem;">Select one or more online sessions to attend:</p>
+
+            <div class="conference-select" id="zoomSelect">
+              <button
+                type="button"
+                class="conference-select__trigger"
+                id="zoomToggle"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+                aria-controls="zoomPanel"
+              >
+                <span class="conference-select__summary" id="zoomSummary">Select one or more sessions</span>
+                <span class="conference-select__meta">
+                  <span class="conference-select__count" id="zoomCount" hidden>0 selected</span>
+                  <span class="conference-select__chevron" aria-hidden="true"></span>
+                </span>
+              </button>
+
+              <div class="conference-select__panel" id="zoomPanel" hidden>
+                <div class="conference-select__search-wrap">
+                  <input
+                    type="search"
+                    id="zoomSearch"
+                    class="form-input conference-select__search"
+                    placeholder="Search sessions"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="conference-select__selected" id="zoomSelected" hidden></div>
+
+                <div class="form-check-group conference-select__options zoom-options-grid" id="zoomSessionsContainer">
+                  <!-- Dynamically populated options -->
+                </div>
+              </div>
+            </div>
+
+            <input type="hidden" id="zoomMeetingId" name="zoomMeetingId" value="" />
+            <div class="form-error" id="zoomMeetingId-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please select at least one Zoom session.
+            </div>
+          </div>
+
+          <div class="form-group" id="conferenceGroup" hidden>
+            <p class="form-label" id="conference-label">
+              Session Selection <span class="required" aria-hidden="true">*</span>
+            </p>
+            <div class="conference-select" id="conferenceSelect">
+              <button
+                type="button"
+                class="conference-select__trigger"
+                id="conferenceToggle"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+                aria-controls="conferencePanel"
+                aria-describedby="conference-error"
+              >
+                <span class="conference-select__summary" id="conferenceSummary">Select one or more sessions</span>
+                <span class="conference-select__meta">
+                  <span class="conference-select__count" id="conferenceCount" hidden>0 selected</span>
+                  <span class="conference-select__chevron" aria-hidden="true"></span>
+                </span>
+              </button>
+
+              <div class="conference-select__panel" id="conferencePanel" hidden>
+                <div class="conference-select__search-wrap">
+                  <input
+                    type="search"
+                    id="conferenceSearch"
+                    class="form-input conference-select__search"
+                    placeholder="Search sessions"
+                    autocomplete="off"
+                    aria-label="Search sessions"
+                  />
+                </div>
+
+                <div class="conference-select__selected" id="conferenceSelected" hidden></div>
+
+                <div class="form-check-group conference-select__options" id="conferenceCheckGroup" role="group" aria-labelledby="conference-label" aria-describedby="conference-error">
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="food-security-nutrition" class="form-check-item__input" />
+                    <span>Food Security and Nutrition</span>
+                  </label>
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="sustainable-agriculture" class="form-check-item__input" />
+                    <span>Sustainable Agriculture Practices</span>
+                  </label>
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="climate-smart-farming" class="form-check-item__input" />
+                    <span>Climate-Smart Farming</span>
+                  </label>
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="digital-agriculture" class="form-check-item__input" />
+                    <span>Digital Agriculture and Innovation</span>
+                  </label>
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="rural-development" class="form-check-item__input" />
+                    <span>Rural Development and Livelihoods</span>
+                  </label>
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="water-land-management" class="form-check-item__input" />
+                    <span>Water and Land Management</span>
+                  </label>
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="agroforestry" class="form-check-item__input" />
+                    <span>Agroforestry and Biodiversity</span>
+                  </label>
+                  <label class="form-check-item">
+                    <input type="checkbox" name="conference[]" value="fisheries-aquaculture" class="form-check-item__input" />
+                    <span>Fisheries and Aquaculture</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-error" id="conference-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please select at least one session.
+            </div>
+          </div>
+
+          <div class="form-group" id="dietaryGroup" hidden>
+            <label class="form-label" for="dietary">
+              Dietary Preference <span class="required" aria-hidden="true">*</span>
+            </label>
+            <select
+              id="dietary"
+              name="dietary"
+              class="form-select"
+              aria-required="true"
+              aria-describedby="dietary-error"
+            >
+              <option value="" disabled selected>Select dietary preference</option>
+              <option value="no-restriction">No restriction</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="halal">Halal</option>
+              <option value="with-allergy">With allergy</option>
+              <option value="other">Other</option>
+            </select>
+            <div class="form-error" id="dietary-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please select your dietary preference.
+            </div>
+          </div>
+
+          <div class="form-group" id="dietarySpecifyGroup" hidden>
+            <label class="form-label" for="dietarySpecify">Please specify</label>
+            <textarea
+              id="dietarySpecify"
+              name="dietarySpecify"
+              class="form-textarea"
+              rows="3"
+              placeholder="Share the allergy or preference we should note."
+              aria-required="false"
+              aria-describedby="dietarySpecify-error"
+            ></textarea>
+            <div class="form-error" id="dietarySpecify-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please provide the requested dietary details.
+            </div>
+          </div>
+
+          <div class="form-group" id="fieldTripGroup" hidden>
+            <p class="form-label" id="fieldTrip-label">
+              Field Trip / Visit <span class="required" aria-hidden="true">*</span>
+            </p>
+            <p class="form-helper">Are you joining the field visit on day 4 (Nov 26)?</p>
+            <select
+              id="fieldTrip"
+              name="fieldTrip"
+              class="form-select"
+              aria-required="false"
+              aria-describedby="fieldTrip-error"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+            >
+              <option value="" disabled selected>Are you joining the field visit on Day 4 (Nov 26)?</option>
+              <option value="option-1">Option 1</option>
+              <option value="option-2">Option 2</option>
+              <option value="option-3">Option 3</option>
+              <option value="not-joining">I am not joining</option>
+            </select>
+            <div class="form-check-group" id="fieldTripCheckGroup" role="group" aria-labelledby="fieldTrip-label" aria-describedby="fieldTrip-error">
+              <label class="form-check-item">
+                <input type="checkbox" name="fieldTrip[]" value="option-1" class="form-check-item__input" />
+                <span>Option 1</span>
+              </label>
+              <label class="form-check-item">
+                <input type="checkbox" name="fieldTrip[]" value="option-2" class="form-check-item__input" />
+                <span>Option 2</span>
+              </label>
+              <label class="form-check-item">
+                <input type="checkbox" name="fieldTrip[]" value="option-3" class="form-check-item__input" />
+                <span>Option 3</span>
+              </label>
+              <label class="form-check-item">
+                <input type="checkbox" name="fieldTrip[]" value="not-joining" class="form-check-item__input" />
+                <span>I am not joining</span>
+              </label>
+            </div>
+            <div class="form-error" id="fieldTrip-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please confirm your field visit preference.
+            </div>
+          </div>
+
+          <!-- Data Privacy Consent -->
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input
+                type="checkbox"
+                id="tcAccept"
+                name="tcAccept"
+                class="form-checkbox__input"
+                aria-required="true"
+                aria-describedby="tcAccept-error"
+              />
+              <label class="form-checkbox__label" for="tcAccept">I have read and agree to the <button type="button" id="tcLink" class="tc-link">Data Privacy Notice</button></label>
+            </div>
+            <div class="form-error" id="tcAccept-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please read and accept the Data Privacy Notice to continue.
+            </div>
+          </div>
+
+          </div><!-- /mainFormFields -->
+
+        </div><!-- /form-fields -->
+
+        <!-- Submit -->
+        <div class="form-actions" id="formActions">
+          <button type="submit" class="btn-primary" id="submitBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Confirm Registration
+          </button>
+          <!--<p class="required-note"><span>*</span> All fields are required</p>-->
+        </div>
+
+      </form>
+
+      <!-- ─── SUCCESS CONFIRMATION ─── -->
+      <div class="confirmation-panel" id="confirmationPanel" role="region" aria-label="Registration confirmed" aria-live="polite">
+        <div class="confirmation-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2 class="confirmation-title">Registration Confirmed</h2>
+        <p class="confirmation-message">
+          Thank you for registering. Your details have been received.<br />
+          A confirmation copy has been noted for event coordination.
+        </p>
+        <div class="confirmation-detail" id="confirmationDetail" aria-label="Your registration details">
+          <!-- Populated by JS -->
+        </div>
+        <button class="btn-secondary" onclick="resetForm()" aria-label="Register another participant">
+          Register Another Participant
+        </button>
+      </div>
+
+    </div><!-- /registration-card -->
+  </main>
+
+  <!-- ═══════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════ -->
+  <footer class="fao-footer" role="contentinfo">
+    <div class="fao-footer__inner">
+
+      <!-- ── Main grid ── -->
+      <div class="fao-footer__grid">
+
+        <!-- Brand column -->
+        <div class="fao-footer__brand">
+          <a href="#" class="fao-footer__brand-logo" aria-label="FAO Home">
+            <span class="fao-logo-emblem-crop fao-logo-emblem-crop--footer" aria-hidden="true">
+              <img src="/assets/fao-logo.svg" alt="" class="fao-footer__logo-img" />
+            </span>
+            <div class="fao-footer__brand-text">
+              <span class="fao-footer__brand-name">FAO</span>
+              <span class="fao-footer__brand-sub">Food and Agriculture Organization</span>
+            </div>
+          </a>
+          <p class="fao-footer__tagline">Fiat Panis — Let There Be Bread</p>
+          <p class="fao-footer__mission">
+            Working towards zero hunger by fostering sustainable food systems,
+            agriculture, and equitable rural development worldwide.
+          </p>
+          <!-- Social media icons -->
+          <div class="fao-footer__social" role="list" aria-label="FAO on social media">
+            <a href="#" class="fao-footer__social-link" aria-label="FAO on X (Twitter)" role="listitem">
+              <!-- X / Twitter -->
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.632 5.905-5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="#" class="fao-footer__social-link" aria-label="FAO on Facebook" role="listitem">
+              <!-- Facebook -->
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+            </a>
+            <a href="#" class="fao-footer__social-link" aria-label="FAO on YouTube" role="listitem">
+              <!-- YouTube -->
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="var(--color-primary-dark)"/></svg>
+            </a>
+            <a href="#" class="fao-footer__social-link" aria-label="FAO on LinkedIn" role="listitem">
+              <!-- LinkedIn -->
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+            </a>
+            <a href="#" class="fao-footer__social-link" aria-label="FAO on Instagram" role="listitem">
+              <!-- Instagram -->
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="var(--color-primary-dark)"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="var(--color-primary-dark)" stroke-width="2"/></svg>
+            </a>
+            <a href="#" class="fao-footer__social-link" aria-label="FAO on Flickr" role="listitem">
+              <!-- Flickr -->
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="12" r="4.5"/><circle cx="16.5" cy="12" r="4.5"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Links column -->
+        <div>
+          <h3 class="fao-footer__col-title">Quick Links</h3>
+          <ul class="fao-footer__links">
+            <li><a href="#">About FAO</a></li>
+            <li><a href="#">Events</a></li>
+            <li><a href="#">Publications</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Careers</a></li>
+          </ul>
+        </div>
+
+        <!-- Resources column -->
+        <div>
+          <h3 class="fao-footer__col-title">Resources</h3>
+          <ul class="fao-footer__links">
+            <li><a href="#">Data &amp; Statistics</a></li>
+            <li><a href="#">News &amp; Stories</a></li>
+            <li><a href="#">Media Center</a></li>
+            <li><a href="#">Country Offices</a></li>
+            <li><a href="#">SDG Progress</a></li>
+          </ul>
+        </div>
+
+        <!-- Connect column -->
+        <div>
+          <h3 class="fao-footer__col-title">Visit FAO</h3>
+          <p class="fao-footer__connect-text">
+            Explore the latest news, data, publications and resources on the
+            official FAO website.
+          </p>
+          <a href="https://www.fao.org" class="fao-footer__website-btn" target="_blank" rel="noopener noreferrer" aria-label="Visit fao.org (opens in new tab)">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+            </svg>
+            Visit fao.org
+          </a>
+        </div>
+
+      </div><!-- /grid -->
+
+      <!-- ── Bottom bar ── -->
+      <div class="fao-footer__bottom">
+        <p class="fao-footer__copyright">
+          &copy; 2026 Food and Agriculture Organization of the United Nations. All rights reserved.
+        </p>
+        <!--<p class="fao-footer__powered">-->
+          <!-- Lightning bolt icon -->
+        <!--  <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>-->
+        <!--  Powered by <a href="#" rel="noopener noreferrer">ProximaTech</a>-->
+        <!--</p>-->
+      </div>
+
+    </div><!-- /inner -->
+  </footer>
+
+  <!-- ═══════════════════════════════════════
+       DATA PRIVACY NOTICE MODAL
+  ═══════════════════════════════════════ -->
+  <div class="tc-modal-overlay" id="tcModal" hidden role="dialog" aria-modal="true" aria-labelledby="tcModalTitle">
+    <div class="tc-modal">
+
+      <div class="tc-modal__header">
+        <h3 class="tc-modal__title" id="tcModalTitle">DATA PRIVACY NOTICE</h3>
+        <button type="button" class="tc-modal__close" id="tcClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="tc-modal__body" id="tcModalBody">
+        <p class="tc-section__intro">
+          Please read the following notice carefully before registering for the FAO event.
+          By confirming, you consent to the processing of the information you provide for event operations.
+        </p>
+
+        <h4 class="tc-section__heading">1. Registration Administration</h4>
+        <p>Your registration details will be used to process your participation, prepare badges or access credentials, coordinate program attendance, and manage event logistics for both in-person and virtual delegates.</p>
+
+        <h4 class="tc-section__heading">2. Use of Personal Data</h4>
+        <p>The Food and Agriculture Organization of the United Nations (FAO) collects and processes your personal data, including your registration profile, contact details, nationality, attendance preference, and any dietary or field-visit selections. To best manage your participation, your information will be shared with a third-party service provider and the Philippine Department of Agriculture, all in accordance with the <button type="button" class="tc-inline-link" id="faoPrivacyScrollBtn">FAO Data Protection and Privacy Policy</button> as well as <a href="https://privacy.gov.ph/data-privacy-act/" target="_blank" rel="noopener noreferrer" class="tc-inline-link">Republic Act No. 10173 or the Data Privacy Act of 2022</a>. Your information will be used only for the administration of this event unless additional consent is obtained.</p>
+
+        <h4 class="tc-section__heading">3. Travel and Onsite Coordination</h4>
+        <p>For in-person participants, submitted information may be used to support venue access, travel coordination, visa-assistance follow-up, catering estimates, and field-visit planning. Providing this information does not in itself guarantee visa issuance, travel support, or placement in a specific field-visit slot.</p>
+
+        <h4 class="tc-section__heading">4. Photography and Media</h4>
+        <p>FAO may capture photographs, videos, and audio recordings during the event for documentation, reporting, and publication purposes. By attending, you consent to the use of your likeness in the event materials, FAO publications, and official digital channels unless you formally opt out by notifying the event organizer in writing.</p>
+
+        <h4 class="tc-section__heading">5. Code of Conduct</h4>
+        <p>All participants are expected to conduct themselves in a professional and respectful manner consistent with FAO's values of integrity, respect for diversity, and commitment to results. Any behavior deemed disruptive, discriminatory, or otherwise contrary to these values may result in removal from the event.</p>
+
+        <h4 class="tc-section__heading">6. Accuracy of Information</h4>
+        <p>You certify that all information provided during registration is accurate and complete to the best of your knowledge. Providing false or misleading information may result in cancellation of your registration without notice.</p>
+
+        <h4 class="tc-section__heading">7. Liability</h4>
+        <p>FAO shall not be liable for any loss, injury, or damage incurred by participants during the event, except where such liability cannot be excluded by law. Participants are responsible for their own travel, accommodation, and personal insurance arrangements.</p>
+
+        <!-- ── FAO Data Protection and Privacy Policy ── -->
+        <hr class="tc-modal__divider" />
+
+        <h4 class="tc-section__heading tc-section__heading--policy" id="faoDataPrivacyPolicy">FAO Data Protection and Privacy Policy</h4>
+        <p><strong>Data protection and privacy notice</strong></p>
+
+        <h4 class="tc-section__heading">1. Introduction</h4>
+        <p>FAO is committed to treat your personal data fairly, with integrity, responsibility, security, and transparency. FAO collects and processes personal data in accordance with its internal rules and procedures on the protection of data, to the exclusion of any single national system of law.</p>
+        <p>This Data Protection and Privacy Notice describes what personal information we may collect and process, the reason for processing, how we use, process and ensure protection of all data provided. It also sets out the options for you to request access, correction, deletion and to object to your data being processed by FAO.</p>
+
+        <h4 class="tc-section__heading">2. Scope of processing activities</h4>
+        <p>This Data Protection and Privacy Notice applies to the:</p>
+        <ol class="tc-list" type="a">
+          <li>web-users visiting FAO websites (within the "fao.org" domain name, or any other domain officially owned by FAO) and other online services including FAO social media pages</li>
+          <li>participants registering for, and attending, FAO events including virtual events</li>
+          <li>personnel and guests entering FAO premises (HQ and decentralized offices)</li>
+          <li>subscribers to FAO newsletters</li>
+          <li>users accessing FAO Knowledge Repository</li>
+          <li>users accessing FAO databases, systems, blogs, forum and other similar tools</li>
+          <li>competitors responding to FAO's contests.</li>
+        </ol>
+        <p>In addition to being governed by the FAO Terms and Conditions, individual platforms or tools on FAO's website may have additional dedicated terms of use. In case of conflict, the present Data Protection and Policy Notice shall apply. For processing activities using FAO apps, please refer to the FAO Privacy Policy for the use of FAO Apps.</p>
+        <p>If you visit FAO's website, you may notice links that may direct you to websites and online platforms managed by third parties. The processing of personal data on the third parties' platforms, including the social media platforms that host FAO's social media pages, are governed by their own privacy policies.</p>
+
+        <h4 class="tc-section__heading">3. What data do we collect and process?</h4>
+        <p>As reflected in the Terms and Conditions on FAO's website, except for authorized investigations and to maintain required correspondence files, no other attempts are made to identify individual users or their usage habits. Raw data logs are used to determine the number of users and, occasionally, which general domains are accessing the FAO website. When you visit the FAO website, FAO uses third parties' platforms that collect anonymous information about users' browsing behaviour when users visit the website, through the use of cookies. By using the FAO website, users agree that FAO can place cookies on users' computer, mobile phone or handheld devices.</p>
+        <p>There may be specific platforms, apps, tools or activities where FAO asks you to provide personal identifiable information (for example, amongst others, full name, date of birth, email and/or postal address, phone number, position/title, company/organisation). This would be for the following processing activities:</p>
+        <ol class="tc-list">
+          <li>Contacting FAO through FAO website, emails, and other means.</li>
+          <li>Subscribing FAO newsletters.</li>
+          <li>Registering to participate in FAO events.</li>
+          <li>Downloading FAO apps (see Privacy Policy for the use of FAO application).</li>
+          <li>Registering to access FAO databases, blogs, forum.</li>
+        </ol>
+
+        <h4 class="tc-section__heading">4. Why do we collect your data?</h4>
+        <p>FAO will only collect and process your personal data for the purpose of FAO activities undertaken within the context of its mandate and in line with its legal framework. So, we may collect your personal data for one or more of the following purposes:</p>
+        <ul class="tc-list tc-list--bullet">
+          <li>To allow you to contact us and/or receive information from us;</li>
+          <li>To organise or promote FAO events and/or activities;</li>
+          <li>To allow you to register to participate in events we organise or co-organise;</li>
+          <li>To analyse web statistics and log files, with the aim of improving the functioning of our website;</li>
+          <li>To give you access to FAO apps or other platforms;</li>
+          <li>To send you FAO newsletters.</li>
+        </ul>
+
+        <h4 class="tc-section__heading">5. Who has access to your personal data and to whom is it disclosed?</h4>
+        <p>Any information provided to FAO by users is managed with utmost care and security. It is not used in any manner other than that set out in this Data Protection and Privacy Notice, or in any additional site-specific policies, without users' consent. All FAO employees who have access to, or are associated with, the processing of personal data are under strict obligations of confidentiality in respect of official business matters, including when processing personal data.</p>
+        <p>Depending on the purpose for which we process your personal data, we may share the necessary information with selected third parties (duly authorized partners or service providers) to perform services for FAO. We make every effort to ensure that those third parties afford a level of protection and safeguards that are the same as or comparable to FAO.</p>
+
+        <h4 class="tc-section__heading">6. How long do we keep your data?</h4>
+        <p>Your personal data will be kept by FAO and its authorized partners and service providers only for as long as necessary for purposes set out in this Notice in accordance with FAO rules.</p>
+
+        <h4 class="tc-section__heading">7. How do we ensure the safeguards of your data?</h4>
+        <p>To prevent unauthorized access, use or disclosure, maintain data accuracy, and ensure the correct use of data, FAO applies adequate security measures and appropriate physical, electronic, and managerial procedures to safeguard and secure the information we process. These measures and procedures are consistent with FAO's rules, policies and practice, which are aligned with international standards and practices.</p>
+
+        <h4 class="tc-section__heading">8. Requests related to your data</h4>
+        <p>In accordance with FAO internal rules and procedures on data protection, you may make the following requests with regard to your data:</p>
+        <ol class="tc-list" type="a">
+          <li><strong>Access.</strong> You may request confirmation of whether your data is being processed and, if that is the case, request access to your data.</li>
+          <li><strong>Correction.</strong> You may request correction or updating of your data.</li>
+          <li><strong>Deletion.</strong> You may request deletion of your data. Requests for deletion will be considered, taking into account whether (i) the data is no longer necessary for the processing purpose, or (ii) you have withdrawn your consent to the data processing and there is no other legitimate basis for processing.</li>
+          <li><strong>Objection.</strong> If you have been asked, but not yet provided your data, you may object to having your data processed. In this case, you should provide compelling legitimate grounds for your objection.</li>
+        </ol>
+
+        <h4 class="tc-section__heading">9. Contact us</h4>
+        <p>If you wish to request for access, correction, deletion, or to object to the use of your personal data, please contact us at <a href="mailto:FAO-Data-Privacy@fao.org" class="tc-inline-link">FAO-Data-Privacy@fao.org</a></p>
+        <p>If you have concerns or require more information regarding the personal data you have provided to us, please contact us at <a href="mailto:FAO-Data-Privacy@fao.org" class="tc-inline-link">FAO-Data-Privacy@fao.org</a></p>
+
+        <h4 class="tc-section__heading">10. Changes to data protection and privacy notice</h4>
+        <p>FAO may, at its own discretion, update this Data Protection and Privacy Notice, to reflect changes in our rules and practices.</p>
+
+        <h4 class="tc-section__heading">11. Privileges and Immunities and applicable law</h4>
+        <p>Nothing in this Data Protection and Privacy Notice shall be construed as constituting a waiver of the privileges or immunities of FAO, nor as its acceptance of the jurisdiction of the courts of any country over disputes arising out of this Notice. FAO's processing of personal data is not governed by any national or regional system of law.</p>
+      </div>
+
+      <div class="tc-modal__footer">
+        <button type="button" class="btn-secondary" id="tcCancel">Cancel</button>
+        <button type="button" class="btn-primary tc-modal__confirm" id="tcConfirm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          I Have Read and Agree
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       ERROR ALERT MODAL
+  ═══════════════════════════════════════ -->
+  <div
+    class="err-modal-overlay"
+    id="errModal"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="errModalTitle"
+    hidden
+  >
+    <div class="err-modal">
+
+      <!-- Dismiss X -->
+      <button type="button" class="err-modal__close" id="errModalClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Icon -->
+      <div class="err-modal__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="11"/>
+          <path d="M12 7v5.5M12 15.5v2" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+
+      <!-- Content -->
+      <h3 class="err-modal__title" id="errModalTitle">Something went wrong</h3>
+      <p class="err-modal__message" id="errModalMessage"></p>
+
+      <!-- Action -->
+      <button type="button" class="err-modal__confirm" id="errModalDismiss">
+        OK, Got It
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────
+       intl-tel-input JS
+  ───────────────────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.5.3/build/js/intlTelInput.min.js"></script>
+
+  <script src="/assets/registration.js"></script>
+</body>
+</html>
