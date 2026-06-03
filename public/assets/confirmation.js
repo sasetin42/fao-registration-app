@@ -21,13 +21,13 @@ function parseJWT(token) {
 const rawToken = new URLSearchParams(window.location.search).get("token");
 
 if (!rawToken) {
-  window.location.replace("index.html");
+  window.location.replace("/fao_registration");
 }
 
 const data = parseJWT(rawToken);
 
 if (!data) {
-  window.location.replace("index.html");
+  window.location.replace("/fao_registration");
 }
 
 /* ── XSS helper ── */
@@ -229,13 +229,79 @@ function showSuccessModal(meetings) {
 
   successModal.removeAttribute("hidden");
   document.body.style.overflow = "hidden";
-}
-
-function closeSuccessModal() {
+}function closeSuccessModal() {
   if (successModal) {
     successModal.setAttribute("hidden", "");
     document.body.style.overflow = "";
   }
+}
+
+function showInPersonSuccessModal() {
+  if (!successModal || !successModalZoomContainer) return;
+
+  const dates = "20261123T010000Z/20261126T090000Z";
+  const title = encodeURIComponent("Asia-Pacific Conference on Sustainable Agricultural Mechanization (APSAM 2026)");
+  const details = encodeURIComponent(
+    `Asia-Pacific Conference on Sustainable Agricultural Mechanization (APSAM 2026)\n\n` +
+    `You are registered for IN-PERSON attendance.\n` +
+    `Venue: Manila, Philippines\n` +
+    `Dates: 23-26 November 2026\n\n` +
+    `Please present your check-in QR code at the event entrance for admission.\n\n` +
+    `Food and Agriculture Organization (FAO) of the United Nations.`
+  );
+  const location = encodeURIComponent("Manila, Philippines");
+  const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+
+  // Get selected days
+  const daysText = data.attendance_days ? formatText(data.attendance_days) : "All Days";
+
+  successModalZoomContainer.innerHTML = `
+    <div class="zoom-card-modal" style="background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 12px; transition: all 0.2s ease;">
+      <div style="display: flex; gap: 16px; padding: 16px; border-bottom: 1px solid var(--color-border-light); align-items: flex-start;">
+        <div style="width: 72px; height: 72px; border-radius: var(--radius-sm); background-image: url('/assets/01-apsam-main-visual-landscape.jpg'); background-size: cover; background-position: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.1);"></div>
+        <div style="flex: 1; min-width: 0; text-align: left;">
+          <h4 style="font-size: 14.5px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 4px;">In-Person Participant Access</h4>
+          <p style="font-size: 12.5px; color: var(--color-primary); font-weight: 600; margin: 0 0 4px; display: flex; align-items: center; gap: 4px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            23-26 November 2026 | Manila, Philippines
+          </p>
+          <p style="font-size: 12px; color: var(--color-text-muted); margin: 0;">Registered Days: <strong style="color: var(--color-text);">${escapeHTML(daysText)}</strong></p>
+        </div>
+      </div>
+      <div style="background-color: var(--color-bg); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start;">
+        <a href="${calendarUrl}" target="_blank" rel="noopener noreferrer" class="da-notice__btn" style="margin: 0; padding: 6px 12px; font-size: 12px; background-color: var(--color-success); border: none; display: inline-flex; align-items: center; gap: 4px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Add to Google Calendar
+        </a>
+        <button type="button" class="btn-toggle-details" style="margin-left: auto; background: none; border: none; font-size: 12px; font-weight: 600; color: var(--color-primary); cursor: pointer; text-decoration: underline;">
+          More Details
+        </button>
+      </div>
+      <div class="card-details-panel" style="display: none; padding: 16px; background-color: #fff; border-top: 1px solid var(--color-border-light); font-size: 13px; line-height: 1.6; text-align: left;">
+        <p style="margin-bottom: var(--spacing-sm);"><strong>Attendee:</strong> ${escapeHTML(data.full_name || (data.first_name + ' ' + data.last_name))}</p>
+        <p style="margin-bottom: var(--spacing-sm);"><strong>Dietary Preference:</strong> ${escapeHTML(formatDietary(data.dietary))}${data.dietary_details ? ' (' + escapeHTML(data.dietary_details) + ')' : ''}</p>
+        <p style="margin-bottom: var(--spacing-sm);"><strong>Visa Assistance:</strong> ${data.visa_assistance == "1" ? "Requested (Our team will contact you)" : "Not Requested"}</p>
+        <p style="margin-bottom: 0;"><strong>Check-in Requirement:</strong> Please present the QR code rendered behind this modal at the main registration desk to print your badge.</p>
+      </div>
+    </div>
+  `;
+
+  // Hook toggle details
+  const toggleBtn = successModalZoomContainer.querySelector(".btn-toggle-details");
+  const detailsPanel = successModalZoomContainer.querySelector(".card-details-panel");
+  toggleBtn.addEventListener("click", () => {
+    const isVisible = detailsPanel.style.display !== "none";
+    detailsPanel.style.display = isVisible ? "none" : "block";
+    toggleBtn.textContent = isVisible ? "More Details" : "Hide Details";
+  });
+
+  // Update title/text for in-person context
+  document.getElementById("successModalTitle").textContent = "REGISTRATION CONFIRMED!";
+  document.getElementById("successModalBody").querySelector("h4").textContent = "In-Person Event Access & Schedule";
+  document.getElementById("successModalBody").querySelector("p").textContent = "Your details have been successfully received and are pending administrator review.";
+
+  successModal.removeAttribute("hidden");
+  document.body.style.overflow = "hidden";
 }
 
 function renderInlineZoomNotice(meetings) {
@@ -275,39 +341,41 @@ function renderInlineZoomNotice(meetings) {
 }
 
 async function initZoomModalAndNotice() {
-  if (data.attendance_mode !== "online" || !data.zoom_meeting_id) {
-    return;
-  }
+  if (data.attendance_mode === "online") {
+    if (!data.zoom_meeting_id) return;
+    const meetingIds = String(data.zoom_meeting_id).split(",").map(s => s.trim());
+    const joinUrls = data.zoom_join_url ? String(data.zoom_join_url).split(",").map(s => s.trim()) : [];
 
-  const meetingIds = String(data.zoom_meeting_id).split(",").map(s => s.trim());
-  const joinUrls = data.zoom_join_url ? String(data.zoom_join_url).split(",").map(s => s.trim()) : [];
-
-  let activeMeetings = [];
-  try {
-    const res = await fetch("/v1/zoom-meetings");
-    const json = await res.json();
-    if (json.success && json.data && json.data.meetings) {
-      activeMeetings = json.data.meetings;
+    let activeMeetings = [];
+    try {
+      const res = await fetch("/v1/zoom-meetings");
+      const json = await res.json();
+      if (json.success && json.data && json.data.meetings) {
+        activeMeetings = json.data.meetings;
+      }
+    } catch (err) {
+      console.error("Failed to fetch zoom meetings metadata:", err);
     }
-  } catch (err) {
-    console.error("Failed to fetch zoom meetings metadata:", err);
+
+    const userMeetings = meetingIds.map((mId, index) => {
+      const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
+      return {
+        meeting_id: mId,
+        display_name: matched ? matched.display_name : `Zoom Session (${mId})`,
+        topic: matched ? matched.topic : `Session ${mId}`,
+        join_url: joinUrls[index] || "#"
+      };
+    });
+
+    // 1. Show the Modal overlay with complete Zoom details and Google Calendar integration
+    showSuccessModal(userMeetings);
+
+    // 2. Insert inline list for persistent visibility
+    renderInlineZoomNotice(userMeetings);
+  } else {
+    // Show in-person success details modal
+    showInPersonSuccessModal();
   }
-
-  const userMeetings = meetingIds.map((mId, index) => {
-    const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
-    return {
-      meeting_id: mId,
-      display_name: matched ? matched.display_name : `Zoom Session (${mId})`,
-      topic: matched ? matched.topic : `Session ${mId}`,
-      join_url: joinUrls[index] || "#"
-    };
-  });
-
-  // 1. Show the Modal overlay with complete Zoom details and Google Calendar integration
-  showSuccessModal(userMeetings);
-
-  // 2. Insert inline list for persistent visibility
-  renderInlineZoomNotice(userMeetings);
 }
 
 // Initialize Success Modal & Notice
@@ -325,7 +393,6 @@ document.addEventListener("keydown", (e) => {
     closeSuccessModal();
   }
 });
-
 
 /* ── Wire download button ── */
 document.getElementById("downloadQrBtn").addEventListener("click", async () => {

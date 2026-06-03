@@ -41,6 +41,14 @@ class RegistrationController
             $data[$field] = isset($body[$field]) ? htmlspecialchars(trim($body[$field]), ENT_QUOTES, 'UTF-8') : null;
         }
 
+        if (empty($data['email'])) {
+            return $this->error($response, "Email address is required.");
+        }
+
+        if ($this->model->emailExists($data['email'])) {
+            return $this->error($response, "This email address is already registered. Please use a different email.");
+        }
+
         try {
             $result = $this->model->addParticipant($data);
 
