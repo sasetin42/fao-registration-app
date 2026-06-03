@@ -8,6 +8,14 @@
         "vlucas/phpdotenv": "^5.0",
         "chillerlan/php-qrcode": "^5.0"
     },
+    "config": {
+        "platform": {
+            "php": "8.2.0"
+        },
+        "allow-plugins": {
+            "chillerlan/composer-settings-plugin": true
+        }
+    },
     "autoload": {
         "psr-4": {
             "App\\": "src/"
