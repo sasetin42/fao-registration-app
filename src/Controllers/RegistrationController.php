@@ -137,17 +137,34 @@ class RegistrationController
 
     public function getActiveMeetings(Request $request, Response $response): Response
     {
-        $meetingsFilePath = __DIR__ . '/../../config/zoom_meetings.json';
-        $meetings = [];
-        if (file_exists($meetingsFilePath)) {
-            $meetings = json_decode(file_get_contents($meetingsFilePath), true) ?? [];
+        try {
+            $meetings = $this->zoom->listMeetings();
+            
+            if (empty($meetings)) {
+                throw new \Exception("No live meetings returned");
+            }
+
+            // Map live Zoom API response to frontend format
+            $mappedMeetings = array_map(function ($m) {
+                return [
+                    'meeting_id'   => (string)$m['id'],
+                    'display_name' => $m['topic']
+                ];
+            }, $meetings);
+
+            return $this->success($response, 'Active meetings fetched', ['meetings' => $mappedMeetings]);
+        } catch (\Throwable $e) {
+            // Fallback to local config file if API fails
+            $meetingsFilePath = __DIR__ . '/../../config/zoom_meetings.json';
+            $meetings = [];
+            if (file_exists($meetingsFilePath)) {
+                $meetings = json_decode(file_get_contents($meetingsFilePath), true) ?? [];
+            }
+            $activeMeetings = array_values(array_filter($meetings, function ($m) {
+                return !empty($m['is_active']);
+            }));
+            return $this->success($response, 'Fallback active meetings fetched', ['meetings' => $activeMeetings]);
         }
-
-        $activeMeetings = array_values(array_filter($meetings, function ($m) {
-            return !empty($m['is_active']);
-        }));
-
-        return $this->success($response, 'Active meetings fetched', ['meetings' => $activeMeetings]);
     }
 
     private function success(Response $response, string $message, array $data = [], int $status = 200): Response
