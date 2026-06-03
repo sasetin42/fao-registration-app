@@ -189,12 +189,19 @@ function buildAttendeeRow() {
   `;
 }
 
-/* ── Close modal ── */
+/* ── Open / Close modal ── */
+function openSuccessModal() {
+  if (!successModal) return;
+  successModal.removeAttribute("hidden");
+  successModal.style.display = "flex";  /* force flex display cross-browser */
+  document.body.style.overflow = "hidden";
+}
+
 function closeSuccessModal() {
-  if (successModal) {
-    successModal.setAttribute("hidden", "");
-    document.body.style.overflow = "";
-  }
+  if (!successModal) return;
+  successModal.setAttribute("hidden", "");
+  successModal.style.display = "";
+  document.body.style.overflow = "";
 }
 
 /* ════════════════════════════════════════════
@@ -332,8 +339,7 @@ function showSuccessModal(meetings) {
     successModalZoomContainer.appendChild(card);
   });
 
-  successModal.removeAttribute("hidden");
-  document.body.style.overflow = "hidden";
+  openSuccessModal();
 }
 
 /* ════════════════════════════════════════════
@@ -449,8 +455,7 @@ function showInPersonSuccessModal() {
   const noticeEl = document.getElementById("successNoticeText");
   if (noticeEl) noticeEl.textContent = "Please bring your QR code (printed or on your phone) to the event venue for check-in and badge printing. Take a screenshot for your records.";
 
-  successModal.removeAttribute("hidden");
-  document.body.style.overflow = "hidden";
+  openSuccessModal();
 }
 
 /* ════════════════════════════════════════════
@@ -501,12 +506,12 @@ function renderInlineZoomNotice(meetings) {
   document.getElementById("confirmationPanel").insertBefore(container, actions);
 }
 
-/* ── Initialize ── */
+/* ── Initialize — wrapped in DOMContentLoaded to guarantee DOM is ready ── */
 async function initZoomModalAndNotice() {
   if (data.attendance_mode === "online") {
-    if (!data.zoom_meeting_id) return;
-
-    const meetingIds = String(data.zoom_meeting_id).split(",").map(s => s.trim());
+    /* Build meetings list even if zoom_meeting_id is empty */
+    const rawIds = data.zoom_meeting_id ? String(data.zoom_meeting_id).trim() : "";
+    const meetingIds = rawIds ? rawIds.split(",").map(s => s.trim()).filter(Boolean) : [];
     const joinUrls   = data.zoom_join_url ? String(data.zoom_join_url).split(",").map(s => s.trim()) : [];
 
     let activeMeetings = [];
@@ -520,25 +525,42 @@ async function initZoomModalAndNotice() {
       console.error("Failed to fetch zoom meetings metadata:", err);
     }
 
-    const userMeetings = meetingIds.map((mId, index) => {
-      const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
-      return {
-        meeting_id   : mId,
-        display_name : matched ? matched.display_name : `Zoom Session (${mId})`,
-        topic        : matched ? matched.topic        : `Session ${mId}`,
+    let userMeetings;
+    if (meetingIds.length > 0) {
+      userMeetings = meetingIds.map((mId, index) => {
+        const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
+        return {
+          meeting_id   : mId,
+          display_name : matched ? matched.display_name : `Zoom Session (${mId})`,
+          topic        : matched ? matched.topic        : `Session ${mId}`,
+          join_url     : joinUrls[index] || "#"
+        };
+      });
+    } else {
+      /* No specific sessions selected — show all active meetings */
+      userMeetings = activeMeetings.map((m, index) => ({
+        meeting_id   : m.meeting_id,
+        display_name : m.display_name,
+        topic        : m.topic,
         join_url     : joinUrls[index] || "#"
-      };
-    });
+      }));
+    }
 
     showSuccessModal(userMeetings);
-    renderInlineZoomNotice(userMeetings);
+    if (meetingIds.length > 0) renderInlineZoomNotice(userMeetings);
 
   } else {
     showInPersonSuccessModal();
   }
 }
 
-initZoomModalAndNotice();
+/* Use DOMContentLoaded to guarantee DOM is fully parsed before init */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initZoomModalAndNotice);
+} else {
+  /* DOM already ready (script is deferred or at end of body) */
+  initZoomModalAndNotice();
+}
 
 /* ── Modal event listeners ── */
 if (successModalClose)   successModalClose.addEventListener("click", closeSuccessModal);
