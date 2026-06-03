@@ -3,18 +3,291 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registration Confirmed — FAO Event</title>
+  <title>Registration Confirmed — APSAM 2026 | FAO</title>
+  <meta name="description" content="Your registration for APSAM 2026 is confirmed. View your Zoom session links, venue details, QR check-in code, and Google Calendar events." />
+  <meta name="robots" content="noindex, nofollow" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
   <link rel="stylesheet" href="/assets/index.css" />
+
+  <style>
+    /* ═══════════════════════════════════════
+       SUCCESS PAGE — Scoped Styles
+    ═══════════════════════════════════════ */
+
+    @keyframes successPop {
+      0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+      65%  { transform: scale(1.18) rotate(2deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* ── Hero Banner ── */
+    .sp-hero {
+      background: linear-gradient(135deg, #1C4767 0%, #116AAB 55%, #5792C9 100%);
+      padding: 52px 28px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sp-hero::before,
+    .sp-hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .sp-hero::before { top: -70px; right: -60px; width: 250px; height: 250px; background: rgba(255,255,255,0.055); }
+    .sp-hero::after  { bottom: -50px; left: 8%; width: 180px; height: 180px; background: rgba(255,255,255,0.038); }
+
+    .sp-hero__inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      position: relative;
+      z-index: 1;
+    }
+    .sp-hero__check {
+      width: 76px; height: 76px; flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.16);
+      border: 2.5px solid rgba(255,255,255,0.45);
+      display: flex; align-items: center; justify-content: center;
+      animation: successPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275) 0.1s both;
+    }
+    .sp-hero__body { flex: 1; min-width: 0; }
+    .sp-hero__title {
+      font-size: 28px; font-weight: 800; color: #fff;
+      margin: 0 0 5px; line-height: 1.2;
+      animation: fadeUp 0.45s ease 0.25s both;
+    }
+    .sp-hero__sub {
+      font-size: 13px; color: rgba(255,255,255,0.76);
+      margin: 0 0 20px;
+      animation: fadeUp 0.45s ease 0.35s both;
+    }
+    .sp-hero__pills {
+      display: flex; flex-wrap: wrap; gap: 9px; align-items: center;
+      animation: fadeUp 0.45s ease 0.45s both;
+    }
+    .sp-hero__pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.13);
+      border: 1px solid rgba(255,255,255,0.26);
+      border-radius: 20px; padding: 5px 13px;
+      font-size: 12.5px; color: rgba(255,255,255,0.93); font-weight: 600;
+    }
+    .sp-hero__badge {
+      border-radius: 20px; padding: 5px 13px;
+      font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px; color: #fff;
+    }
+    .sp-hero__ref {
+      margin-top: 18px;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.11);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 12px; color: rgba(255,255,255,0.82);
+      animation: fadeUp 0.45s ease 0.55s both;
+    }
+    .sp-hero__ref strong { color: #fff; font-size: 13px; }
+
+    /* ── Page layout ── */
+    .sp-main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 38px 24px 60px;
+    }
+    .sp-grid {
+      display: grid;
+      grid-template-columns: 1fr 330px;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 820px) {
+      .sp-grid { grid-template-columns: 1fr; }
+      .sp-hero__inner { flex-direction: column; text-align: center; }
+      .sp-hero__pills { justify-content: center; }
+      .sp-hero__title { font-size: 22px; }
+      .sp-hero__ref   { justify-content: center; }
+    }
+
+    /* ── Section heading ── */
+    .sp-section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+    }
+    .sp-section-title {
+      margin: 0; font-size: 12.5px; font-weight: 700;
+      color: var(--color-primary-dark);
+      text-transform: uppercase; letter-spacing: 0.65px;
+      display: flex; align-items: center; gap: 7px;
+    }
+
+    /* ── Session / Venue Cards ── */
+    .sp-card {
+      background: #fff;
+      border: 1.5px solid #DDE4ED;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      transition: box-shadow 0.22s ease, transform 0.22s ease;
+      animation: fadeUp 0.4s ease both;
+    }
+    .sp-card:hover {
+      box-shadow: 0 10px 32px rgba(17,106,171,0.11);
+      transform: translateY(-2px);
+    }
+    .sp-card__top    { display: flex; border-bottom: 1px solid #EDF0F4; }
+    .sp-card__img    { width: 92px; min-height: 100px; background-size: cover; background-position: center; flex-shrink: 0; }
+    .sp-card__info   { flex: 1; padding: 14px 16px 13px; }
+    .sp-card__name   { font-size: 15px; font-weight: 700; color: #1C4767; margin: 0 0 5px; line-height: 1.3; }
+    .sp-card__date   { font-size: 12px; color: #116AAB; font-weight: 600; margin: 0 0 7px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .sp-card__id     { font-size: 11.5px; color: #3A3A3A; background: #F0F4F8; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-weight: 600; letter-spacing: 0.3px; }
+    .sp-card__chips  { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+    .sp-card__actions {
+      padding: 10px 14px;
+      background: #FAFBFC;
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      border-bottom: 1px solid #EDF0F4;
+    }
+    .sp-card__detail {
+      display: none;
+      padding: 16px 18px;
+      background: #F8FBFF;
+      font-size: 12.5px; line-height: 1.68;
+    }
+    .sp-card__detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px 24px;
+    }
+    @media (max-width: 540px) {
+      .sp-card__detail-grid { grid-template-columns: 1fr; }
+      .sp-card__img { width: 72px; }
+    }
+    .sp-dl { margin: 0; font-size: 10.5px; font-weight: 700; color: #1C4767; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }
+    .sp-dv { margin: 0; color: #545454; }
+
+    /* ── Buttons ── */
+    .sp-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      border: none; border-radius: 6px;
+      padding: 7px 13px; font-size: 12px; font-weight: 700;
+      cursor: pointer; text-decoration: none;
+      transition: all 0.2s; white-space: nowrap; font-family: inherit;
+    }
+    .sp-btn:hover { opacity: 0.87; transform: translateY(-1px); }
+    .sp-btn--zoom  { background: #2D8CFF; color: #fff; }
+    .sp-btn--cal   { background: #188038; color: #fff; }
+    .sp-btn--maps  { background: #1A73E8; color: #fff; }
+    .sp-btn--copy  { background: #fff; color: #3A3A3A; border: 1.5px solid #CDD4DB; }
+    .sp-btn--ghost { background: none; color: #116AAB; border: none; font-size: 12px; text-decoration: underline; padding: 4px 0; margin-left: auto; cursor: pointer; font-family: inherit; font-weight: 700; }
+    .sp-btn--ghost:hover { transform: none; opacity: 1; color: #1C4767; }
+
+    /* ── Add-all banner ── */
+    .sp-add-all {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      background: linear-gradient(90deg, #E8F5E9, #F1F8E9);
+      border: 1px solid #A5D6A7;
+      border-radius: 9px; padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    .sp-add-all p { margin: 0; font-size: 13px; font-weight: 600; color: #1B5E20; }
+
+    /* ── Sidebar: QR Card ── */
+    .sp-qr-card {
+      background: #fff;
+      border: 1.5px solid #DDE4ED;
+      border-radius: 12px;
+      padding: 24px 20px 20px;
+      text-align: center;
+      margin-bottom: 18px;
+      animation: fadeUp 0.4s ease 0.1s both;
+    }
+    .sp-qr-card__title {
+      font-size: 12.5px; font-weight: 700;
+      color: var(--color-primary-dark);
+      text-transform: uppercase; letter-spacing: 0.65px;
+      margin: 0 0 16px;
+    }
+    .sp-qr-card__img {
+      width: 100%; max-width: 190px; height: auto;
+      display: block; margin: 0 auto 14px;
+      border-radius: 6px;
+      border: 1px solid #EDF0F4;
+    }
+    .sp-qr-card__note {
+      font-size: 11.5px; color: var(--color-text-muted);
+      margin: 0 0 16px; line-height: 1.55;
+    }
+
+    /* ── Sidebar: Info Card ── */
+    .sp-info-card {
+      background: #FFF8E1;
+      border: 1px solid #FFE082;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      font-size: 12.5px; line-height: 1.65;
+      color: #5D4037;
+      animation: fadeUp 0.4s ease 0.2s both;
+    }
+    .sp-info-card__title {
+      font-size: 11.5px; font-weight: 700;
+      color: #E65100; text-transform: uppercase; letter-spacing: 0.5px;
+      margin: 0 0 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sp-info-card__list { margin: 0; padding: 0 0 0 16px; }
+    .sp-info-card__list li { margin-bottom: 6px; }
+    .sp-info-card__list li:last-child { margin-bottom: 0; }
+
+    /* ── Sidebar: Contact Card ── */
+    .sp-contact-card {
+      background: #EBF3FB;
+      border: 1px solid #B3D4EE;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 12.5px; color: #1C4767;
+      animation: fadeUp 0.4s ease 0.3s both;
+    }
+    .sp-contact-card strong { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+
+    /* ── Page Actions ── */
+    .sp-actions {
+      margin-top: 36px;
+      padding-top: 26px;
+      border-top: 1.5px solid var(--color-border-light);
+      display: flex; flex-wrap: wrap; gap: 12px;
+      align-items: center; justify-content: space-between;
+    }
+
+    /* ── Print mode ── */
+    @media print {
+      .fao-header, .fao-footer, .sp-hero, .sp-actions,
+      .sp-card__actions, .sp-add-all, .sp-btn--ghost { display: none !important; }
+      .sp-grid { grid-template-columns: 1fr !important; }
+      .sp-card__detail { display: block !important; }
+      body { background: #fff !important; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- ═══════════════════ HEADER ═══════════════════ -->
   <header class="fao-header" role="banner">
     <div class="fao-header__inner">
       <a href="/" class="fao-header__logo" aria-label="FAO Home">
@@ -46,79 +319,154 @@
     </nav>
   </header>
 
-  <!-- PAGE HERO -->
-  <section class="page-hero" aria-label="Page header">
-    <div class="page-hero__inner">
-      <span class="page-hero__label">Registration Confirmed</span>
-      <div class="page-hero__rule" aria-hidden="true"></div>
-      <h1 class="page-hero__title">Asia-Pacific Conference on Sustainable Agricultural Mechanization</h1>
-      <p class="page-hero__theme">Modernize. Scale. Sustain.</p>
-      <div class="page-hero__meta" aria-label="Conference details">
-        <span class="page-hero__meta-item page-hero__meta-item--venue">
-          <svg class="page-hero__meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-          </svg>
-          Manila, Philippines
-        </span>
-        <span class="page-hero__meta-item">
-          <svg class="page-hero__meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-          </svg>
-          23-26 November 2026
-        </span>
-      </div>
-    </div>
-  </section>
+  <!-- ═══════════════════ SUCCESS HERO ═══════════════════ -->
+  <section class="sp-hero" aria-labelledby="sp-hero-title">
+    <div class="sp-hero__inner">
 
-  <!-- MAIN -->
-  <main class="page-main" id="main-content">
-    <div class="registration-card" id="confirmationPanel" role="region" aria-label="Registration confirmation">
-
-      <div class="confirmation-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
+      <!-- Animated checkmark badge -->
+      <div class="sp-hero__check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="none"
+             stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       </div>
 
-      <h2 class="confirmation-title">You're Registered!</h2>
-      <p class="confirmation-message">
-        Thank you for registering for APSAM 2026. Your details have been received and are pending review.<br />
-        Please save or download your QR code below — you will need it for event check-in.
-      </p>
-
-      <!-- QR Code — centered, populated by confirmation.js -->
-      <div id="confirmationRef" class="confirmation-ref" aria-label="Your check-in QR code" style="text-align:center;"></div>
-
-      <!-- Download button — directly below QR -->
-      <div style="text-align:center; margin: 16px 0 24px;">
-        <button class="btn-primary" id="downloadQrBtn" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+      <!-- Text & pills — populated by JS -->
+      <div class="sp-hero__body">
+        <h1 class="sp-hero__title" id="sp-hero-title">Registration Successful!</h1>
+        <p  class="sp-hero__sub"   id="sp-hero-sub">
+          APSAM 2026 · Asia-Pacific Conference on Sustainable Agricultural Mechanization
+        </p>
+        <div class="sp-hero__pills" id="sp-hero-pills">
+          <!-- JS: attendee name | email | mode badge -->
+        </div>
+        <div class="sp-hero__ref" id="sp-hero-ref" hidden>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="rgba(255,255,255,0.6)"
+               stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
           </svg>
-          Download QR Code
-        </button>
-      </div>
-
-      <!-- DA notice injected here by confirmation.js if international -->
-
-      <!-- Register Another — at the bottom -->
-      <div class="confirmation-actions">
-        <a href="/" class="btn-secondary">Register Another Participant</a>
+          Attendance Key: <strong id="sp-hero-key">—</strong>
+        </div>
       </div>
 
     </div>
-  </main>
+  </section>
 
-  <!-- FOOTER -->
+  <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+  <main class="sp-main" id="main-content">
+    <div class="sp-grid">
+
+      <!-- ── LEFT: Session / Event Details ── -->
+      <div id="sp-left">
+
+        <!-- Add-all banner (virtual ≥2 sessions) — shown by JS -->
+        <div id="sp-add-all-banner" hidden></div>
+
+        <!-- Section heading -->
+        <div class="sp-section-head">
+          <h2 class="sp-section-title" id="sp-sessions-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/>
+              <rect x="3" y="6" width="12" height="12" rx="2" ry="2"/>
+            </svg>
+            Your Registered Sessions
+          </h2>
+          <!-- "Add All" button moved here for single-line layout -->
+          <div id="sp-add-all-head" hidden></div>
+        </div>
+
+        <!-- Session / venue cards injected by JS -->
+        <div id="sp-sessions-panel"></div>
+
+        <!-- DA form notice (international delegates) -->
+        <div id="sp-notices-area"></div>
+
+      </div><!-- /#sp-left -->
+
+      <!-- ── RIGHT: QR Code + Info ── -->
+      <div id="sp-right">
+
+        <!-- QR Code card -->
+        <div class="sp-qr-card">
+          <p class="sp-qr-card__title">Your Check-In QR Code</p>
+          <div id="confirmationRef" aria-label="Your check-in QR code">
+            <!-- QR image injected by JS -->
+          </div>
+          <p class="sp-qr-card__note">
+            Present this QR code at the event registration desk to receive your conference badge.
+          </p>
+          <button class="btn-primary" id="downloadQrBtn" type="button"
+                  style="width:100%;justify-content:center;font-size:13px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download QR Code
+          </button>
+        </div>
+
+        <!-- Important info card -->
+        <div class="sp-info-card">
+          <p class="sp-info-card__title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#E65100"
+                 stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Important Information
+          </p>
+          <ul class="sp-info-card__list" id="sp-info-list">
+            <!-- Populated by JS -->
+          </ul>
+        </div>
+
+        <!-- Contact card -->
+        <div class="sp-contact-card">
+          <strong>Need Help?</strong>
+          <a href="mailto:apsam2026@fao.org" style="color:#116AAB;font-weight:600;">apsam2026@fao.org</a><br/>
+          <span style="color:#545454;">+63 2 8521 0000</span><br/>
+          <span style="font-size:11.5px;color:#888;margin-top:4px;display:block;">Mon – Fri, 08:00–17:00 PHT</span>
+        </div>
+
+      </div><!-- /#sp-right -->
+
+    </div><!-- /.sp-grid -->
+
+    <!-- ── Bottom Actions ── -->
+    <div class="sp-actions">
+      <a href="/" class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" width="14" height="14" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Register Another Participant
+      </a>
+      <button type="button" id="successPrintBtn" class="btn-secondary"
+              style="display:inline-flex;align-items:center;gap:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" width="14" height="14" aria-hidden="true">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Print / Save as PDF
+      </button>
+    </div>
+
+  </main><!-- /#main-content -->
+
+  <!-- ═══════════════════ FOOTER ═══════════════════ -->
   <footer class="fao-footer" role="contentinfo">
     <div class="fao-footer__inner">
-
       <div class="fao-footer__grid">
 
         <div class="fao-footer__brand">
-          <a href="#" class="fao-footer__brand-logo" aria-label="FAO Home">
+          <a href="/" class="fao-footer__brand-logo" aria-label="FAO Home">
             <span class="fao-logo-emblem-crop fao-logo-emblem-crop--footer" aria-hidden="true">
               <img src="/assets/fao-logo.png" alt="" class="fao-footer__logo-img" />
             </span>
@@ -140,16 +488,10 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
             </a>
             <a href="#" class="fao-footer__social-link" aria-label="FAO on YouTube" role="listitem">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="var(--color-primary-dark)"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
             </a>
             <a href="#" class="fao-footer__social-link" aria-label="FAO on LinkedIn" role="listitem">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
-            </a>
-            <a href="#" class="fao-footer__social-link" aria-label="FAO on Instagram" role="listitem">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="var(--color-primary-dark)"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="var(--color-primary-dark)" stroke-width="2"/></svg>
-            </a>
-            <a href="#" class="fao-footer__social-link" aria-label="FAO on Flickr" role="listitem">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="12" r="4.5"/><circle cx="16.5" cy="12" r="4.5"/></svg>
             </a>
           </div>
         </div>
@@ -179,10 +521,10 @@
         <div>
           <h3 class="fao-footer__col-title">Visit FAO</h3>
           <p class="fao-footer__connect-text">
-            Explore the latest news, data, publications and resources on the
-            official FAO website.
+            Explore the latest news, data, publications and resources on the official FAO website.
           </p>
-          <a href="https://www.fao.org" class="fao-footer__website-btn" target="_blank" rel="noopener noreferrer" aria-label="Visit fao.org (opens in new tab)">
+          <a href="https://www.fao.org" class="fao-footer__website-btn"
+             target="_blank" rel="noopener noreferrer" aria-label="Visit fao.org (opens in new tab)">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="10"/>
               <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
@@ -192,117 +534,13 @@
         </div>
 
       </div>
-
       <div class="fao-footer__bottom">
         <p class="fao-footer__copyright">
           &copy; 2026 Food and Agriculture Organization of the United Nations. All rights reserved.
         </p>
       </div>
-
     </div>
   </footer>
-
-   <!-- ═══════════════════════════════════════════════════════════
-       SUCCESS REGISTRATION MODAL  — Enhanced Premium Version
-       Shown for both Online/Virtual and In-Person attendees.
-  ═══════════════════════════════════════════════════════════ -->
-  <div class="tc-modal-overlay" id="successModal" hidden role="dialog" aria-modal="true" aria-labelledby="successModalTitle" style="z-index: 2200; align-items: flex-start; padding: 24px 16px; overflow-y: auto;">
-
-    <div class="tc-modal" style="max-width: 700px; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 64px rgba(17,106,171,0.22); margin: auto;">
-
-      <!-- ── Modal Header Banner ── -->
-      <div id="successModalHeader" style="background: linear-gradient(135deg, #1C4767 0%, #116AAB 60%, #5792C9 100%); padding: 28px 28px 22px; position: relative; overflow: hidden;">
-        <!-- Decorative circles -->
-        <div aria-hidden="true" style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
-        <div aria-hidden="true" style="position:absolute;bottom:-20px;left:40px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"></div>
-
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
-          <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;">
-            <!-- Animated checkmark badge -->
-            <div id="successCheckBadge" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:successPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both;" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div>
-              <h3 id="successModalTitle" style="font-size:18px;font-weight:700;color:#ffffff;margin:0 0 4px;line-height:1.3;">Registration Successful!</h3>
-              <p id="successModalSubtitle" style="font-size:12.5px;color:rgba(255,255,255,0.8);margin:0;line-height:1.4;">APSAM 2026 · Asia-Pacific Conference on Sustainable Agricultural Mechanization</p>
-            </div>
-          </div>
-          <button type="button" id="successModalClose" aria-label="Close registration details" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s;color:#fff;">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-
-        <!-- Attendee summary row -->
-        <div id="successAttendeeRow" style="margin-top:18px;padding:12px 14px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-      <!-- ── Modal Body ── -->
-      <div id="successModalBody" style="padding:0;max-height:60vh;overflow-y:auto;">
-
-        <!-- Section title -->
-        <div id="successModalSectionLabel" style="padding:16px 24px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <h4 style="font-size:14px;font-weight:700;color:var(--color-primary-dark);text-transform:uppercase;letter-spacing:0.6px;display:flex;align-items:center;gap:7px;margin:0;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg>
-            <span id="successSessionsLabel">Your Registered Sessions</span>
-          </h4>
-          <!-- Add All to Calendar button (virtual only) -->
-          <button type="button" id="successAddAllCalBtn" hidden style="background:var(--color-success);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Add All to Google Calendar
-          </button>
-        </div>
-
-        <!-- Dynamic Zoom / event cards -->
-        <div id="successModalZoomContainer" style="padding:12px 24px 8px;display:flex;flex-direction:column;gap:14px;">
-          <!-- Injected by JS -->
-        </div>
-
-        <!-- Important notice bar -->
-        <div id="successImportantNotice" style="margin:4px 24px 16px;padding:12px 14px;background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;font-size:12.5px;color:#5D4037;display:flex;align-items:flex-start;gap:9px;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E65100" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span id="successNoticeText">Please save or screenshot this information. A confirmation has also been sent to your registered email address.</span>
-        </div>
-      </div>
-
-      <!-- ── Modal Footer ── -->
-      <div style="padding:14px 24px;background:var(--color-bg);border-top:1px solid var(--color-border-light);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-        <button type="button" id="successPrintBtn" style="background:none;border:1.5px solid var(--color-border);border-radius:6px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--color-text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print / Save as PDF
-        </button>
-        <div style="display:flex;gap:10px;">
-          <button type="button" id="successModalDismiss" style="background:var(--color-primary);color:#fff;border:none;border-radius:6px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 9 15 9"/><polyline points="9 12 15 12"/><polyline points="9 15 13 15"/></svg>
-            View My QR Code
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Keyframe for badge pop-in animation -->
-  <style>
-    @keyframes successPop {
-      0%   { transform: scale(0); opacity: 0; }
-      70%  { transform: scale(1.15); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    #successModal .tc-modal::-webkit-scrollbar { width: 5px; }
-    #successModal .tc-modal::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
-    #successModalBody::-webkit-scrollbar { width: 5px; }
-    #successModalBody::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
-    .success-zoom-card { transition: box-shadow 0.2s, transform 0.2s; }
-    .success-zoom-card:hover { box-shadow: 0 6px 24px rgba(17,106,171,0.13); transform: translateY(-1px); }
-    .success-action-btn { transition: all 0.2s; }
-    .success-action-btn:hover { opacity: 0.87; transform: translateY(-1px); }
-    #successPrintBtn:hover { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary-dark); }
-    #successModalClose:hover { background: rgba(255,255,255,0.28); }
-    #successModalDismiss:hover { background: var(--color-primary-dark); }
-    #successAddAllCalBtn:hover { background: #1B5E20; }
-  </style>
 
   <script src="/assets/confirmation.js"></script>
 </body>

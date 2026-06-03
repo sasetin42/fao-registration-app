@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════
    CONFIRMATION PAGE — confirmation.js
-   Reads registration data directly from the JWT token
-   passed as ?token= in the URL query string.
+   Reads JWT from ?token= and builds the full Success Page.
+   No modal — everything renders directly on the page.
 ═══════════════════════════════════════════════════════════ */
 
-/* ── JWT decoder (client-side, display only — no verification) ── */
+/* ── JWT decoder (client-side, display-only — no signature check) ── */
 function parseJWT(token) {
   try {
     const payload = token.split(".")[1];
@@ -19,68 +19,24 @@ function parseJWT(token) {
 
 /* ── Guard: no token or invalid → back to registration ── */
 const rawToken = new URLSearchParams(window.location.search).get("token");
-
-if (!rawToken) {
-  window.location.replace("/fao_registration");
-}
-
+if (!rawToken) { window.location.replace("/fao_registration"); }
 const data = parseJWT(rawToken);
+if (!data)    { window.location.replace("/fao_registration"); }
 
-if (!data) {
-  window.location.replace("/fao_registration");
-}
-
-/* ── XSS helper ── */
+/* ═══════════════════════════════════════════════════════════
+   UTILITY HELPERS
+═══════════════════════════════════════════════════════════ */
 function escapeHTML(str) {
   const d = document.createElement("div");
   d.appendChild(document.createTextNode(String(str ?? "")));
   return d.innerHTML;
 }
-
 function formatText(value) {
   return String(value ?? "")
     .split("-")
-    .map(part => part ? part.charAt(0).toUpperCase() + part.slice(1) : part)
+    .map(p => p ? p.charAt(0).toUpperCase() + p.slice(1) : p)
     .join(" ");
 }
-
-/* ── Attendance mode label map ── */
-const attendanceModeLabels = {
-  "in-person" : "In-Person",
-  "online"    : "Online / Virtual",
-};
-
-function formatAttendanceMode(slug) {
-  return attendanceModeLabels[slug] ?? slug;
-}
-
-/* ── Seminar label map ── */
-const seminarLabels = {
-  "food-security-nutrition"  : "Food Security and Nutrition",
-  "sustainable-agriculture"  : "Sustainable Agriculture Practices",
-  "climate-smart-farming"    : "Climate-Smart Farming",
-  "digital-agriculture"      : "Digital Agriculture and Innovation",
-  "rural-development"        : "Rural Development and Livelihoods",
-  "water-land-management"    : "Water and Land Management",
-  "agroforestry"             : "Agroforestry and Biodiversity",
-  "fisheries-aquaculture"    : "Fisheries and Aquaculture",
-};
-
-function formatSeminar(slug) {
-  return seminarLabels[slug] ?? slug;
-}
-
-function formatSeminars(value) {
-  if (!value) return "";
-  return String(value)
-    .split(",")
-    .map(item => item.trim())
-    .filter(Boolean)
-    .map(formatSeminar)
-    .join(", ");
-}
-
-/* ── Dietary label map (slug → display) ── */
 const dietaryLabels = {
   "no-preference" : "No Preference",
   "vegan"         : "Vegan",
@@ -92,41 +48,19 @@ const dietaryLabels = {
   "pescatarian"   : "Pescatarian",
   "dairy-free"    : "Dairy-Free",
 };
+function formatDietary(slug) { return dietaryLabels[slug] ?? slug; }
 
-function formatDietary(slug) {
-  return dietaryLabels[slug] ?? slug;
+function formatMeetingId(id) {
+  const s = String(id).replace(/\s/g, "");
+  return s.length === 11 ? `${s.slice(0,3)} ${s.slice(3,7)} ${s.slice(7)}` : s;
 }
 
-/* ── Format address block (Country first per form order) ── */
-const addrParts = [
-  data.address_country,
-  data.address_street,
-  [data.address_city, data.address_state].filter(Boolean).join(", "),
-  data.address_zip,
-].filter(Boolean);
-const addrBlock = addrParts.join("\n");
+function fullName() {
+  return ((data.full_name || ((data.first_name || "") + " " + (data.last_name || ""))).trim());
+}
 
-/* ── Populate QR code + reference ── */
-const qrSrc = `/v1/qr?attendance_key=${encodeURIComponent(data.attendance_key)}`;
-
-document.getElementById("confirmationRef").innerHTML = `
-  <span class="confirmation-ref__label">Your Check-in QR Code</span>
-  <img class="confirmation-ref__qr" src="${qrSrc}" alt="QR code for attendance check-in" />
-  <span class="confirmation-ref__note">Present this QR code at the event entrance for check-in</span>
-`;
-
-/* ═══════════════════════════════════════════════════════════
-   SUCCESS REGISTRATION MODAL — Enhanced Premium Version
-   Works for both Online/Virtual and In-Person attendees.
-═══════════════════════════════════════════════════════════ */
-
-const successModal          = document.getElementById("successModal");
-const successModalClose     = document.getElementById("successModalClose");
-const successModalDismiss   = document.getElementById("successModalDismiss");
-const successModalZoomContainer = document.getElementById("successModalZoomContainer");
-
-/* ── Build Google Calendar URL + metadata for a Zoom meeting ── */
-function getGoogleCalendarUrl(meeting) {
+/* ── Google Calendar URL builder for a Zoom meeting ── */
+function getCalendarUrl(meeting) {
   let dates    = "20261123T010000Z/20261123T090000Z";
   let schedule = "Monday, November 23, 2026 | 09:00 AM – 05:00 PM (PHT / UTC+8)";
   let desc     = "Day 1 Session: Food Security and Nutrition";
@@ -141,18 +75,18 @@ function getGoogleCalendarUrl(meeting) {
     desc     = "Day 3 Session: Digital Agriculture and Innovation";
   }
 
-  const title = encodeURIComponent(`APSAM 2026 – ${meeting.topic || meeting.display_name}`);
+  const title   = encodeURIComponent(`APSAM 2026 – ${meeting.topic || meeting.display_name}`);
   const details = encodeURIComponent(
     `Asia-Pacific Conference on Sustainable Agricultural Mechanization (APSAM 2026)\n\n` +
     `📋 Session: ${meeting.display_name}\n` +
     `🆔 Zoom Meeting ID: ${formatMeetingId(meeting.meeting_id)}\n` +
     `🔗 Personal Join Link: ${meeting.join_url}\n\n` +
-    `ℹ️ Please use your personal Zoom join link above to access this session.\n` +
+    `ℹ️ Use your personal Zoom link above to access this session.\n` +
     `📞 Dial-in numbers will be included in your Zoom confirmation email.\n\n` +
     `Organized by: Food and Agriculture Organization (FAO) of the United Nations\n` +
     `Contact: apsam2026@fao.org`
   );
-  const location = encodeURIComponent("Online via Zoom — Asia-Pacific Conference on Sustainable Agricultural Mechanization");
+  const location = encodeURIComponent("Online via Zoom – APSAM 2026");
   return {
     url: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`,
     schedule,
@@ -160,204 +94,285 @@ function getGoogleCalendarUrl(meeting) {
   };
 }
 
-/* ── Format Zoom Meeting ID (e.g. 987 6543 2101) ── */
-function formatMeetingId(id) {
-  const s = String(id).replace(/\s/g, "");
-  if (s.length === 11) return `${s.slice(0,3)} ${s.slice(3,7)} ${s.slice(7)}`;
-  return s;
-}
+/* ═══════════════════════════════════════════════════════════
+   1. BUILD HERO
+═══════════════════════════════════════════════════════════ */
+function buildHero() {
+  const isOnline  = data.attendance_mode === "online";
+  const name      = escapeHTML(fullName());
+  const email     = escapeHTML(data.email || "");
+  const modeLabel = isOnline ? "Online / Virtual" : "In-Person";
+  const modeBg    = isOnline ? "#2D8CFF" : "#2E9C4E";
 
-/* ── Populate the header attendee summary row ── */
-function buildAttendeeRow() {
-  const row = document.getElementById("successAttendeeRow");
-  if (!row) return;
-  const name  = escapeHTML((data.full_name || ((data.first_name || "") + " " + (data.last_name || ""))).trim());
-  const email = escapeHTML(data.email || "");
-  const mode  = data.attendance_mode === "online" ? "Online / Virtual" : "In-Person";
-  const modeColor = data.attendance_mode === "online" ? "#2D8CFF" : "#2E9C4E";
+  /* Title / subtitle */
+  if (!isOnline) {
+    document.getElementById("sp-hero-title").textContent = "Registration Confirmed!";
+    document.getElementById("sp-hero-sub").textContent   = "APSAM 2026 · In-Person Attendance — Manila, Philippines";
+  }
 
-  row.innerHTML = `
-    <span style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:rgba(255,255,255,0.95);font-weight:600;">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  /* Attendee pills */
+  document.getElementById("sp-hero-pills").innerHTML = `
+    <span class="sp-hero__pill">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       ${name}
     </span>
-    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.72);">
+    <span class="sp-hero__pill">
       <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       ${email}
     </span>
-    <span style="margin-left:auto;background:${modeColor};color:#fff;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;white-space:nowrap;">${mode}</span>
+    <span class="sp-hero__badge" style="background:${modeBg};">${modeLabel}</span>
+  `;
+
+  /* Attendance key ref */
+  if (data.attendance_key) {
+    const refEl = document.getElementById("sp-hero-ref");
+    const keyEl = document.getElementById("sp-hero-key");
+    if (refEl && keyEl) {
+      keyEl.textContent = data.attendance_key;
+      refEl.removeAttribute("hidden");
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   2. BUILD QR SECTION (sidebar)
+═══════════════════════════════════════════════════════════ */
+let qrSrc = "";
+function buildQrSection() {
+  qrSrc = `/v1/qr?attendance_key=${encodeURIComponent(data.attendance_key)}`;
+  document.getElementById("confirmationRef").innerHTML = `
+    <img class="sp-qr-card__img" id="qrImage" src="${qrSrc}"
+         alt="QR code for attendance check-in at APSAM 2026" />
   `;
 }
 
-/* ── Open / Close modal ── */
-function openSuccessModal() {
-  if (!successModal) return;
-  successModal.removeAttribute("hidden");
-  successModal.style.display = "flex";  /* force flex display cross-browser */
-  document.body.style.overflow = "hidden";
+/* ═══════════════════════════════════════════════════════════
+   3. BUILD INFO CARD (sidebar)
+═══════════════════════════════════════════════════════════ */
+function buildInfoCard() {
+  const isOnline = data.attendance_mode === "online";
+  const el = document.getElementById("sp-info-list");
+  if (!el) return;
+  const items = isOnline ? [
+    `Save your personal Zoom join links from the session cards below.`,
+    `A confirmation email was sent to <strong>${escapeHTML(data.email)}</strong>.`,
+    `Download your QR code and keep it accessible on your device.`,
+    `For technical issues, email <strong>apsam2026@fao.org</strong>.`,
+    `Join Zoom at least <strong>5 minutes</strong> before session start.`,
+  ] : [
+    `Present your QR code at the venue registration desk on arrival.`,
+    `A confirmation email was sent to <strong>${escapeHTML(data.email)}</strong>.`,
+    `Download your QR code and keep it on your phone or printed.`,
+    `Venue: <strong>Sofitel Philippine Plaza Manila</strong>, Pasay, Manila.`,
+    `For assistance, contact <strong>apsam2026@fao.org</strong>.`,
+  ];
+  el.innerHTML = items.map(i => `<li>${i}</li>`).join("");
 }
 
-function closeSuccessModal() {
-  if (!successModal) return;
-  successModal.setAttribute("hidden", "");
-  successModal.style.display = "";
-  document.body.style.overflow = "";
-}
+/* ═══════════════════════════════════════════════════════════
+   4a. RENDER ONLINE / VIRTUAL SESSIONS
+═══════════════════════════════════════════════════════════ */
+function renderOnlineSessions(meetings) {
+  /* Section title */
+  const titleEl = document.getElementById("sp-sessions-title");
+  if (titleEl) titleEl.innerHTML = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/>
+      <rect x="3" y="6" width="12" height="12" rx="2" ry="2"/>
+    </svg>
+    Your Online Sessions (${meetings.length})
+  `;
 
-/* ════════════════════════════════════════════
-   ONLINE / VIRTUAL — Premium Zoom Session Cards
-════════════════════════════════════════════ */
-function showSuccessModal(meetings) {
-  if (!successModal || !successModalZoomContainer) return;
-
-  buildAttendeeRow();
-
-  /* Show "Add All to Calendar" button when multiple meetings */
-  const addAllBtn = document.getElementById("successAddAllCalBtn");
-  if (addAllBtn && meetings.length > 1) {
-    addAllBtn.removeAttribute("hidden");
-    addAllBtn.addEventListener("click", () => {
-      meetings.forEach((m, i) => {
-        const cal = getGoogleCalendarUrl(m);
-        setTimeout(() => window.open(cal.url, "_blank", "noopener,noreferrer"), i * 450);
+  /* Add All to Calendar — show in header row when ≥2 sessions */
+  if (meetings.length > 1) {
+    const headSlot = document.getElementById("sp-add-all-head");
+    if (headSlot) {
+      headSlot.removeAttribute("hidden");
+      headSlot.innerHTML = `
+        <button type="button" id="addAllCalBtn" class="sp-btn sp-btn--cal" style="font-size:12px;padding:6px 12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"
+               width="12" height="12" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Add All to Google Calendar
+        </button>
+      `;
+      document.getElementById("addAllCalBtn").addEventListener("click", () => {
+        meetings.forEach((m, i) => {
+          const cal = getCalendarUrl(m);
+          setTimeout(() => window.open(cal.url, "_blank", "noopener,noreferrer"), i * 480);
+        });
       });
-    });
+    }
   }
 
-  /* Update section label */
-  const lblEl = document.getElementById("successSessionsLabel");
-  if (lblEl) lblEl.textContent = `Your Online Sessions (${meetings.length})`;
-
-  successModalZoomContainer.innerHTML = "";
+  /* Session cards */
+  const panel = document.getElementById("sp-sessions-panel");
+  panel.innerHTML = "";
 
   meetings.forEach((m, idx) => {
-    const cal      = getGoogleCalendarUrl(m);
+    const cal      = getCalendarUrl(m);
     const imgIndex = (idx % 4) + 1;
-    const imgUrl   = `/assets/event_${imgIndex}.png`;
     const fmtId    = formatMeetingId(m.meeting_id);
 
     const card = document.createElement("div");
-    card.className = "success-zoom-card";
-    card.style.cssText = "background:#fff;border:1.5px solid #DDE4ED;border-radius:10px;overflow:hidden;";
-
+    card.className = "sp-card";
+    card.style.animationDelay = `${idx * 0.08}s`;
     card.innerHTML = `
-      <!-- ── Card top: image + session info ── -->
-      <div style="display:flex;border-bottom:1px solid #EDF0F4;">
-        <div style="width:82px;min-height:88px;background-image:url('${imgUrl}');background-size:cover;background-position:center;flex-shrink:0;"></div>
-        <div style="flex:1;padding:13px 15px 11px;">
-          <h4 style="font-size:13.5px;font-weight:700;color:#1C4767;margin:0 0 5px;line-height:1.35;">${escapeHTML(m.display_name)}</h4>
-          <p style="font-size:12px;color:#116AAB;font-weight:600;margin:0 0 6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <!-- Top: image + info -->
+      <div class="sp-card__top">
+        <div class="sp-card__img" style="background-image:url('/assets/event_${imgIndex}.png');" role="img" aria-label="Session banner"></div>
+        <div class="sp-card__info">
+          <h3 class="sp-card__name">${escapeHTML(m.display_name)}</h3>
+          <p class="sp-card__date">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
             ${cal.schedule}
           </p>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-            <span style="font-size:11.5px;color:#3A3A3A;background:#F0F4F8;padding:3px 8px;border-radius:4px;font-family:monospace;font-weight:600;letter-spacing:0.3px;">ID: ${escapeHTML(fmtId)}</span>
-            <button type="button" class="btn-copy-id" data-copy="${escapeHTML(m.meeting_id)}" title="Copy Meeting ID to clipboard" style="font-size:11px;background:none;border:1px solid #CDD4DB;border-radius:4px;padding:3px 8px;cursor:pointer;color:#545454;display:inline-flex;align-items:center;gap:3px;font-weight:600;transition:all 0.2s;">
-              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          <div class="sp-card__chips">
+            <span class="sp-card__id">ID: ${escapeHTML(fmtId)}</span>
+            <button type="button" class="btn-copy-id sp-btn sp-btn--copy"
+                    data-copy="${escapeHTML(m.meeting_id)}"
+                    style="font-size:11px;padding:3px 8px;">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none"
+                   stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
               Copy ID
             </button>
           </div>
         </div>
       </div>
 
-      <!-- ── Action buttons row ── -->
-      <div style="padding:10px 14px;background:#FAFBFC;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid #EDF0F4;">
-        <a href="${escapeHTML(m.join_url)}" target="_blank" rel="noopener noreferrer" class="success-action-btn" style="background:#2D8CFF;color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="12" height="12" aria-hidden="true"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg>
+      <!-- Actions row -->
+      <div class="sp-card__actions">
+        <a href="${escapeHTML(m.join_url)}" target="_blank" rel="noopener noreferrer" class="sp-btn sp-btn--zoom">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+               stroke-linecap="round" width="12" height="12" aria-hidden="true">
+            <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/>
+            <rect x="3" y="6" width="12" height="12" rx="2" ry="2"/>
+          </svg>
           Join Zoom Meeting
         </a>
-        <a href="${cal.url}" target="_blank" rel="noopener noreferrer" class="success-action-btn" style="background:#188038;color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="12" height="12" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <a href="${cal.url}" target="_blank" rel="noopener noreferrer" class="sp-btn sp-btn--cal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+               stroke-linecap="round" width="12" height="12" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
           Add to Google Calendar
         </a>
-        <button type="button" class="btn-copy-link success-action-btn" data-link="${escapeHTML(m.join_url)}" style="background:#fff;border:1.5px solid #CDD4DB;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;color:#3A3A3A;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" aria-hidden="true"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        <button type="button" class="btn-copy-link sp-btn sp-btn--copy"
+                data-link="${escapeHTML(m.join_url)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               width="12" height="12" aria-hidden="true">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
           Copy Join Link
         </button>
-        <button type="button" class="btn-toggle-details" style="margin-left:auto;background:none;border:none;font-size:12px;font-weight:700;color:#116AAB;cursor:pointer;text-decoration:underline;padding:4px 0;white-space:nowrap;">More Details ▾</button>
+        <button type="button" class="btn-toggle-details sp-btn sp-btn--ghost">More Details ▾</button>
       </div>
 
-      <!-- ── Expandable details panel ── -->
-      <div class="card-details-panel" style="display:none;padding:15px 16px;background:#F8FBFF;font-size:12.5px;line-height:1.65;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px 22px;">
+      <!-- Expandable details -->
+      <div class="sp-card__detail">
+        <div class="sp-card__detail-grid">
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Session Description</p>
-            <p style="margin:0;color:#545454;">${cal.desc}</p>
+            <p class="sp-dl">Session Description</p>
+            <p class="sp-dv">${cal.desc}</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Platform</p>
-            <p style="margin:0;color:#545454;">Zoom Video Communications</p>
+            <p class="sp-dl">Platform</p>
+            <p class="sp-dv">Zoom Video Communications</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Zoom Passcode</p>
-            <p style="margin:0;"><code style="background:#E8EDF2;padding:2px 7px;border-radius:4px;font-family:monospace;color:#116AAB;">Automated — No Passcode Required</code></p>
+            <p class="sp-dl">Zoom Passcode</p>
+            <p class="sp-dv">
+              <code style="background:#E8EDF2;padding:2px 7px;border-radius:4px;font-family:monospace;color:#116AAB;">
+                Automated — Not Required
+              </code>
+            </p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Host</p>
-            <p style="margin:0;color:#545454;">FAO of the United Nations</p>
+            <p class="sp-dl">Host Organization</p>
+            <p class="sp-dv">FAO of the United Nations</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Dial-in Numbers</p>
-            <p style="margin:0;color:#545454;">+1 669 900 6833 (US) · +44 330 088 5830 (UK) · Full list sent to <strong>${escapeHTML(data.email)}</strong></p>
+            <p class="sp-dl">Dial-in Numbers</p>
+            <p class="sp-dv">
+              +1 669 900 6833 <em>(US)</em> ·
+              +44 330 088 5830 <em>(UK)</em> ·
+              Full list sent to <strong>${escapeHTML(data.email)}</strong>
+            </p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Language</p>
-            <p style="margin:0;color:#545454;">English · Simultaneous Interpretation Available</p>
+            <p class="sp-dl">Language</p>
+            <p class="sp-dv">English · Simultaneous Interpretation Available</p>
           </div>
         </div>
       </div>
     `;
 
-    /* Hook: Copy Meeting ID */
+    /* ── Interact: Copy Meeting ID ── */
     card.querySelector(".btn-copy-id").addEventListener("click", function () {
       navigator.clipboard.writeText(this.getAttribute("data-copy")).then(() => {
         const orig = this.innerHTML;
-        this.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#188038" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+        this.textContent = "✔ Copied!";
         this.style.color = "#188038";
         setTimeout(() => { this.innerHTML = orig; this.style.color = ""; }, 2200);
       });
     });
 
-    /* Hook: Copy Join Link */
+    /* ── Interact: Copy Join Link ── */
     card.querySelector(".btn-copy-link").addEventListener("click", function () {
       navigator.clipboard.writeText(this.getAttribute("data-link")).then(() => {
         const orig = this.innerHTML;
-        this.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#188038" stroke-width="2.5" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg> <span style="color:#188038">Copied!</span>`;
-        setTimeout(() => { this.innerHTML = orig; }, 2200);
+        this.textContent = "✔ Copied!";
+        this.style.color = "#188038";
+        setTimeout(() => { this.innerHTML = orig; this.style.color = ""; }, 2200);
       });
     });
 
-    /* Hook: Toggle Details */
+    /* ── Interact: Toggle Details ── */
     const toggleBtn    = card.querySelector(".btn-toggle-details");
-    const detailsPanel = card.querySelector(".card-details-panel");
+    const detailsPanel = card.querySelector(".sp-card__detail");
     toggleBtn.addEventListener("click", () => {
       const open = detailsPanel.style.display !== "none";
       detailsPanel.style.display = open ? "none" : "block";
       toggleBtn.textContent = open ? "More Details ▾" : "Hide Details ▴";
     });
 
-    successModalZoomContainer.appendChild(card);
+    panel.appendChild(card);
   });
-
-  openSuccessModal();
 }
 
-/* ════════════════════════════════════════════
-   IN-PERSON — Venue & Google Calendar Card
-════════════════════════════════════════════ */
-function showInPersonSuccessModal() {
-  if (!successModal || !successModalZoomContainer) return;
+/* ═══════════════════════════════════════════════════════════
+   4b. RENDER IN-PERSON CONTENT
+═══════════════════════════════════════════════════════════ */
+function renderInPersonContent() {
+  const titleEl = document.getElementById("sp-sessions-title");
+  if (titleEl) titleEl.innerHTML = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+    Your Event Access Details
+  `;
 
-  buildAttendeeRow();
-
-  /* Update header texts */
-  document.getElementById("successModalTitle").textContent    = "Registration Confirmed!";
-  document.getElementById("successModalSubtitle").textContent = "APSAM 2026 · In-Person Attendance — Manila, Philippines";
-
-  const lblEl = document.getElementById("successSessionsLabel");
-  if (lblEl) lblEl.textContent = "Your Event Access Details";
-
-  const daysText      = data.attendance_days ? formatText(data.attendance_days) : "All Conference Days (23–26 November 2026)";
+  const daysText       = data.attendance_days ? formatText(data.attendance_days) : "All Conference Days (23–26 November 2026)";
   const dietaryDisplay = formatDietary(data.dietary) + (data.dietary_details ? ` (${data.dietary_details})` : "");
 
   /* Google Calendar URL */
@@ -366,251 +381,144 @@ function showInPersonSuccessModal() {
   const calDetails = encodeURIComponent(
     `Asia-Pacific Conference on Sustainable Agricultural Mechanization (APSAM 2026)\n\n` +
     `✅ Attendance Type: IN-PERSON\n` +
-    `👤 Attendee: ${(data.full_name || ((data.first_name || "") + " " + (data.last_name || ""))).trim()}\n` +
+    `👤 Attendee: ${fullName()}\n` +
     `📧 Email: ${data.email}\n` +
     `🏨 Venue: Sofitel Philippine Plaza Manila, CCP Complex, Roxas Boulevard, Pasay, Metro Manila, Philippines\n` +
     `📅 Dates: 23–26 November 2026\n\n` +
-    `📋 Please present your QR code at the main registration desk to print your conference badge.\n\n` +
+    `📋 Present your QR code at the main registration desk to receive your conference badge.\n\n` +
     `📞 Contact: apsam2026@fao.org | +63 2 8521 0000\n` +
     `Organized by: Food and Agriculture Organization (FAO) of the United Nations`
   );
-  const calLocation  = encodeURIComponent("Sofitel Philippine Plaza Manila, CCP Complex, Roxas Boulevard, Pasay 1300, Metro Manila, Philippines");
-  const calendarUrl  = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calTitle}&dates=${calDates}&details=${calDetails}&location=${calLocation}`;
-  const mapsUrl      = "https://maps.google.com/?q=Sofitel+Philippine+Plaza+Manila,+CCP+Complex,+Roxas+Boulevard,+Pasay,+Metro+Manila";
+  const calLocation = encodeURIComponent("Sofitel Philippine Plaza Manila, CCP Complex, Roxas Boulevard, Pasay 1300, Metro Manila, Philippines");
+  const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calTitle}&dates=${calDates}&details=${calDetails}&location=${calLocation}`;
+  const mapsUrl     = "https://maps.google.com/?q=Sofitel+Philippine+Plaza+Manila,+CCP+Complex,+Roxas+Boulevard,+Pasay,+Metro+Manila";
 
-  successModalZoomContainer.innerHTML = `
-    <div class="success-zoom-card" style="background:#fff;border:1.5px solid #DDE4ED;border-radius:10px;overflow:hidden;">
-
-      <!-- Card top: image + venue info -->
-      <div style="display:flex;border-bottom:1px solid #EDF0F4;">
-        <div style="width:82px;min-height:88px;background-image:url('/assets/01-apsam-main-visual-landscape.jpg');background-size:cover;background-position:center;flex-shrink:0;"></div>
-        <div style="flex:1;padding:13px 15px 11px;">
-          <h4 style="font-size:13.5px;font-weight:700;color:#1C4767;margin:0 0 5px;line-height:1.35;">In-Person Conference Access</h4>
-          <p style="font-size:12px;color:#116AAB;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:5px;">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  const panel = document.getElementById("sp-sessions-panel");
+  panel.innerHTML = `
+    <div class="sp-card">
+      <!-- Top: banner + venue info -->
+      <div class="sp-card__top">
+        <div class="sp-card__img"
+             style="background-image:url('/assets/01-apsam-main-visual-landscape.jpg');"
+             role="img" aria-label="APSAM 2026 conference visual"></div>
+        <div class="sp-card__info">
+          <h3 class="sp-card__name">In-Person Conference Attendance</h3>
+          <p class="sp-card__date">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
             23–26 November 2026
           </p>
-          <p style="font-size:11.5px;color:#545454;margin:0;display:flex;align-items:center;gap:5px;">
-            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#116AAB" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <p style="font-size:12px;color:#545454;margin:0;display:flex;align-items:center;gap:5px;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#116AAB"
+                 stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              <circle cx="12" cy="9" r="2.5"/>
+            </svg>
             Sofitel Philippine Plaza Manila, Pasay, Metro Manila
           </p>
+          <div class="sp-card__chips" style="margin-top:8px;">
+            <span style="font-size:11.5px;background:#E8F5E9;color:#1B5E20;padding:3px 9px;border-radius:4px;font-weight:600;border:1px solid #A5D6A7;">
+              ✔ Confirmed
+            </span>
+            <span style="font-size:11.5px;color:#545454;padding:3px 0;">Days: ${escapeHTML(daysText)}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Action buttons -->
-      <div style="padding:10px 14px;background:#FAFBFC;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid #EDF0F4;">
-        <a href="${calendarUrl}" target="_blank" rel="noopener noreferrer" class="success-action-btn" style="background:#188038;color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="12" height="12" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <!-- Actions -->
+      <div class="sp-card__actions">
+        <a href="${calendarUrl}" target="_blank" rel="noopener noreferrer" class="sp-btn sp-btn--cal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+               stroke-linecap="round" width="12" height="12" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
           Add to Google Calendar
         </a>
-        <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="success-action-btn" style="background:#1A73E8;color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="12" height="12" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="sp-btn sp-btn--maps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+               stroke-linecap="round" width="12" height="12" aria-hidden="true">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
           View on Google Maps
         </a>
-        <button type="button" class="btn-toggle-details-ip" style="margin-left:auto;background:none;border:none;font-size:12px;font-weight:700;color:#116AAB;cursor:pointer;text-decoration:underline;padding:4px 0;white-space:nowrap;">More Details ▾</button>
+        <button type="button" class="btn-toggle-ip sp-btn sp-btn--ghost">More Details ▾</button>
       </div>
 
-      <!-- Expandable details panel -->
-      <div class="ip-details-panel" style="display:none;padding:15px 16px;background:#F8FBFF;font-size:12.5px;line-height:1.65;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px 22px;">
+      <!-- Expandable details -->
+      <div class="sp-card__detail ip-detail-panel" style="display:none;">
+        <div class="sp-card__detail-grid">
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Registered Days</p>
-            <p style="margin:0;color:#545454;">${escapeHTML(daysText)}</p>
+            <p class="sp-dl">Registered Days</p>
+            <p class="sp-dv">${escapeHTML(daysText)}</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Dietary Preference</p>
-            <p style="margin:0;color:#545454;">${escapeHTML(dietaryDisplay)}</p>
+            <p class="sp-dl">Dietary Preference</p>
+            <p class="sp-dv">${escapeHTML(dietaryDisplay)}</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Visa Assistance</p>
-            <p style="margin:0;color:#545454;">${data.visa_assistance == "1" ? "✔ Requested — Our team will contact you" : "Not Requested"}</p>
+            <p class="sp-dl">Visa Assistance</p>
+            <p class="sp-dv">${data.visa_assistance == "1"
+              ? "✔ Requested — Our team will contact you"
+              : "Not Requested"}</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Venue Address</p>
-            <p style="margin:0;color:#545454;">Sofitel Philippine Plaza Manila, CCP Complex, Roxas Blvd., Pasay 1300, Metro Manila, Philippines</p>
+            <p class="sp-dl">Venue Address</p>
+            <p class="sp-dv">Sofitel Philippine Plaza Manila, CCP Complex, Roxas Blvd., Pasay 1300, Metro Manila, Philippines</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Check-in</p>
-            <p style="margin:0;color:#545454;">Present the QR code shown on this page at the main registration desk to receive your conference badge.</p>
+            <p class="sp-dl">Check-in Requirement</p>
+            <p class="sp-dv">Present your QR code at the main registration desk to receive your conference badge.</p>
           </div>
           <div>
-            <p style="margin:0 0 2px;font-weight:700;color:#1C4767;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;">Contact</p>
-            <p style="margin:0;color:#545454;">apsam2026@fao.org · +63 2 8521 0000</p>
+            <p class="sp-dl">Dress Code</p>
+            <p class="sp-dv">Business Casual / Smart Casual</p>
+          </div>
+          <div>
+            <p class="sp-dl">Registration Desk Opens</p>
+            <p class="sp-dv">07:30 AM daily — Lobby, Sofitel Philippine Plaza Manila</p>
+          </div>
+          <div>
+            <p class="sp-dl">Contact</p>
+            <p class="sp-dv">apsam2026@fao.org · +63 2 8521 0000</p>
           </div>
         </div>
       </div>
     </div>
   `;
 
-  /* Hook: Toggle in-person details */
-  const ipToggle = successModalZoomContainer.querySelector(".btn-toggle-details-ip");
-  const ipPanel  = successModalZoomContainer.querySelector(".ip-details-panel");
+  /* Toggle in-person details */
+  const ipToggle = panel.querySelector(".btn-toggle-ip");
+  const ipPanel  = panel.querySelector(".ip-detail-panel");
   ipToggle.addEventListener("click", () => {
     const open = ipPanel.style.display !== "none";
     ipPanel.style.display = open ? "none" : "block";
     ipToggle.textContent  = open ? "More Details ▾" : "Hide Details ▴";
   });
-
-  /* Update notice text for in-person */
-  const noticeEl = document.getElementById("successNoticeText");
-  if (noticeEl) noticeEl.textContent = "Please bring your QR code (printed or on your phone) to the event venue for check-in and badge printing. Take a screenshot for your records.";
-
-  openSuccessModal();
 }
 
-/* ════════════════════════════════════════════
-   INLINE ZOOM NOTICE — persistent on-page cards
-   (virtual attendees only, below the QR code)
-════════════════════════════════════════════ */
-function renderInlineZoomNotice(meetings) {
-  const container = document.createElement("div");
-  container.style.marginTop = "2rem";
-  container.style.textAlign = "left";
-
-  const cardsHtml = meetings.map((m, idx) => {
-    const cal      = getGoogleCalendarUrl(m);
-    const imgIndex = (idx % 4) + 1;
-    const imgUrl   = `/assets/event_${imgIndex}.png`;
-    const fmtId    = formatMeetingId(m.meeting_id);
-
-    return `
-      <div class="da-notice" style="margin-top:1rem;border-left-color:#2D8CFF;background:#F0F7FF;border-color:#D2E7FF;padding:16px;">
-        <div style="display:flex;gap:14px;width:100%;align-items:flex-start;flex-wrap:wrap;">
-          <div style="width:58px;height:58px;border-radius:var(--radius-sm);background-image:url('${imgUrl}');background-size:cover;background-position:center;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.08);"></div>
-          <div style="flex:1;min-width:200px;">
-            <p style="margin:0;font-weight:700;font-size:14px;color:var(--color-primary-dark);">${escapeHTML(m.display_name)}</p>
-            <p style="margin:2px 0 2px;font-size:11.5px;color:var(--color-text-muted);">Meeting ID: <code style="font-family:monospace;color:#116AAB;font-size:12px;">${escapeHTML(fmtId)}</code></p>
-            <p style="margin:0 0 8px;font-size:12.5px;color:var(--color-primary);font-weight:600;">${cal.schedule}</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <a href="${escapeHTML(m.join_url)}" target="_blank" rel="noopener noreferrer" class="da-notice__btn" style="margin:0;padding:6px 12px;font-size:11.5px;background:#2D8CFF;border:none;display:inline-flex;align-items:center;gap:4px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="11" height="11" aria-hidden="true"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z"/><rect x="3" y="6" width="12" height="12" rx="2" ry="2"/></svg>
-                Join Zoom
-              </a>
-              <a href="${cal.url}" target="_blank" rel="noopener noreferrer" class="da-notice__btn" style="margin:0;padding:6px 12px;font-size:11.5px;background:var(--color-success);border:none;display:inline-flex;align-items:center;gap:4px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="11" height="11" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Add to Calendar
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  container.innerHTML = `
-    <h3 style="font-size:15px;font-weight:700;color:var(--color-primary-dark);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;">Your Registered Online Sessions</h3>
-    ${cardsHtml}
-  `;
-
-  const actions = document.querySelector("#confirmationPanel .confirmation-actions");
-  document.getElementById("confirmationPanel").insertBefore(container, actions);
-}
-
-/* ── Initialize — wrapped in DOMContentLoaded to guarantee DOM is ready ── */
-async function initZoomModalAndNotice() {
-  if (data.attendance_mode === "online") {
-    /* Build meetings list even if zoom_meeting_id is empty */
-    const rawIds = data.zoom_meeting_id ? String(data.zoom_meeting_id).trim() : "";
-    const meetingIds = rawIds ? rawIds.split(",").map(s => s.trim()).filter(Boolean) : [];
-    const joinUrls   = data.zoom_join_url ? String(data.zoom_join_url).split(",").map(s => s.trim()) : [];
-
-    let activeMeetings = [];
-    try {
-      const res  = await fetch("/v1/zoom-meetings");
-      const json = await res.json();
-      if (json.success && json.data && json.data.meetings) {
-        activeMeetings = json.data.meetings;
-      }
-    } catch (err) {
-      console.error("Failed to fetch zoom meetings metadata:", err);
-    }
-
-    let userMeetings;
-    if (meetingIds.length > 0) {
-      userMeetings = meetingIds.map((mId, index) => {
-        const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
-        return {
-          meeting_id   : mId,
-          display_name : matched ? matched.display_name : `Zoom Session (${mId})`,
-          topic        : matched ? matched.topic        : `Session ${mId}`,
-          join_url     : joinUrls[index] || "#"
-        };
-      });
-    } else {
-      /* No specific sessions selected — show all active meetings */
-      userMeetings = activeMeetings.map((m, index) => ({
-        meeting_id   : m.meeting_id,
-        display_name : m.display_name,
-        topic        : m.topic,
-        join_url     : joinUrls[index] || "#"
-      }));
-    }
-
-    showSuccessModal(userMeetings);
-    if (meetingIds.length > 0) renderInlineZoomNotice(userMeetings);
-
-  } else {
-    showInPersonSuccessModal();
-  }
-}
-
-/* Use DOMContentLoaded to guarantee DOM is fully parsed before init */
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initZoomModalAndNotice);
-} else {
-  /* DOM already ready (script is deferred or at end of body) */
-  initZoomModalAndNotice();
-}
-
-/* ── Modal event listeners ── */
-if (successModalClose)   successModalClose.addEventListener("click", closeSuccessModal);
-if (successModalDismiss) successModalDismiss.addEventListener("click", closeSuccessModal);
-if (successModal) {
-  successModal.addEventListener("click", function (e) {
-    if (e.target === this) closeSuccessModal();
-  });
-}
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && successModal && !successModal.hasAttribute("hidden")) {
-    closeSuccessModal();
-  }
-});
-
-/* ── Print / Save as PDF ── */
-const successPrintBtn = document.getElementById("successPrintBtn");
-if (successPrintBtn) {
-  successPrintBtn.addEventListener("click", () => window.print());
-}
-
-/* ── Wire QR download button ── */
-document.getElementById("downloadQrBtn").addEventListener("click", async () => {
-  try {
-    const res = await fetch(qrSrc);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const blob      = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    const a         = document.createElement("a");
-    a.href     = objectUrl;
-    a.download = `fao-qr-${String(data.attendance_key)}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(objectUrl);
-  } catch (err) {
-    console.error("QR download failed:", err);
-  }
-});
-
-/* ── DA Form notice for international delegates ── */
-const isInternational = data.nationality && data.nationality !== "philippines";
-
-if (isInternational) {
-  const daNotice = document.createElement("div");
-  daNotice.className = "da-notice";
-  daNotice.innerHTML = `
+/* ═══════════════════════════════════════════════════════════
+   5. DA FORM NOTICE (international delegates)
+═══════════════════════════════════════════════════════════ */
+function buildDaNotice() {
+  const isInternational = data.nationality && data.nationality !== "philippines";
+  if (!isInternational) return;
+  const area = document.getElementById("sp-notices-area");
+  if (!area) return;
+  const notice = document.createElement("div");
+  notice.className = "da-notice";
+  notice.style.marginTop = "16px";
+  notice.innerHTML = `
     <div class="da-notice__icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
         <line x1="16" y1="13" x2="8" y2="13"/>
@@ -622,18 +530,13 @@ if (isInternational) {
       <p class="da-notice__title">Additional Form Required</p>
       <p class="da-notice__text">
         As an international delegate, you are required to complete the
-        <strong>Department of Agriculture (DA) Registration Form</strong> for
-        biosecurity and coordination purposes prior to the event.
+        <strong>Department of Agriculture (DA) Registration Form</strong> for biosecurity
+        and coordination purposes prior to the event.
       </p>
-      <a
-        href="#"
-        class="da-notice__btn"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Fill up the DA form (opens in new tab)"
-      >
+      <a href="#" class="da-notice__btn" target="_blank" rel="noopener noreferrer"
+         aria-label="Fill up the DA form (opens in new tab)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+             stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
           <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
           <polyline points="15 3 21 3 21 9"/>
           <line x1="10" y1="14" x2="21" y2="3"/>
@@ -642,16 +545,106 @@ if (isInternational) {
       </a>
     </div>
   `;
-  const actions = document.querySelector("#confirmationPanel .confirmation-actions");
-  document.getElementById("confirmationPanel").insertBefore(daNotice, actions);
+  area.appendChild(notice);
 }
 
-/* ── "Back to Registration" — no session to clear anymore ── */
-// Nothing extra needed, href on the button handles navigation.
+/* ═══════════════════════════════════════════════════════════
+   6. WIRE BUTTONS (Download QR, Print)
+═══════════════════════════════════════════════════════════ */
+function wireButtons() {
+  /* Download QR */
+  const dlBtn = document.getElementById("downloadQrBtn");
+  if (dlBtn) {
+    dlBtn.addEventListener("click", async () => {
+      try {
+        const res = await fetch(qrSrc);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href     = objectUrl;
+        a.download = `fao-qr-${String(data.attendance_key)}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(objectUrl);
+      } catch (err) {
+        console.error("QR download failed:", err);
+      }
+    });
+  }
+
+  /* Print */
+  const printBtn = document.getElementById("successPrintBtn");
+  if (printBtn) printBtn.addEventListener("click", () => window.print());
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN INIT
+═══════════════════════════════════════════════════════════ */
+async function initPage() {
+  buildHero();
+  buildQrSection();
+  buildInfoCard();
+  buildDaNotice();
+  wireButtons();
+
+  if (data.attendance_mode === "online") {
+    /* Collect meeting IDs from JWT */
+    const rawIds     = data.zoom_meeting_id ? String(data.zoom_meeting_id).trim() : "";
+    const meetingIds = rawIds ? rawIds.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const joinUrls   = data.zoom_join_url
+      ? String(data.zoom_join_url).split(",").map(s => s.trim())
+      : [];
+
+    /* Fetch display names from server */
+    let activeMeetings = [];
+    try {
+      const res  = await fetch("/v1/zoom-meetings");
+      const json = await res.json();
+      if (json.success && json.data && json.data.meetings) {
+        activeMeetings = json.data.meetings;
+      }
+    } catch (err) {
+      console.error("Failed to fetch Zoom meetings metadata:", err);
+    }
+
+    let userMeetings;
+    if (meetingIds.length > 0) {
+      userMeetings = meetingIds.map((mId, i) => {
+        const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
+        return {
+          meeting_id   : mId,
+          display_name : matched ? matched.display_name : `Zoom Session (${mId})`,
+          topic        : matched ? matched.topic        : `Session ${mId}`,
+          join_url     : joinUrls[i] || "#"
+        };
+      });
+    } else {
+      /* Fallback: show all active sessions */
+      userMeetings = activeMeetings.map((m, i) => ({
+        meeting_id   : m.meeting_id,
+        display_name : m.display_name,
+        topic        : m.topic,
+        join_url     : joinUrls[i] || "#"
+      }));
+    }
+
+    renderOnlineSessions(userMeetings);
+  } else {
+    renderInPersonContent();
+  }
+}
+
+/* Run after DOM is ready */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPage);
+} else {
+  initPage();
+}
 
 /* ═══════════════════════════════════════════════════════════
    HAMBURGER / MOBILE NAV
-   (self-contained — no dependency on registration.js)
 ═══════════════════════════════════════════════════════════ */
 const navToggle = document.getElementById("navToggle");
 const mobileNav = document.getElementById("mobileNav");
@@ -669,33 +662,19 @@ navToggle.addEventListener("click", () => {
   mobileNav.classList.toggle("is-open", isOpen);
   navToggle.setAttribute("aria-expanded", String(isOpen));
   navToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
-  if (isOpen) {
-    mobileNav.removeAttribute("hidden");
-  } else {
-    mobileNav.setAttribute("hidden", "");
-  }
+  if (isOpen) mobileNav.removeAttribute("hidden");
+  else        mobileNav.setAttribute("hidden", "");
 });
 
-/* Close on outside click */
 document.addEventListener("click", (e) => {
-  if (!navToggle.contains(e.target) && !mobileNav.contains(e.target)) {
-    closeMobileNav();
-  }
+  if (!navToggle.contains(e.target) && !mobileNav.contains(e.target)) closeMobileNav();
 });
-
-/* Close on Escape */
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && navToggle.classList.contains("is-open")) {
-    closeMobileNav();
-    navToggle.focus();
+    closeMobileNav(); navToggle.focus();
   }
 });
-
-/* Auto-hide when viewport expands to desktop */
 const desktopMQ = window.matchMedia("(min-width: 769px)");
 const onBreakpoint = (e) => { if (e.matches) closeMobileNav(); };
-if (desktopMQ.addEventListener) {
-  desktopMQ.addEventListener("change", onBreakpoint);
-} else {
-  desktopMQ.addListener(onBreakpoint); // Safari < 14 fallback
-}
+if (desktopMQ.addEventListener) desktopMQ.addEventListener("change", onBreakpoint);
+else desktopMQ.addListener(onBreakpoint); // Safari < 14 fallback
