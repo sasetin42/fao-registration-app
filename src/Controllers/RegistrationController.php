@@ -137,6 +137,17 @@ class RegistrationController
 
     public function getActiveMeetings(Request $request, Response $response): Response
     {
+        $meetingsFilePath = __DIR__ . '/../../config/zoom_meetings.json';
+        $configMeetings = [];
+        if (file_exists($meetingsFilePath)) {
+            $configMeetings = json_decode(file_get_contents($meetingsFilePath), true) ?? [];
+        }
+
+        $configMap = [];
+        foreach ($configMeetings as $cm) {
+            $configMap[$cm['meeting_id']] = $cm;
+        }
+
         try {
             $meetings = $this->zoom->listMeetings();
             
@@ -145,22 +156,20 @@ class RegistrationController
             }
 
             // Map live Zoom API response to frontend format
-            $mappedMeetings = array_map(function ($m) {
+            $mappedMeetings = array_map(function ($m) use ($configMap) {
+                $mId = (string)$m['id'];
+                $hasConfig = isset($configMap[$mId]);
                 return [
-                    'meeting_id'   => (string)$m['id'],
-                    'display_name' => $m['topic']
+                    'meeting_id'   => $mId,
+                    'display_name' => $hasConfig ? $configMap[$mId]['display_name'] : $m['topic'],
+                    'image_url'    => $hasConfig && !empty($configMap[$mId]['image_url']) ? $configMap[$mId]['image_url'] : ''
                 ];
             }, $meetings);
 
             return $this->success($response, 'Active meetings fetched', ['meetings' => $mappedMeetings]);
         } catch (\Throwable $e) {
             // Fallback to local config file if API fails
-            $meetingsFilePath = __DIR__ . '/../../config/zoom_meetings.json';
-            $meetings = [];
-            if (file_exists($meetingsFilePath)) {
-                $meetings = json_decode(file_get_contents($meetingsFilePath), true) ?? [];
-            }
-            $activeMeetings = array_values(array_filter($meetings, function ($m) {
+            $activeMeetings = array_values(array_filter($configMeetings, function ($m) {
                 return !empty($m['is_active']);
             }));
             return $this->success($response, 'Fallback active meetings fetched', ['meetings' => $activeMeetings]);

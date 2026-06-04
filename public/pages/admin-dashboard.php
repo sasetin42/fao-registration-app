@@ -216,6 +216,12 @@
                             <input type="text" id="configMeetingId" required placeholder="Meeting ID (numbers only)" style="flex: 2;">
                             <input type="text" id="configTopic" required placeholder="Session Topic" style="flex: 3;">
                             <input type="text" id="configDisplayName" placeholder="Display Name (optional)" style="flex: 3;">
+                            <select id="configImage" style="flex: 2.5;">
+                                <option value="/assets/event_1.png">Banner 1 (Green/Agri)</option>
+                                <option value="/assets/event_2.png">Banner 2 (Climate/Tech)</option>
+                                <option value="/assets/event_3.png">Banner 3 (Innovation)</option>
+                                <option value="/assets/event_4.png">Banner 4 (Sustainable)</option>
+                            </select>
                             <button type="submit" class="btn-primary" style="flex: 1.5;">Add / Update</button>
                         </div>
                     </form>
@@ -224,9 +230,11 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
+                                    <th>Image</th>
                                     <th>Meeting ID</th>
                                     <th>Topic</th>
                                     <th>Display Name</th>
+                                    <th>Registrants</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -264,11 +272,12 @@
                                 <th>Start Time</th>
                                 <th>Duration</th>
                                 <th>Type</th>
+                                <th>Local Registrants</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="liveMeetingsBody">
-                            <tr><td colspan="6" style="text-align:center;">Click "Sync Zoom Account" to retrieve live meetings.</td></tr>
+                            <tr><td colspan="7" style="text-align:center;">Click "Sync Zoom Account" to retrieve live meetings.</td></tr>
                         </tbody>
                     </table>
                 </div>

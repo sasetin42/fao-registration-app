@@ -155,6 +155,24 @@ class AdminController
     {
         $meetings = $this->zoomService->listMeetings();
         
+        $registrations = $this->registrationModel->getAllRegistrations();
+        $counts = [];
+        foreach ($registrations as $r) {
+            if (!empty($r['zoom_meeting_id'])) {
+                $ids = explode(',', $r['zoom_meeting_id']);
+                foreach ($ids as $id) {
+                    $id = trim($id);
+                    if (empty($id)) continue;
+                    $counts[$id] = ($counts[$id] ?? 0) + 1;
+                }
+            }
+        }
+
+        foreach ($meetings as &$m) {
+            $mId = (string)($m['id'] ?? '');
+            $m['registrants_count'] = $counts[$mId] ?? 0;
+        }
+
         $payload = json_encode(['success' => true, 'data' => $meetings]);
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
@@ -196,6 +214,23 @@ class AdminController
             $meetings = json_decode(file_get_contents($this->meetingsFilePath), true) ?? [];
         }
 
+        $registrations = $this->registrationModel->getAllRegistrations();
+        $counts = [];
+        foreach ($registrations as $r) {
+            if (!empty($r['zoom_meeting_id'])) {
+                $ids = explode(',', $r['zoom_meeting_id']);
+                foreach ($ids as $id) {
+                    $id = trim($id);
+                    if (empty($id)) continue;
+                    $counts[$id] = ($counts[$id] ?? 0) + 1;
+                }
+            }
+        }
+
+        foreach ($meetings as &$m) {
+            $m['registrants_count'] = $counts[$m['meeting_id']] ?? 0;
+        }
+
         $payload = json_encode(['success' => true, 'data' => $meetings]);
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
@@ -207,6 +242,7 @@ class AdminController
         $meetingId = trim($data['meeting_id'] ?? '');
         $topic = trim($data['topic'] ?? '');
         $displayName = trim($data['display_name'] ?? '');
+        $imageUrl = trim($data['image_url'] ?? '/assets/event_1.png');
         $isActive = isset($data['is_active']) ? (bool)$data['is_active'] : true;
 
         if (empty($meetingId) || empty($topic)) {
@@ -226,6 +262,7 @@ class AdminController
             if ($m['meeting_id'] === $meetingId) {
                 $m['topic'] = $topic;
                 $m['display_name'] = !empty($displayName) ? $displayName : "{$topic} ({$meetingId})";
+                $m['image_url'] = $imageUrl;
                 $m['is_active'] = $isActive;
                 $found = true;
                 break;
@@ -237,6 +274,7 @@ class AdminController
                 'meeting_id' => $meetingId,
                 'topic' => $topic,
                 'display_name' => !empty($displayName) ? $displayName : "{$topic} ({$meetingId})",
+                'image_url' => $imageUrl,
                 'is_active' => $isActive
             ];
         }

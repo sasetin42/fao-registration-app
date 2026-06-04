@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const renderConfigMeetingsTable = (meetings) => {
             configMeetingsBody.innerHTML = '';
             if (meetings.length === 0) {
-                configMeetingsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No sessions configured. Add one above!</td></tr>';
+                configMeetingsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No sessions configured. Add one above!</td></tr>';
                 return;
             }
 
@@ -610,12 +610,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? '<span class="badge badge-success">Active</span>' 
                     : '<span class="badge badge-warning">Inactive</span>';
 
+                const imgUrl = m.image_url || '/assets/event_1.png';
+                const imgTag = `<img src="${imgUrl}" style="width:50px; height:30px; object-fit:cover; border-radius:4px; border: 1px solid var(--surface-border);" />`;
+
                 tr.innerHTML = `
+                    <td>${imgTag}</td>
                     <td>${m.meeting_id}</td>
                     <td>${m.topic}</td>
                     <td>${m.display_name}</td>
+                    <td><strong>${m.registrants_count ?? 0}</strong></td>
                     <td>${badge}</td>
                     <td class="action-btns">
+                        <button class="btn-ghost btn-small edit-config-btn" data-id="${m.meeting_id}" data-topic="${m.topic}" data-display="${m.display_name}" data-image="${imgUrl}">Edit</button>
                         <button class="btn-ghost btn-small toggle-active-btn" data-id="${m.meeting_id}" data-active="${m.is_active ? '0' : '1'}">
                             ${m.is_active ? 'Deactivate' : 'Activate'}
                         </button>
@@ -623,6 +629,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     </td>
                 `;
                 configMeetingsBody.appendChild(tr);
+            });
+
+            // Attach Edit handlers
+            document.querySelectorAll('.edit-config-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const dataset = e.target.dataset;
+                    document.getElementById('configMeetingId').value = dataset.id;
+                    document.getElementById('configTopic').value = dataset.topic;
+                    document.getElementById('configDisplayName').value = dataset.display;
+                    document.getElementById('configImage').value = dataset.image;
+                    
+                    // Smooth scroll to form
+                    document.getElementById('configMeetingForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
             });
 
             // Attach events
@@ -641,6 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 meeting_id,
                                 topic: meeting.topic,
                                 display_name: meeting.display_name,
+                                image_url: meeting.image_url || '/assets/event_1.png',
                                 is_active
                             })
                         });
@@ -674,18 +695,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const meeting_id = document.getElementById('configMeetingId').value.trim();
             const topic = document.getElementById('configTopic').value.trim();
             const display_name = document.getElementById('configDisplayName').value.trim();
+            const image_url = document.getElementById('configImage').value;
 
             try {
                 const res = await fetch(`${API_BASE}/zoom/config`, {
                     method: 'POST',
                     headers: authHeaders,
-                    body: JSON.stringify({ meeting_id, topic, display_name, is_active: true })
+                    body: JSON.stringify({ meeting_id, topic, display_name, image_url, is_active: true })
                 });
                 const data = await res.json();
                 if (data.success) {
                     document.getElementById('configMeetingId').value = '';
                     document.getElementById('configTopic').value = '';
                     document.getElementById('configDisplayName').value = '';
+                    document.getElementById('configImage').selectedIndex = 0;
                     loadConfigMeetings();
                 } else {
                     alert(data.message || 'Error saving session config');
@@ -697,24 +720,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Load Live Zoom Account Meetings
         const loadLiveZoomMeetings = async () => {
-            liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Retrieving live scheduled meetings from Zoom API...</td></tr>';
+            liveMeetingsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Retrieving live scheduled meetings from Zoom API...</td></tr>';
             try {
                 const res = await fetch(`${API_BASE}/zoom/meetings`, { headers: authHeaders });
                 const data = await res.json();
                 if (data.success) {
                     renderLiveMeetingsTable(data.data);
                 } else {
-                    liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger-color);">Error fetching live meetings. Check credentials.</td></tr>';
+                    liveMeetingsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--danger-color);">Error fetching live meetings. Check credentials.</td></tr>';
                 }
             } catch (err) {
-                liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger-color);">Connection error while syncing with Zoom.</td></tr>';
+                liveMeetingsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--danger-color);">Connection error while syncing with Zoom.</td></tr>';
             }
         };
 
         const renderLiveMeetingsTable = (meetings) => {
             liveMeetingsBody.innerHTML = '';
             if (meetings.length === 0) {
-                liveMeetingsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No scheduled Zoom meetings found in this account.</td></tr>';
+                liveMeetingsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No scheduled Zoom meetings found in this account.</td></tr>';
                 return;
             }
 
@@ -730,6 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${startTime}</td>
                     <td>${duration}</td>
                     <td>${type}</td>
+                    <td><strong>${m.registrants_count ?? 0}</strong></td>
                     <td>
                         <button class="btn-primary btn-small inspect-btn" data-id="${m.id}">Inspect Details</button>
                     </td>

@@ -1053,8 +1053,10 @@ async function fetchZoomMeetings() {
 
       let imgIndex = 1;
       meetings.forEach(m => {
-        const imgUrl = `/assets/event_${imgIndex}.png`;
-        imgIndex = (imgIndex % 4) + 1; // cycle 1 to 4
+        const imgUrl = m.image_url || `/assets/event_${imgIndex}.png`;
+        if (!m.image_url) {
+          imgIndex = (imgIndex % 4) + 1; // cycle 1 to 4
+        }
 
         const labelEl = document.createElement("label");
         labelEl.className = "form-check-item zoom-card-dropdown-item";
