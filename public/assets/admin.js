@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('adminLoginForm');
     if (loginForm) {
         if (getToken()) {
-            window.location.href = '/pages/admin-dashboard.php';
+            window.location.href = '/admin/dashboard';
             return;
         }
 
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (res.ok && data.success) {
                     setToken(data.token);
-                    window.location.href = '/pages/admin-dashboard.php';
+                    window.location.href = '/admin/dashboard';
                 } else {
                     errorDiv.textContent = data.message || 'Login failed.';
                 }
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             clearToken();
-            window.location.href = '/pages/admin-login.php';
+            window.location.href = '/admin/login';
         });
 
         // Fetch Data
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 if (err.message === 'Unauthorized') {
                     clearToken();
-                    window.location.href = '/pages/admin-login.php';
+                    window.location.href = '/admin/login';
                 } else {
                     console.error('Error loading dashboard data', err);
                 }

@@ -36,12 +36,12 @@ app.get('/confirmation', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public/pages/confirmation.html')));
 
 app.get('/admin', (_req, res) =>
-  res.redirect('/admin-login'));
+  res.redirect('/admin/login'));
 
-app.get('/admin-login', (_req, res) =>
+app.get('/admin/login', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public/pages/admin-login.html')));
 
-app.get('/admin-dashboard', (_req, res) =>
+app.get('/admin/dashboard', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public/pages/admin-dashboard.html')));
 
 // ── API Routes ───────────────────────────────────────────────
@@ -55,7 +55,7 @@ app.use((_req, res) => res.status(404).json({ success: false, message: 'Not foun
 app.listen(PORT, () => {
   console.log(`\n🚀 FAO APSAM 2026 App running at http://localhost:${PORT}`);
   console.log(`   Registration : http://localhost:${PORT}/fao_registration`);
-  console.log(`   Admin Panel  : http://localhost:${PORT}/admin-dashboard`);
+  console.log(`   Admin Panel  : http://localhost:${PORT}/admin/dashboard`);
   console.log(`   Environment  : ${process.env.APP_ENV || 'development'}\n`);
 });
 
