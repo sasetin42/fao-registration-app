@@ -7,21 +7,41 @@
 /* ── JWT decoder (client-side, display-only — no signature check) ── */
 function parseJWT(token) {
   try {
-    const payload = token.split(".")[1];
+    if (!token) return null;
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const payload = parts[1];
     if (!payload) return null;
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded  = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
-    return JSON.parse(atob(padded));
-  } catch {
+    let base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = base64.length % 4;
+    if (pad === 2) {
+      base64 += "==";
+    } else if (pad === 3) {
+      base64 += "=";
+    }
+    const binaryStr = atob(base64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch (err) {
+    console.error("parseJWT failed:", err);
     return null;
   }
 }
 
 /* ── Guard: no token or invalid → back to registration ── */
 const rawToken = new URLSearchParams(window.location.search).get("token");
-if (!rawToken) { window.location.replace("/fao_registration"); }
+if (!rawToken) {
+  window.location.replace("/fao_registration");
+  throw new Error("Redirecting: token not found");
+}
 const data = parseJWT(rawToken);
-if (!data)    { window.location.replace("/fao_registration"); }
+if (!data) {
+  window.location.replace("/fao_registration");
+  throw new Error("Redirecting: invalid token payload");
+}
 
 /* ═══════════════════════════════════════════════════════════
    UTILITY HELPERS
@@ -48,7 +68,10 @@ const dietaryLabels = {
   "pescatarian"   : "Pescatarian",
   "dairy-free"    : "Dairy-Free",
 };
-function formatDietary(slug) { return dietaryLabels[slug] ?? slug; }
+function formatDietary(slug) {
+  if (!slug) return "No Preference";
+  return dietaryLabels[slug] ?? formatText(slug);
+}
 
 function formatMeetingId(id) {
   const s = String(id).replace(/\s/g, "");
