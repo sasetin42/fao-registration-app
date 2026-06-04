@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const renderConfigMeetingsTable = (meetings) => {
             configMeetingsBody.innerHTML = '';
             if (meetings.length === 0) {
-                configMeetingsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No sessions configured. Add one above!</td></tr>';
+                configMeetingsBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No sessions configured. Add one above!</td></tr>';
                 return;
             }
 
@@ -667,10 +667,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${m.meeting_id}</td>
                     <td>${m.topic}</td>
                     <td>${m.display_name}</td>
+                    <td><code style="background:rgba(0,0,0,0.05); padding:2px 6px; border-radius:4px;">${m.passcode || 'FAO2026'}</code></td>
                     <td><strong>${m.registrants_count ?? 0}</strong></td>
                     <td>${badge}</td>
                     <td class="action-btns">
-                        <button class="btn-ghost btn-small edit-config-btn" data-id="${m.meeting_id}" data-topic="${m.topic}" data-display="${m.display_name}" data-image="${imgUrl}">Edit</button>
+                        <button class="btn-ghost btn-small edit-config-btn" data-id="${m.meeting_id}" data-topic="${m.topic}" data-display="${m.display_name}" data-passcode="${m.passcode || ''}" data-image="${imgUrl}">Edit</button>
                         <button class="btn-ghost btn-small toggle-active-btn" data-id="${m.meeting_id}" data-active="${m.is_active ? '0' : '1'}">
                             ${m.is_active ? 'Deactivate' : 'Activate'}
                         </button>
@@ -687,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('configMeetingId').value = dataset.id;
                     document.getElementById('configTopic').value = dataset.topic;
                     document.getElementById('configDisplayName').value = dataset.display;
+                    document.getElementById('configPasscode').value = dataset.passcode || '';
                     document.getElementById('configImage').value = dataset.image;
                     
                     // Smooth scroll to form
@@ -711,6 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 topic: meeting.topic,
                                 display_name: meeting.display_name,
                                 image_url: meeting.image_url || '/assets/event_1.png',
+                                passcode: meeting.passcode || '',
                                 is_active
                             })
                         });
@@ -744,19 +747,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const meeting_id = document.getElementById('configMeetingId').value.trim();
             const topic = document.getElementById('configTopic').value.trim();
             const display_name = document.getElementById('configDisplayName').value.trim();
+            const passcode = document.getElementById('configPasscode').value.trim();
             const image_url = document.getElementById('configImage').value;
 
             try {
                 const res = await fetch(`${API_BASE}/zoom/config`, {
                     method: 'POST',
                     headers: authHeaders,
-                    body: JSON.stringify({ meeting_id, topic, display_name, image_url, is_active: true })
+                    body: JSON.stringify({ meeting_id, topic, display_name, image_url, passcode, is_active: true })
                 });
                 const data = await res.json();
                 if (data.success) {
                     document.getElementById('configMeetingId').value = '';
                     document.getElementById('configTopic').value = '';
                     document.getElementById('configDisplayName').value = '';
+                    document.getElementById('configPasscode').value = '';
                     document.getElementById('configImage').selectedIndex = 0;
                     loadConfigMeetings();
                 } else {
@@ -1134,6 +1139,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(setupSSE, 5000);
             };
         };
+        // --- Theme Toggle Logic ---
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIconSun = document.getElementById('themeIconSun');
+        const themeIconMoon = document.getElementById('themeIconMoon');
+
+        if (themeToggleBtn) {
+            const currentTheme = localStorage.getItem('admin_theme') || 'light';
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeIconSun.classList.remove('hidden');
+                themeIconMoon.classList.add('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark-theme');
+                localStorage.setItem('admin_theme', isDark ? 'dark' : 'light');
+                if (isDark) {
+                    themeIconSun.classList.remove('hidden');
+                    themeIconMoon.classList.add('hidden');
+                } else {
+                    themeIconSun.classList.add('hidden');
+                    themeIconMoon.classList.remove('hidden');
+                }
+            });
+        }
+
         setupSSE();
     }
 });
