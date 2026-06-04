@@ -111,41 +111,227 @@ input[type="checkbox"] {
 
 /* === LOGIN PAGE === */
 .login-body {
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    background-color: #f8fafc;
+}
+
+.login-wrapper-split {
+    display: flex;
+    width: 100%;
     min-height: 100vh;
 }
 
-.login-container {
+/* Left Hero Panel */
+.login-hero-panel {
+    flex: 1.2;
+    position: relative;
+    background-image: url('/assets/01-apsam-main-visual-landscape.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4rem;
+    overflow: hidden;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.8) 100%);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hero-logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.hero-fao-logo {
+    height: 48px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+}
+
+.hero-text {
+    max-width: 520px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.hero-subtitle {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--success-color);
+    margin-bottom: 1rem;
+}
+
+.hero-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.hero-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #cbd5e1; /* Slate 300 */
+}
+
+.hero-footer {
+    font-size: 0.75rem;
+    color: #94a3b8; /* Slate 400 */
+}
+
+/* Right Form Panel */
+.login-form-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    background-color: #f8fafc;
+}
+
+.login-form-container {
     width: 100%;
-    max-width: 360px;
-    padding: 15px;
+    max-width: 400px;
+    padding: 2.5rem;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     animation: fadeIn 0.4s ease-out forwards;
 }
 
-.login-card {
-    padding: 2rem;
-    border-radius: 12px;
+.form-header {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.form-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.admin-login-form {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
 }
 
-.logo-wrapper { text-align: center; }
-.logo-wrapper h2 { 
-    font-size: 1.5rem; 
-    margin-bottom: 0.25rem; 
-    background: linear-gradient(90deg, var(--primary-color), #8b5cf6); 
-    -webkit-background-clip: text; 
-    -webkit-text-fill-color: transparent; 
+.form-group-custom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
 }
-.logo-wrapper p { color: var(--text-muted); font-size: 0.8rem; }
 
-.input-group { display: flex; flex-direction: column; gap: 0.35rem; }
-.input-group label { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); }
+.form-group-custom label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569; /* Slate 600 */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
 
-.error-msg { color: var(--danger-color); font-size: 0.75rem; min-height: 18px; text-align: center; }
+.input-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    color: #94a3b8; /* Slate 400 */
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    transition: color var(--transition-speed);
+}
+
+.input-icon-wrapper input {
+    padding: 0.65rem 0.65rem 0.65rem 38px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.input-icon-wrapper input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.input-icon-wrapper input:focus + .input-icon {
+    color: var(--primary-color);
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    transition: color var(--transition-speed);
+}
+
+.toggle-password-btn:hover {
+    color: var(--text-main);
+}
+
+.btn-login-submit {
+    padding: 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
+}
+
+.error-msg {
+    color: var(--danger-color);
+    font-size: 0.78rem;
+    min-height: 18px;
+    text-align: left;
+    font-weight: 500;
+}
+
 .hidden { display: none !important; }
 
 /* Loader */
@@ -521,3 +707,19 @@ input[type="checkbox"] {
 .inspect-sub-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
 .inspect-sub-table-header h3 { font-size: 0.8rem; font-weight: 700; color: var(--text-main); }
 .inspect-sub-table-header span { font-size: 0.65rem; color: var(--text-muted); }
+
+/* Responsive Design for Split-Screen Login */
+@media (max-width: 850px) {
+    .login-hero-panel {
+        display: none !important;
+    }
+    .login-form-panel {
+        padding: 1.5rem;
+    }
+    .login-form-container {
+        padding: 2rem 1.5rem;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+    }
+}
