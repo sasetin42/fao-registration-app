@@ -141,8 +141,10 @@ let qrSrc = "";
 function buildQrSection() {
   qrSrc = `/v1/qr?attendance_key=${encodeURIComponent(data.attendance_key)}`;
   document.getElementById("confirmationRef").innerHTML = `
-    <img class="sp-qr-card__img" id="qrImage" src="${qrSrc}"
-         alt="QR code for attendance check-in at APSAM 2026" />
+    <a href="${qrSrc}" target="_blank" title="Open QR Code in new tab">
+      <img class="sp-qr-card__img" id="qrImage" src="${qrSrc}"
+           alt="QR code for attendance check-in at APSAM 2026" style="cursor: pointer;" />
+    </a>
   `;
 }
 
@@ -287,7 +289,7 @@ function renderOnlineSessions(meetings) {
       </div>
 
       <!-- Expandable details -->
-      <div class="sp-card__detail">
+      <div class="sp-card__detail" style="display:none;">
         <div class="sp-card__detail-grid">
           <div>
             <p class="sp-dl">Session Description</p>
@@ -613,21 +615,27 @@ async function initPage() {
     if (meetingIds.length > 0) {
       userMeetings = meetingIds.map((mId, i) => {
         const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
+        const rawUrl = joinUrls[i] || "";
+        const finalUrl = (rawUrl && rawUrl !== "#") ? rawUrl : `https://zoom.us/j/${mId}`;
         return {
           meeting_id   : mId,
           display_name : matched ? matched.display_name : `Zoom Session (${mId})`,
           topic        : matched ? matched.topic        : `Session ${mId}`,
-          join_url     : joinUrls[i] || "#"
+          join_url     : finalUrl
         };
       });
     } else {
       /* Fallback: show all active sessions */
-      userMeetings = activeMeetings.map((m, i) => ({
-        meeting_id   : m.meeting_id,
-        display_name : m.display_name,
-        topic        : m.topic,
-        join_url     : joinUrls[i] || "#"
-      }));
+      userMeetings = activeMeetings.map((m, i) => {
+        const rawUrl = joinUrls[i] || "";
+        const finalUrl = (rawUrl && rawUrl !== "#") ? rawUrl : `https://zoom.us/j/${m.meeting_id}`;
+        return {
+          meeting_id   : m.meeting_id,
+          display_name : m.display_name,
+          topic        : m.topic,
+          join_url     : finalUrl
+        };
+      });
     }
 
     renderOnlineSessions(userMeetings);
