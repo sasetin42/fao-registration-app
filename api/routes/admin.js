@@ -223,16 +223,61 @@ router.get('/zoom/meetings', async (req, res) => {
 router.get('/zoom/meetings/:meetingId', async (req, res) => {
   const { meetingId } = req.params;
   try {
-    const details = await zoom.getMeetingDetails(meetingId);
+    let details = await zoom.getMeetingDetails(meetingId);
+    let registrants = [];
+    let participants = [];
+    let zoomError = null;
+
     if (!details || details.error) {
-      return res.json({ success: false, message: details?.error || 'Meeting not found' });
+      zoomError = details?.error || 'Could not retrieve Zoom details';
+      // Load fallback details from configured meetings
+      let configMeetings = [];
+      if (fs.existsSync(meetingsFilePath)) {
+        try {
+          configMeetings = JSON.parse(await fs.promises.readFile(meetingsFilePath, 'utf8')) || [];
+        } catch (e) {}
+      }
+      const matched = configMeetings.find(m => String(m.meeting_id) === String(meetingId));
+      details = {
+        id: meetingId,
+        topic: matched ? matched.topic : `Zoom Session (${meetingId})`,
+        status: 'Offline / Local Only',
+        fallback: true
+      };
+    } else {
+      registrants = await zoom.getMeetingRegistrants(meetingId);
+      participants = await zoom.getMeetingParticipants(meetingId);
     }
-    const registrants = await zoom.getMeetingRegistrants(meetingId);
-    const participants = await zoom.getMeetingParticipants(meetingId);
+
+    // Get local database registrants for this meetingId
+    let localRegistrants = [];
+    try {
+      const localRegs = await supabase.select('registration_list');
+      localRegistrants = localRegs.filter(r => {
+        if (!r.zoom_meeting_id) return false;
+        const ids = String(r.zoom_meeting_id).split(',').map(id => id.trim());
+        return ids.includes(String(meetingId));
+      }).map(r => ({
+        first_name: r.first_name || '',
+        last_name: r.last_name || r.full_name || '',
+        email: r.email,
+        status: parseInt(r.approval_status, 10) === 1 ? 'Approved' : (parseInt(r.approval_status, 10) === -1 ? 'Rejected' : 'Pending'),
+        create_time: r.created_at,
+        is_local: true
+      }));
+    } catch (dbErr) {
+      console.error('Database fetch error in zoom inspect:', dbErr);
+    }
 
     return res.json({
       success: true,
-      data: { details, registrants, participants }
+      data: { 
+        details, 
+        registrants, 
+        participants,
+        localRegistrants,
+        zoomError
+      }
     });
   } catch (err) {
     console.error('Zoom meeting details error:', err);

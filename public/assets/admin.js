@@ -833,22 +833,67 @@ document.addEventListener('DOMContentLoaded', () => {
                     const d = info.details;
                     
                     zoomInspectTitle.textContent = `Inspect: ${d.topic}`;
-                    
+
+                    // Merge and reconcile Zoom Portal Registrants and Local App database registrants
                     let registrantsRows = '';
+                    const allRegs = [];
+
+                    // 1. Add Local App database registrants
+                    if (info.localRegistrants && info.localRegistrants.length > 0) {
+                        info.localRegistrants.forEach(r => {
+                            allRegs.push({
+                                name: `${r.first_name} ${r.last_name}`.trim(),
+                                email: r.email,
+                                status: r.status,
+                                source: 'Local App',
+                                create_time: r.create_time
+                            });
+                        });
+                    }
+
+                    // 2. Reconcile / Merge Zoom Portal API registrants
                     if (info.registrants && info.registrants.length > 0) {
                         info.registrants.forEach(r => {
-                            const createTime = new Date(r.create_time).toLocaleString();
+                            const existing = allRegs.find(e => e.email.toLowerCase() === r.email.toLowerCase());
+                            if (existing) {
+                                existing.source = 'Synced (Both)';
+                                existing.status = `${existing.status} / ${r.status}`;
+                            } else {
+                                allRegs.push({
+                                    name: `${r.first_name || ''} ${r.last_name || ''}`.trim(),
+                                    email: r.email,
+                                    status: r.status,
+                                    source: 'Zoom Portal',
+                                    create_time: r.create_time
+                                });
+                            }
+                        });
+                    }
+
+                    if (allRegs.length > 0) {
+                        allRegs.forEach(r => {
+                            const createTime = r.create_time ? new Date(r.create_time).toLocaleString() : 'N/A';
+                            let sourceBadge = '';
+                            if (r.source === 'Local App') {
+                                sourceBadge = '<span class="badge badge-info">Local App</span>';
+                            } else if (r.source === 'Zoom Portal') {
+                                sourceBadge = '<span class="badge badge-warning" style="background:#e0f2fe; color:#0369a1;">Zoom Portal</span>';
+                            } else {
+                                sourceBadge = '<span class="badge badge-success">Synced (Both)</span>';
+                            }
+                            
                             registrantsRows += `
                                 <tr>
-                                    <td>${r.first_name} ${r.last_name}</td>
+                                    <td><strong>${r.name}</strong></td>
                                     <td>${r.email}</td>
-                                    <td>${r.status}</td>
+                                    <td style="text-transform: capitalize;">${r.status}</td>
+                                    <td>${sourceBadge}</td>
                                     <td>${createTime}</td>
                                 </tr>
                             `;
                         });
                     } else {
-                        registrantsRows = '<tr><td colspan="4" style="text-align:center;">No registrants registered for this Zoom session.</td></tr>';
+                        registrantsRows = '<tr><td colspan="5" style="text-align:center;">No registrants registered for this Zoom session.</td></tr>';
                     }
 
                     let participantsRows = '';
@@ -871,7 +916,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         participantsRows = '<tr><td colspan="5" style="text-align:center;">No attendee participation logs found yet.</td></tr>';
                     }
 
+                    let warningBanner = '';
+                    if (info.zoomError) {
+                        warningBanner = `
+                            <div class="zoom-warning-banner" style="background:#fffbeb; border:1px solid #fef3c7; color:#b45309; padding:0.75rem 1rem; border-radius:8px; font-size:0.8rem; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <span><strong>Zoom API Sync Notice:</strong> ${info.zoomError}. Showing local application registrations.</span>
+                            </div>
+                        `;
+                    }
+
                     zoomInspectBodyContent.innerHTML = `
+                        ${warningBanner}
                         <div class="inspect-details-section">
                             <div class="inspect-stats-grid">
                                 <div class="inspect-stat-card">
@@ -880,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div class="inspect-stat-card">
                                     <h4>Total Registrants</h4>
-                                    <div class="val">${info.registrants.length}</div>
+                                    <div class="val">${allRegs.length}</div>
                                 </div>
                                 <div class="inspect-stat-card">
                                     <h4>Live/Past Attendees</h4>
@@ -904,6 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                                 <th>Name</th>
                                                 <th>Email</th>
                                                 <th>Status</th>
+                                                <th>Source</th>
                                                 <th>Registered At</th>
                                             </tr>
                                         </thead>
