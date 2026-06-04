@@ -445,16 +445,40 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = allRegistrations.find(r => r.id === id);
             if (!user) return;
 
+            let conditionalFields = '';
+            if (user.attendance_mode === 'in-person') {
+                conditionalFields = `
+                    <div class="detail-row"><div class="detail-label">Attendance Days</div><div class="detail-value">${user.attendance_days || 'N/A'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Dietary Preference</div><div class="detail-value" style="text-transform: capitalize;">${user.dietary || 'N/A'}</div></div>
+                    ${user.dietary_details ? `<div class="detail-row"><div class="detail-label">Dietary Details</div><div class="detail-value">${user.dietary_details}</div></div>` : ''}
+                    <div class="detail-row"><div class="detail-label">Visa Assistance</div><div class="detail-value">${user.visa_assistance == '1' || user.visa_assistance === true ? 'Yes' : 'No'}</div></div>
+                    <div class="detail-row"><div class="detail-label">Field Trip Selection</div><div class="detail-value">${user.field_trip || 'None'}</div></div>
+                `;
+            } else if (user.attendance_mode === 'online') {
+                conditionalFields = `
+                    <div class="detail-row"><div class="detail-label">Zoom Meeting ID(s)</div><div class="detail-value">${user.zoom_meeting_id || 'N/A'}</div></div>
+                `;
+            }
+
             const content = `
-                <div class="detail-row"><div class="detail-label">Full Name</div><div class="detail-value">${user.full_name || user.first_name + ' ' + user.last_name}</div></div>
+                <div class="detail-row"><div class="detail-label">Prefix</div><div class="detail-value" style="text-transform: capitalize;">${user.prefix || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Full Name</div><div class="detail-value">${user.full_name || (user.first_name + ' ' + user.last_name)}</div></div>
                 <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${user.email}</div></div>
+                <div class="detail-row"><div class="detail-label">Mobile Number</div><div class="detail-value">${user.phone || 'N/A'}</div></div>
                 <div class="detail-row"><div class="detail-label">Registration Type</div><div class="detail-value" style="text-transform: capitalize;">${user.registration_type}</div></div>
-                <div class="detail-row"><div class="detail-label">Attendance Mode</div><div class="detail-value" style="text-transform: capitalize;">${user.attendance_mode}</div></div>
-                <div class="detail-row"><div class="detail-label">Company/Affiliation</div><div class="detail-value">${user.company || user.affiliation}</div></div>
-                <div class="detail-row"><div class="detail-label">Designation</div><div class="detail-value">${user.designation || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Phone</div><div class="detail-value">${user.phone || 'N/A'}</div></div>
+                ${user.speaker_type ? `<div class="detail-row"><div class="detail-label">Speaker Type</div><div class="detail-value" style="text-transform: capitalize;">${user.speaker_type}</div></div>` : ''}
+                <div class="detail-row"><div class="detail-label">Age Range</div><div class="detail-value">${user.age_range || 'N/A'}</div></div>
                 <div class="detail-row"><div class="detail-label">Gender</div><div class="detail-value" style="text-transform: capitalize;">${user.gender || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Zoom Meeting ID</div><div class="detail-value">${user.zoom_meeting_id || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Nationality</div><div class="detail-value" style="text-transform: capitalize;">${user.nationality || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Affiliation Type</div><div class="detail-value" style="text-transform: capitalize;">${user.affiliation || 'N/A'}</div></div>
+                ${user.affiliation_sub ? `<div class="detail-row"><div class="detail-label">Affiliation Category</div><div class="detail-value" style="text-transform: capitalize;">${user.affiliation_sub}</div></div>` : ''}
+                ${user.affiliation_specify ? `<div class="detail-row"><div class="detail-label">Affiliation Specify</div><div class="detail-value">${user.affiliation_specify}</div></div>` : ''}
+                <div class="detail-row"><div class="detail-label">Company</div><div class="detail-value">${user.company || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Designation</div><div class="detail-value">${user.designation || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Country of Affiliation</div><div class="detail-value" style="text-transform: capitalize;">${user.address_country || 'N/A'}</div></div>
+                <div class="detail-row"><div class="detail-label">Attendance Mode</div><div class="detail-value" style="text-transform: capitalize;">${user.attendance_mode}</div></div>
+                ${conditionalFields}
+                <div class="detail-row"><div class="detail-label">Registered At</div><div class="detail-value">${user.created_at || 'N/A'}</div></div>
             `;
             document.getElementById('modalBodyContent').innerHTML = content;
             document.getElementById('detailsModal').classList.remove('hidden');
