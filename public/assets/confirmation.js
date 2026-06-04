@@ -312,9 +312,9 @@ function renderOnlineSessions(meetings) {
             <p class="sp-dl">Zoom Passcode</p>
             <p class="sp-dv" style="display:flex;align-items:center;gap:6px;">
               <code class="zoom-passcode-val" style="background:#E8EDF2;padding:2px 7px;border-radius:4px;font-family:monospace;color:#116AAB;font-weight:700;">
-                ${escapeHTML(extractPasscode(m.join_url))}
+                ${escapeHTML(m.passcode || 'FAO2026')}
               </code>
-              <button type="button" class="btn-copy-passcode sp-btn sp-btn--copy" data-passcode="${escapeHTML(extractPasscode(m.join_url))}" style="font-size:10px;padding:2px 6px;display:inline-flex;align-items:center;height:18px;">
+              <button type="button" class="btn-copy-passcode sp-btn sp-btn--copy" data-passcode="${escapeHTML(m.passcode || 'FAO2026')}" style="font-size:10px;padding:2px 6px;display:inline-flex;align-items:center;height:18px;">
                 Copy
               </button>
             </p>
@@ -635,29 +635,53 @@ async function initPage() {
 
     let userMeetings;
     if (meetingIds.length > 0) {
-      userMeetings = meetingIds.map((mId, i) => {
+      userMeetings = await Promise.all(meetingIds.map(async (mId, i) => {
         const matched = activeMeetings.find(m => String(m.meeting_id) === mId);
         const rawUrl = joinUrls[i] || "";
         const finalUrl = (rawUrl && rawUrl !== "#") ? rawUrl : `https://zoom.us/j/${mId}`;
+        
+        let passcode = "FAO2026";
+        try {
+          const detailRes = await fetch(`/v1/zoom-meetings/${mId}`);
+          const detailJson = await detailRes.json();
+          if (detailJson.success && detailJson.data && detailJson.data.passcode) {
+            passcode = detailJson.data.passcode;
+          }
+        } catch (e) {
+          console.error(`Error fetching passcode for ${mId}:`, e);
+        }
+
         return {
           meeting_id   : mId,
           display_name : matched ? matched.display_name : `Zoom Session (${mId})`,
           topic        : matched ? matched.topic        : `Session ${mId}`,
-          join_url     : finalUrl
+          join_url     : finalUrl,
+          passcode     : passcode
         };
-      });
+      }));
     } else {
       /* Fallback: show all active sessions */
-      userMeetings = activeMeetings.map((m, i) => {
+      userMeetings = await Promise.all(activeMeetings.map(async (m, i) => {
         const rawUrl = joinUrls[i] || "";
         const finalUrl = (rawUrl && rawUrl !== "#") ? rawUrl : `https://zoom.us/j/${m.meeting_id}`;
+        
+        let passcode = "FAO2026";
+        try {
+          const detailRes = await fetch(`/v1/zoom-meetings/${m.meeting_id}`);
+          const detailJson = await detailRes.json();
+          if (detailJson.success && detailJson.data && detailJson.data.passcode) {
+            passcode = detailJson.data.passcode;
+          }
+        } catch (e) {}
+
         return {
           meeting_id   : m.meeting_id,
           display_name : m.display_name,
           topic        : m.topic,
-          join_url     : finalUrl
+          join_url     : finalUrl,
+          passcode     : passcode
         };
-      });
+      }));
     }
 
     renderOnlineSessions(userMeetings);

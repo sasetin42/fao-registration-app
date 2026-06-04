@@ -125,6 +125,28 @@ router.get('/zoom-meetings', async (req, res) => {
   }
 });
 
+// ── GET /v1/zoom-meetings/:meetingId ──────────────────────────
+router.get('/zoom-meetings/:meetingId', async (req, res) => {
+  const { meetingId } = req.params;
+  try {
+    const details = await zoom.getMeetingDetails(meetingId);
+    if (!details || details.error) {
+      return res.status(404).json({ success: false, message: 'Meeting not found' });
+    }
+    return res.json({
+      success: true,
+      data: {
+        meeting_id: String(details.id),
+        topic: details.topic,
+        passcode: details.password || 'FAO2026'
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching public meeting details:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // ── POST /v1/register ────────────────────────────────────────
 router.post('/register', upload.none(), async (req, res) => {
   const body = req.body || {};
