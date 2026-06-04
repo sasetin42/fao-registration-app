@@ -1,5 +1,6 @@
 import express from 'express';
 import fs from 'fs';
+import multer from 'multer';
 import * as supabase from '../services/supabase.js';
 import * as zoom from '../services/zoom.js';
 import { generate as generateJWT } from '../services/jwt.js';
@@ -7,6 +8,7 @@ import { generateVisitorCode, generateAttendanceKey } from '../services/codegen.
 import { generate as generateQR } from '../services/qr.js';
 
 const router = express.Router();
+const upload = multer();
 
 // SSE Broadcast list (for admin panel realtime update)
 export const sseClients = new Set();
@@ -124,7 +126,7 @@ router.get('/zoom-meetings', async (req, res) => {
 });
 
 // ── POST /v1/register ────────────────────────────────────────
-router.post('/register', async (req, res) => {
+router.post('/register', upload.none(), async (req, res) => {
   const body = req.body || {};
   const fields = [
     'registration_type', 'prefix', 'speaker_type',
