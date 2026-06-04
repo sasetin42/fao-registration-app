@@ -294,11 +294,11 @@ function renderOnlineSessions(meetings) {
           </svg>
           Copy Join Link
         </button>
-        <button type="button" class="btn-toggle-details sp-btn sp-btn--ghost">More Details ▾</button>
+        <button type="button" class="btn-toggle-details sp-btn sp-btn--ghost">Hide Details ▴</button>
       </div>
 
       <!-- Expandable details -->
-      <div class="sp-card__detail" style="display:none;">
+      <div class="sp-card__detail" style="display:block;">
         <div class="sp-card__detail-grid">
           <div>
             <p class="sp-dl">Session Description</p>
@@ -474,11 +474,11 @@ function renderInPersonContent() {
           </svg>
           View on Google Maps
         </a>
-        <button type="button" class="btn-toggle-ip sp-btn sp-btn--ghost">More Details ▾</button>
+        <button type="button" class="btn-toggle-ip sp-btn sp-btn--ghost">Hide Details ▴</button>
       </div>
 
       <!-- Expandable details -->
-      <div class="sp-card__detail ip-detail-panel" style="display:none;">
+      <div class="sp-card__detail ip-detail-panel" style="display:block;">
         <div class="sp-card__detail-grid">
           <div>
             <p class="sp-dl">Registered Days</p>
