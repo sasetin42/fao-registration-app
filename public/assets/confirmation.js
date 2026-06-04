@@ -55,6 +55,15 @@ function formatMeetingId(id) {
   return s.length === 11 ? `${s.slice(0,3)} ${s.slice(3,7)} ${s.slice(7)}` : s;
 }
 
+function extractPasscode(joinUrl) {
+  try {
+    const url = new URL(joinUrl);
+    const pwd = url.searchParams.get("pwd");
+    if (pwd) return pwd;
+  } catch (e) {}
+  return "FAO2026";
+}
+
 function fullName() {
   return ((data.full_name || ((data.first_name || "") + " " + (data.last_name || ""))).trim());
 }
@@ -301,10 +310,13 @@ function renderOnlineSessions(meetings) {
           </div>
           <div>
             <p class="sp-dl">Zoom Passcode</p>
-            <p class="sp-dv">
-              <code style="background:#E8EDF2;padding:2px 7px;border-radius:4px;font-family:monospace;color:#116AAB;">
-                Automated — Not Required
+            <p class="sp-dv" style="display:flex;align-items:center;gap:6px;">
+              <code class="zoom-passcode-val" style="background:#E8EDF2;padding:2px 7px;border-radius:4px;font-family:monospace;color:#116AAB;font-weight:700;">
+                ${escapeHTML(extractPasscode(m.join_url))}
               </code>
+              <button type="button" class="btn-copy-passcode sp-btn sp-btn--copy" data-passcode="${escapeHTML(extractPasscode(m.join_url))}" style="font-size:10px;padding:2px 6px;display:inline-flex;align-items:center;height:18px;">
+                Copy
+              </button>
             </p>
           </div>
           <div>
@@ -340,6 +352,16 @@ function renderOnlineSessions(meetings) {
     /* ── Interact: Copy Join Link ── */
     card.querySelector(".btn-copy-link").addEventListener("click", function () {
       navigator.clipboard.writeText(this.getAttribute("data-link")).then(() => {
+        const orig = this.innerHTML;
+        this.textContent = "✔ Copied!";
+        this.style.color = "#188038";
+        setTimeout(() => { this.innerHTML = orig; this.style.color = ""; }, 2200);
+      });
+    });
+
+    /* ── Interact: Copy Passcode ── */
+    card.querySelector(".btn-copy-passcode").addEventListener("click", function () {
+      navigator.clipboard.writeText(this.getAttribute("data-passcode")).then(() => {
         const orig = this.innerHTML;
         this.textContent = "✔ Copied!";
         this.style.color = "#188038";
