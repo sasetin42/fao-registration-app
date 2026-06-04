@@ -44,6 +44,10 @@
                 <div id="realtimeClock" class="realtime-clock"></div>
             </div>
             <div class="user-profile">
+                <button id="themeToggleBtn" class="theme-toggle-btn btn-ghost" title="Toggle theme" style="padding: 6px; border-radius: 50%; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--surface-border); background: transparent;">
+                    <svg id="themeIconSun" class="theme-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg id="themeIconMoon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
                 <span>Admin</span>
                 <div class="avatar">A</div>
             </div>
@@ -216,6 +220,7 @@
                             <input type="text" id="configMeetingId" required placeholder="Meeting ID (numbers only)" style="flex: 2;">
                             <input type="text" id="configTopic" required placeholder="Session Topic" style="flex: 3;">
                             <input type="text" id="configDisplayName" placeholder="Display Name (optional)" style="flex: 3;">
+                            <input type="text" id="configPasscode" placeholder="Passcode (Optional)" style="flex: 2;">
                             <select id="configImage" style="flex: 2.5;">
                                 <option value="/assets/event_1.png">Banner 1 (Green/Agri)</option>
                                 <option value="/assets/event_2.png">Banner 2 (Climate/Tech)</option>
@@ -234,6 +239,7 @@
                                     <th>Meeting ID</th>
                                     <th>Topic</th>
                                     <th>Display Name</th>
+                                    <th>Passcode</th>
                                     <th>Registrants</th>
                                     <th>Status</th>
                                     <th>Actions</th>

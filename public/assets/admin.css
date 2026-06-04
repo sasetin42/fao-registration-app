@@ -345,6 +345,7 @@ input[type="checkbox"] {
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* === DASHBOARD === */
 .dashboard-body { display: flex; background: #f8fafc; }
@@ -465,38 +466,67 @@ input[type="checkbox"] {
 .stats-grid { 
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); 
-    gap: 1rem; 
+    gap: 1.25rem; 
 }
 .stat-card { 
-    padding: 0.75rem 1rem; 
-    border-radius: 8px; 
+    padding: 1rem 1.25rem; 
+    border-radius: 12px; 
     display: flex; 
     align-items: center; 
-    gap: 0.75rem; 
-    transition: transform 0.2s, box-shadow 0.2s; 
+    gap: 1rem; 
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease; 
 }
 .stat-card:hover { 
-    transform: translateY(-1px); 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-3px); 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
 }
+
+/* Left Indicator Colors for KPI Groups */
+.stat-card.info-tint { border-left: 4px solid var(--primary-color); }
+.stat-card.success-tint { border-left: 4px solid var(--success-color); }
+.stat-card.warning-tint { border-left: 4px solid var(--warning-color); }
+.stat-card.primary-tint { border-left: 4px solid #0284c7; }
+.stat-card.purple-tint { border-left: 4px solid #7c3aed; }
+
 .stat-icon-wrapper {
-    width: 36px;
-    height: 36px;
-    border-radius: 6px;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.2s ease;
 }
-.stat-content h3 { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-.stat-val { font-size: 1.35rem; font-weight: 700; color: var(--text-main); }
+.stat-card:hover .stat-icon-wrapper {
+    transform: scale(1.1);
+}
+
+.stat-content h3 { 
+    font-size: 0.72rem; 
+    color: var(--text-muted); 
+    font-weight: 600; 
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.25rem;
+}
+.stat-val { 
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    color: var(--text-main); 
+    line-height: 1.1;
+}
 
 /* Colorized Icons CSS definitions */
-.color-primary { color: var(--primary-color); background: rgba(37, 99, 235, 0.1); }
-.color-success { color: var(--success-color); background: rgba(16, 185, 129, 0.1); }
-.color-warning { color: var(--warning-color); background: rgba(245, 158, 11, 0.1); }
-.color-info { color: #0284c7; background: rgba(2, 132, 199, 0.1); }
-.color-purple { color: #7c3aed; background: rgba(124, 58, 237, 0.1); }
-.color-danger { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
+.color-primary { color: var(--primary-color); background: rgba(37, 99, 235, 0.08); }
+.color-success { color: var(--success-color); background: rgba(16, 185, 129, 0.08); }
+.color-warning { color: var(--warning-color); background: rgba(245, 158, 11, 0.08); }
+.color-info { color: #0284c7; background: rgba(2, 132, 199, 0.08); }
+.color-purple { color: #7c3aed; background: rgba(124, 58, 237, 0.08); }
+.color-danger { color: var(--danger-color); background: rgba(239, 68, 68, 0.08); }
 
 .nav-icon {
     flex-shrink: 0;
@@ -553,7 +583,7 @@ input[type="checkbox"] {
 
 .action-btns { display: flex; gap: 0.35rem; }
 
-/* Action Dropdown Menu */
+/* Action Dropdown Menu & Dropdown clipping fixes */
 .action-dropdown {
     position: relative;
     display: inline-block;
@@ -563,50 +593,87 @@ input[type="checkbox"] {
     background: #ffffff;
     border: 1px solid #cbd5e1;
     color: var(--text-main);
-    padding: 0.25rem 0.5rem;
+    padding: 0.35rem 0.65rem;
     font-size: 0.75rem;
-    border-radius: 4px;
+    font-weight: 500;
+    border-radius: 6px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.dropdown-trigger:hover { background: #f1f5f9; }
+.dropdown-trigger:hover { 
+    background: #f8fafc; 
+    border-color: #94a3b8;
+}
+.dropdown-trigger:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
 
 .dropdown-menu {
     display: none;
     position: absolute;
     right: 0;
     top: 100%;
-    margin-top: 3px;
+    margin-top: 5px;
     background: #ffffff;
     border: 1px solid var(--surface-border);
-    border-radius: 6px;
-    min-width: 130px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -4px rgba(0,0,0,0.05);
-    z-index: 100;
-    overflow: hidden;
+    border-radius: 8px;
+    min-width: 140px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+    z-index: 1000 !important;
+    overflow: visible; /* Prevent children elements from getting clipped */
+}
+
+/* Ensure the table cell and row rises to top index when active dropdown is visible */
+tr:has(.dropdown-menu.show) {
+    position: relative;
+    z-index: 999 !important;
+}
+td:has(.dropdown-menu.show) {
+    position: relative;
+    z-index: 999 !important;
+}
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: visible !important;
+    min-height: 280px; /* Allocate padding height inside container so items do not clip */
+}
+.data-table td {
+    position: relative;
 }
 
 .dropdown-menu.show {
     display: block;
-    animation: slideDown 0.12s ease-out forwards;
+    animation: slideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .dropdown-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     width: 100%;
-    padding: 0.5rem 0.85rem;
+    padding: 0.55rem 0.85rem;
     background: transparent;
     border: none;
-    border-radius: 0;
     color: var(--text-main);
-    font-size: 0.75rem;
+    font-size: 0.76rem;
     font-weight: 500;
     text-align: left;
-    transition: background 0.15s;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
+.dropdown-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.dropdown-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
 .dropdown-item:hover { background: #f1f5f9; }
 .dropdown-item.text-success { color: #059669; }
 .dropdown-item.text-success:hover { background: rgba(16, 185, 129, 0.06); }

@@ -321,11 +321,12 @@ router.get('/zoom/config', async (req, res) => {
 });
 
 router.post('/zoom/config', async (req, res) => {
-  const { meeting_id, topic, display_name, image_url, is_active } = req.body || {};
+  const { meeting_id, topic, display_name, image_url, passcode, is_active } = req.body || {};
   const mId = (meeting_id || '').trim();
   const mTopic = (topic || '').trim();
   const dName = (display_name || '').trim();
   const imgUrl = (image_url || '/assets/event_1.png').trim();
+  const passVal = (passcode || '').trim();
   const active = is_active !== undefined ? !!is_active : true;
 
   if (!mId || !mTopic) {
@@ -347,6 +348,7 @@ router.post('/zoom/config', async (req, res) => {
       m.topic = mTopic;
       m.display_name = dName || `${mTopic} (${mId})`;
       m.image_url = imgUrl;
+      m.passcode = passVal;
       m.is_active = active;
       found = true;
       break;
@@ -359,6 +361,7 @@ router.post('/zoom/config', async (req, res) => {
       topic: mTopic,
       display_name: dName || `${mTopic} (${mId})`,
       image_url: imgUrl,
+      passcode: passVal,
       is_active: active
     });
   }

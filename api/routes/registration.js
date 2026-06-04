@@ -129,16 +129,38 @@ router.get('/zoom-meetings', async (req, res) => {
 router.get('/zoom-meetings/:meetingId', async (req, res) => {
   const { meetingId } = req.params;
   try {
+    let localPasscode = 'FAO2026';
+    let configMeetings = [];
+    const meetingsFilePath = new URL('../../config/zoom_meetings.json', import.meta.url);
+    try {
+      configMeetings = JSON.parse(await fs.promises.readFile(meetingsFilePath, 'utf8')) || [];
+      const matched = configMeetings.find(m => String(m.meeting_id) === String(meetingId));
+      if (matched && matched.passcode) {
+        localPasscode = matched.passcode;
+      }
+    } catch (e) {
+      // Ignore
+    }
+
     const details = await zoom.getMeetingDetails(meetingId);
     if (!details || details.error) {
-      return res.status(404).json({ success: false, message: 'Meeting not found' });
+      const matched = configMeetings.find(m => String(m.meeting_id) === String(meetingId));
+      return res.json({
+        success: true,
+        data: {
+          meeting_id: String(meetingId),
+          topic: matched ? matched.topic : `Session ${meetingId}`,
+          passcode: localPasscode
+        }
+      });
     }
+
     return res.json({
       success: true,
       data: {
         meeting_id: String(details.id),
         topic: details.topic,
-        passcode: details.password || 'FAO2026'
+        passcode: details.password || localPasscode
       }
     });
   } catch (err) {
