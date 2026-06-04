@@ -4,3 +4,6 @@
 /config/zoom_meetings.json
 /config/zoom_settings.json.backup
 *.log
+node_modules/
+scratch/
+*.zip

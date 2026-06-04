@@ -1,0 +1,220 @@
+import express from 'express';
+import fs from 'fs';
+import * as supabase from '../services/supabase.js';
+import * as zoom from '../services/zoom.js';
+import { generate as generateJWT } from '../services/jwt.js';
+import { generateVisitorCode, generateAttendanceKey } from '../services/codegen.js';
+import { generate as generateQR } from '../services/qr.js';
+
+const router = express.Router();
+
+// SSE Broadcast list (for admin panel realtime update)
+export const sseClients = new Set();
+
+export function broadcastToAdmins(event, data) {
+  const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.write(payload);
+    } catch (e) {
+      // Ignore write errors (connection closed)
+    }
+  }
+}
+
+// ── GET /v1/qr & /v1/qr/logo ─────────────────────────────────
+const handleQR = async (req, res) => {
+  const key = req.query.attendance_key || '2510061';
+  try {
+    const buffer = await generateQR(key);
+    res.setHeader('Content-Type', 'image/png');
+    res.send(buffer);
+  } catch (err) {
+    console.error('QR generation error:', err);
+    res.status(500).json({ success: false, message: 'Could not generate QR code' });
+  }
+};
+
+router.get('/qr', handleQR);
+router.get('/qr/logo', handleQR);
+
+// ── POST /v1/validate-email ──────────────────────────────────
+router.post('/validate-email', async (req, res) => {
+  const email = (req.body.email_address || '').trim();
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Email address is required' });
+  }
+  try {
+    const existing = await supabase.select('registration_list', { email }, 'id');
+    if (existing && existing.length > 0) {
+      return res.status(400).json({ success: false, message: 'Email already registered' });
+    }
+    return res.json({ success: true, message: 'Email is available' });
+  } catch (err) {
+    console.error('Email validation error:', err);
+    return res.status(500).json({ success: false, message: 'Server error validating email' });
+  }
+});
+
+// ── POST /v1/refresh-status ──────────────────────────────────
+router.post('/refresh-status', async (req, res) => {
+  const userId = parseInt(req.body.user_id || 0, 10);
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'User ID is required' });
+  }
+  try {
+    const result = await supabase.select('registration_list', { id: userId }, 'approval_status');
+    if (!result || result.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const approvalStatus = result[0].approval_status;
+    const responseData = { approval_status: approvalStatus };
+
+    if (parseInt(approvalStatus, 10) === 1) {
+      const keys = await supabase.select('attendance_keys', { participant_id: userId }, 'visitor_code, attendance_key');
+      responseData.attendance_key = keys?.[0]?.attendance_key || 'N/A';
+    }
+    return res.json({ success: true, message: 'Status fetched', data: responseData });
+  } catch (err) {
+    console.error('Refresh status error:', err);
+    return res.status(500).json({ success: false, message: 'Server error fetching status' });
+  }
+});
+
+// ── GET /v1/zoom-meetings ────────────────────────────────────
+router.get('/zoom-meetings', async (req, res) => {
+  try {
+    // Zoom config fallback read
+    let configMeetings = [];
+    const meetingsFilePath = new URL('../../config/zoom_meetings.json', import.meta.url);
+    try {
+      configMeetings = JSON.parse(await fs.promises.readFile(meetingsFilePath, 'utf8')) || [];
+    } catch (e) {
+      // Ignore
+    }
+
+    const configMap = {};
+    for (const cm of configMeetings) {
+      configMap[cm.meeting_id] = cm;
+    }
+
+    try {
+      const meetings = await zoom.listMeetings();
+      if (!meetings || meetings.length === 0) {
+        throw new Error("No live meetings returned");
+      }
+      const mappedMeetings = meetings.map(m => {
+        const mId = String(m.id);
+        const hasConfig = configMap[mId] !== undefined;
+        return {
+          meeting_id: mId,
+          display_name: hasConfig ? configMap[mId].display_name : m.topic,
+          image_url: (hasConfig && configMap[mId].image_url) ? configMap[mId].image_url : ''
+        };
+      });
+      return res.json({ success: true, message: 'Active meetings fetched', data: { meetings: mappedMeetings } });
+    } catch (err) {
+      const activeMeetings = configMeetings.filter(m => m.is_active);
+      return res.json({ success: true, message: 'Fallback active meetings fetched', data: { meetings: activeMeetings } });
+    }
+  } catch (err) {
+    console.error('zoom-meetings route error:', err);
+    return res.status(500).json({ success: false, message: 'Server error fetching zoom meetings' });
+  }
+});
+
+// ── POST /v1/register ────────────────────────────────────────
+router.post('/register', async (req, res) => {
+  const body = req.body || {};
+  const fields = [
+    'registration_type', 'prefix', 'speaker_type',
+    'first_name', 'middle_initial', 'last_name', 'suffix', 'full_name',
+    'age_range', 'gender', 'nationality',
+    'affiliation', 'affiliation_sub', 'affiliation_specify',
+    'designation', 'media_queries', 'company',
+    'email', 'phone',
+    'address_country', 'address_state', 'address_street', 'address_city', 'address_zip',
+    'dietary', 'dietary_details', 'academic_type',
+    'attendance_mode', 'attendance_days', 'visa_assistance', 'field_trip', 'seminar', 'zoom_meeting_id',
+  ];
+
+  const data = {};
+  for (const field of fields) {
+    let val = body[field];
+    if (typeof val === 'string') {
+      val = val.trim();
+      // Simple htmlspecialchars-like sanitize
+      val = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+    data[field] = val || null;
+  }
+
+  if (!data.email) {
+    return res.status(400).json({ success: false, message: 'Email address is required.' });
+  }
+
+  try {
+    // Check duplicate
+    const existing = await supabase.select('registration_list', { email: data.email }, 'id');
+    if (existing && existing.length > 0) {
+      return res.status(400).json({ success: false, message: 'This email address is already registered. Please use a different email.' });
+    }
+
+    data.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    // Insert into Supabase
+    const inserted = await supabase.insert('registration_list', data);
+    if (!inserted || inserted.length === 0) {
+      return res.status(400).json({ success: false, message: "We couldn't process your registration. Please try again." });
+    }
+
+    const userId = inserted[0].id;
+    const visitorCode = generateVisitorCode(userId, 'FAO');
+    const attendanceKey = generateAttendanceKey(userId);
+
+    // Insert attendance keys
+    await supabase.insert('attendance_keys', {
+      participant_id: userId,
+      visitor_code: visitorCode,
+      attendance_key: attendanceKey
+    });
+
+    let joinUrl = null;
+    if (data.attendance_mode === 'online' && data.zoom_meeting_id) {
+      const meetingIds = String(data.zoom_meeting_id).split(',');
+      const joinUrls = [];
+      for (let mId of meetingIds) {
+        mId = mId.trim();
+        if (!mId) continue;
+        const jUrl = await zoom.registerParticipant(mId, data.email, data.first_name, data.last_name);
+        if (jUrl) {
+          await supabase.saveZoomDetails(userId, jUrl);
+          joinUrls.push(jUrl);
+        }
+      }
+      if (joinUrls.length > 0) {
+        joinUrl = joinUrls.join(', ');
+      }
+    }
+
+    const tokenPayload = {
+      ...data,
+      user_id: userId,
+      attendance_key: attendanceKey
+    };
+    if (joinUrl) {
+      tokenPayload.zoom_join_url = joinUrl;
+    }
+    const token = generateJWT(tokenPayload);
+
+    // Broadcast new registration to admin panel realtime table
+    broadcastToAdmins('new_registration', { ...data, id: userId, visitor_code: visitorCode, attendance_key: attendanceKey, zoom_join_url: joinUrl });
+
+    return res.json({ status: 'success', success: true, message: 'Registration successful', data: { token } });
+
+  } catch (err) {
+    console.error('Registration API error:', err);
+    return res.status(500).json({ success: false, message: "There's a problem submitting your form. Please try again or contact the Administrator." });
+  }
+});
+
+export default router;

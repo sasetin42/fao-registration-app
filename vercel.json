@@ -1,35 +1,19 @@
 {
   "version": 2,
-  "buildCommand": null,
-  "installCommand": null,
-  "env": {
-    "COMPOSER_FLAGS": "--ignore-platform-reqs"
-  },
-  "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.9.0"
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/assets/(.*)",
       "dest": "/public/assets/$1"
     },
     {
-      "src": "/pages/(.*)",
-      "dest": "/api/pages/$1"
-    },
-    {
-      "src": "/(v1/.*)",
-      "dest": "/api/index.php"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/public/assets/favicon.ico"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/api/index.php"
+      "dest": "server.js"
     }
   ]
 }

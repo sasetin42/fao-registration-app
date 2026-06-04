@@ -941,5 +941,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialize
         loadDashboard();
+
+        // --- Realtime Event Stream via SSE ---
+        const setupSSE = () => {
+            const token = getToken();
+            if (!token) return;
+            const es = new EventSource(`/v1/admin/stream?token=${token}`);
+            
+            es.addEventListener('new_registration', (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    // Add to allRegistrations
+                    allRegistrations.unshift(data);
+                    // Rerender table and charts
+                    renderTable();
+                    renderCharts();
+                    // Increment stats
+                    const totalEl = document.getElementById('statTotal');
+                    if (totalEl) totalEl.textContent = parseInt(totalEl.textContent || 0, 10) + 1;
+                    const pendingEl = document.getElementById('statPending');
+                    if (pendingEl) pendingEl.textContent = parseInt(pendingEl.textContent || 0, 10) + 1;
+                    if (data.attendance_mode === 'in-person') {
+                        const inPersonEl = document.getElementById('statInPerson');
+                        if (inPersonEl) inPersonEl.textContent = parseInt(inPersonEl.textContent || 0, 10) + 1;
+                    } else if (data.attendance_mode === 'online') {
+                        const virtualEl = document.getElementById('statVirtual');
+                        if (virtualEl) virtualEl.textContent = parseInt(virtualEl.textContent || 0, 10) + 1;
+                    }
+                } catch (err) {
+                    console.error('SSE new_registration error:', err);
+                }
+            });
+
+            es.addEventListener('status_update', (e) => {
+                try {
+                    const { id, approval_status } = JSON.parse(e.data);
+                    const idx = allRegistrations.findIndex(r => r.id === id);
+                    if (idx > -1) {
+                        allRegistrations[idx].approval_status = approval_status;
+                        renderTable();
+                        renderCharts();
+                        // Re-fetch stats to update stats cards
+                        fetch(`${API_BASE}/stats`, { headers: authHeaders })
+                            .then(res => res.json())
+                            .then(statsData => {
+                                if (statsData.success) {
+                                    document.getElementById('statTotal').textContent = statsData.data.total;
+                                    document.getElementById('statApproved').textContent = statsData.data.approved;
+                                    document.getElementById('statPending').textContent = statsData.data.pending;
+                                    document.getElementById('statInPerson').textContent = statsData.data.inPerson;
+                                    document.getElementById('statVirtual').textContent = statsData.data.virtual;
+                                }
+                            });
+                    }
+                } catch (err) {
+                    console.error('SSE status_update error:', err);
+                }
+            });
+
+            es.addEventListener('registration_deleted', (e) => {
+                try {
+                    const { id } = JSON.parse(e.data);
+                    allRegistrations = allRegistrations.filter(r => r.id !== id);
+                    renderTable();
+                    renderCharts();
+                    // Re-fetch stats
+                    fetch(`${API_BASE}/stats`, { headers: authHeaders })
+                        .then(res => res.json())
+                        .then(statsData => {
+                            if (statsData.success) {
+                                document.getElementById('statTotal').textContent = statsData.data.total;
+                                document.getElementById('statApproved').textContent = statsData.data.approved;
+                                document.getElementById('statPending').textContent = statsData.data.pending;
+                                document.getElementById('statInPerson').textContent = statsData.data.inPerson;
+                                document.getElementById('statVirtual').textContent = statsData.data.virtual;
+                            }
+                        });
+                } catch (err) {
+                    console.error('SSE registration_deleted error:', err);
+                }
+            });
+
+            es.onerror = () => {
+                console.warn('SSE connection lost. Reconnecting in 5s...');
+                es.close();
+                setTimeout(setupSSE, 5000);
+            };
+        };
+        setupSSE();
     }
 });
