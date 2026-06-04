@@ -3,10 +3,10 @@
   "version": "2.0.0",
   "description": "FAO APSAM 2026 Registration Application - Node.js/Express",
   "type": "module",
-  "main": "server.js",
+  "main": "api/index.js",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js"
+    "dev": "nodemon api/index.js",
+    "start": "node api/index.js"
   },
   "dependencies": {
     "axios": "^1.7.2",
@@ -21,6 +21,6 @@
     "nodemon": "^3.1.4"
   },
   "engines": {
-    "node": ">=18"
+    "node": "20.x"
   }
 }
