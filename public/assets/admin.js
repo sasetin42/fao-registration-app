@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboardBody = document.querySelector('.dashboard-body');
     if (dashboardBody) {
         if (!getToken()) {
-            window.location.href = '/pages/admin-login.php';
+            window.location.href = '/admin/login';
             return;
         }
 
