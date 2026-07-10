@@ -3,6 +3,123 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE = '/v1/admin';
     let allRegistrations = [];
 
+    // --- Custom Alert, Confirm & Toast Notification System ---
+    const showToast = (message, type = 'success') => {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = '';
+        if (type === 'success') {
+            icon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+        } else if (type === 'error') {
+            icon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+        } else {
+            icon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+        }
+
+        toast.innerHTML = `
+            ${icon}
+            <span>${message}</span>
+        `;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            toast.addEventListener('animationend', () => {
+                toast.remove();
+                if (container.childNodes.length === 0) container.remove();
+            });
+        }, 3000);
+    };
+
+    const showConfirm = (title, message, confirmText = 'Confirm', type = 'confirm') => {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-modal-overlay';
+            
+            let iconHtml = '';
+            if (type === 'confirm') {
+                iconHtml = `<div class="custom-modal-icon confirm"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>`;
+            } else if (type === 'warning') {
+                iconHtml = `<div class="custom-modal-icon warning"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>`;
+            } else {
+                iconHtml = `<div class="custom-modal-icon critical"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>`;
+            }
+
+            overlay.innerHTML = `
+                <div class="custom-modal">
+                    <div class="custom-modal-header">
+                        ${iconHtml}
+                        <h3>${title}</h3>
+                    </div>
+                    <div class="custom-modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="custom-modal-footer">
+                        <button class="btn-ghost btn-small" id="customConfirmCancel">Cancel</button>
+                        <button class="btn-primary btn-small" id="customConfirmOk">${confirmText}</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            const cleanUp = (result) => {
+                overlay.remove();
+                resolve(result);
+            };
+
+            overlay.querySelector('#customConfirmCancel').addEventListener('click', () => cleanUp(false));
+            overlay.querySelector('#customConfirmOk').addEventListener('click', () => cleanUp(true));
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) cleanUp(false);
+            });
+        });
+    };
+
+    const showAlert = (title, message) => {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-modal-overlay';
+            overlay.innerHTML = `
+                <div class="custom-modal">
+                    <div class="custom-modal-header">
+                        <div class="custom-modal-icon confirm">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <h3>${title}</h3>
+                    </div>
+                    <div class="custom-modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="custom-modal-footer">
+                        <button class="btn-primary btn-small" id="customAlertOk">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            const cleanUp = () => {
+                overlay.remove();
+                resolve();
+            };
+
+            overlay.querySelector('#customAlertOk').addEventListener('click', cleanUp);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) cleanUp();
+            });
+        });
+    };
+
     // --- Authentication ---
     const getToken = () => localStorage.getItem('admin_token');
     const setToken = (token) => localStorage.setItem('admin_token', token);
@@ -81,9 +198,111 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Initialize Premium App Shell Interactivity
+        const initPremiumShell = () => {
+            const sidebar = document.getElementById('appSidebar');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            if (sidebar && toggleBtn) {
+                const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+                if (isCollapsed) sidebar.classList.add('collapsed');
+                
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('collapsed');
+                    localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+
+            const searchBar = document.getElementById('globalCommandSearch');
+            if (searchBar) {
+                window.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        searchBar.focus();
+                    }
+                });
+                searchBar.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase().trim();
+                    if (!query) return;
+                    const links = document.querySelectorAll('.nav-links li');
+                    links.forEach(link => {
+                        const text = link.textContent.toLowerCase();
+                        link.style.outline = text.includes(query) ? '2px solid var(--fao-accent)' : '';
+                    });
+                });
+                searchBar.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const query = e.target.value.toLowerCase().trim();
+                        const links = document.querySelectorAll('.nav-links li');
+                        for (let link of links) {
+                            if (link.textContent.toLowerCase().includes(query)) {
+                                link.click();
+                                searchBar.value = '';
+                                searchBar.blur();
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+
+            const profileToggle = document.getElementById('profileMenuToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target)) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
+
+            const dropLogout = document.getElementById('dropdownLogoutBtn');
+            if (dropLogout) {
+                dropLogout.addEventListener('click', async () => {
+                    const confirmed = await showConfirm('Secure Logout', 'Are you sure you want to log out of the Event Command Center?', 'Logout', 'warning');
+                    if (confirmed) {
+                        clearToken();
+                        window.location.href = '/admin/login';
+                    }
+                });
+            }
+
+            const standardLogout = document.getElementById('logoutBtn');
+            if (standardLogout) {
+                standardLogout.addEventListener('click', async () => {
+                    const confirmed = await showConfirm('Secure Logout', 'Are you sure you want to log out of the Event Command Center?', 'Logout', 'warning');
+                    if (confirmed) {
+                        clearToken();
+                        window.location.href = '/admin/login';
+                    }
+                });
+            }
+
+            // Setup Details Tabs
+            const tabBtns = document.querySelectorAll('.modal-tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const tabId = btn.dataset.tab;
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    const targetContent = document.getElementById(tabId);
+                    if (targetContent) targetContent.classList.add('active');
+                });
+            });
+        };
+
+        initPremiumShell();
+
         // Navigation
         const navLinks = document.querySelectorAll('.nav-links li');
         const sections = document.querySelectorAll('.content-section');
+        const breadcrumb = document.getElementById('activeBreadcrumb');
 
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -91,13 +310,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 sections.forEach(s => s.classList.remove('active'));
                 link.classList.add('active');
                 document.getElementById(link.dataset.target).classList.add('active');
+                if (breadcrumb) {
+                    breadcrumb.textContent = link.querySelector('span').textContent;
+                }
             });
-        });
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            clearToken();
-            window.location.href = '/admin/login';
         });
 
         // Fetch Data
@@ -353,7 +569,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const ids = getSelectedIds();
             if (ids.length === 0) return;
             const label = status === 1 ? 'approve' : 'reject';
-            if (!confirm(`Are you sure you want to ${label} the ${ids.length} selected registration(s)?`)) return;
+            const confirmed = await showConfirm(
+                'Confirm Batch Action', 
+                `Are you sure you want to ${label} the ${ids.length} selected registration(s)?`,
+                `Yes, ${label}`,
+                status === 1 ? 'confirm' : 'warning'
+            );
+            if (!confirmed) return;
 
             try {
                 const res = await fetch(`${API_BASE}/registrations/batch-status`, {
@@ -367,16 +589,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (idx > -1) allRegistrations[idx].approval_status = status;
                     });
                     loadDashboard();
+                    showToast(`Successfully updated ${ids.length} registrations.`, 'success');
+                } else {
+                    showToast('Error processing batch update', 'error');
                 }
             } catch (err) {
-                alert('Error processing batch update');
+                showToast('Error processing batch update', 'error');
             }
         };
 
         const handleBatchDelete = async () => {
             const ids = getSelectedIds();
             if (ids.length === 0) return;
-            if (!confirm(`Are you sure you want to permanently delete the ${ids.length} selected registration(s)?`)) return;
+            const confirmed = await showConfirm(
+                'Delete Registrations',
+                `Are you sure you want to permanently delete the ${ids.length} selected registration(s)?`,
+                'Delete',
+                'critical'
+            );
+            if (!confirmed) return;
 
             try {
                 const res = await fetch(`${API_BASE}/registrations/batch-delete`, {
@@ -387,9 +618,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.ok) {
                     allRegistrations = allRegistrations.filter(r => !ids.includes(r.id));
                     loadDashboard();
+                    showToast(`Successfully deleted ${ids.length} registrations.`, 'success');
+                } else {
+                    showToast('Error processing batch delete', 'error');
                 }
             } catch (err) {
-                alert('Error processing batch delete');
+                showToast('Error processing batch delete', 'error');
             }
         };
 
@@ -407,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (exportCsvBtn) {
             exportCsvBtn.addEventListener('click', () => {
                 if (allRegistrations.length === 0) {
-                    alert('No registration data to export.');
+                    showToast('No registration data to export.', 'warning');
                     return;
                 }
 
@@ -461,6 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                showToast('CSV export downloaded successfully.', 'success');
             });
         }
 
@@ -470,60 +705,66 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = allRegistrations.find(r => r.id === id);
             if (!user) return;
 
-            let conditionalFields = '';
-            if (user.attendance_mode === 'in-person') {
-                conditionalFields = `
-                    <div class="detail-row"><div class="detail-label">Attendance Days</div><div class="detail-value">${user.attendance_days || 'N/A'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Dietary Preference</div><div class="detail-value" style="text-transform: capitalize;">${user.dietary || 'N/A'}</div></div>
-                    ${user.dietary_details ? `<div class="detail-row"><div class="detail-label">Dietary Details</div><div class="detail-value">${user.dietary_details}</div></div>` : ''}
-                    <div class="detail-row"><div class="detail-label">Visa Assistance</div><div class="detail-value">${user.visa_assistance == '1' || user.visa_assistance === true ? 'Yes' : 'No'}</div></div>
-                    <div class="detail-row"><div class="detail-label">Field Trip Selection</div><div class="detail-value">${user.field_trip || 'None'}</div></div>
-                `;
-            } else if (user.attendance_mode === 'online') {
-                conditionalFields = `
-                    <div class="detail-row"><div class="detail-label">Zoom Meeting ID(s)</div><div class="detail-value">${user.zoom_meeting_id || 'N/A'}</div></div>
-                `;
-            }
-
             const content = `
-                <div class="detail-row"><div class="detail-label">Prefix</div><div class="detail-value" style="text-transform: capitalize;">${user.prefix || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Full Name</div><div class="detail-value">${user.full_name || (user.first_name + ' ' + user.last_name)}</div></div>
-                <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${user.email}</div></div>
-                <div class="detail-row"><div class="detail-label">Mobile Number</div><div class="detail-value">${user.phone || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Registration Type</div><div class="detail-value" style="text-transform: capitalize;">${user.registration_type}</div></div>
-                ${user.speaker_type ? `<div class="detail-row"><div class="detail-label">Speaker Type</div><div class="detail-value" style="text-transform: capitalize;">${user.speaker_type}</div></div>` : ''}
-                <div class="detail-row"><div class="detail-label">Age Range</div><div class="detail-value">${user.age_range || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Gender</div><div class="detail-value" style="text-transform: capitalize;">${user.gender || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Nationality</div><div class="detail-value" style="text-transform: capitalize;">${user.nationality || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Affiliation Type</div><div class="detail-value" style="text-transform: capitalize;">${user.affiliation || 'N/A'}</div></div>
-                ${user.affiliation_sub ? `<div class="detail-row"><div class="detail-label">Affiliation Category</div><div class="detail-value" style="text-transform: capitalize;">${user.affiliation_sub}</div></div>` : ''}
-                ${user.affiliation_specify ? `<div class="detail-row"><div class="detail-label">Affiliation Specify</div><div class="detail-value">${user.affiliation_specify}</div></div>` : ''}
-                <div class="detail-row"><div class="detail-label">Company</div><div class="detail-value">${user.company || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Designation</div><div class="detail-value">${user.designation || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Country of Affiliation</div><div class="detail-value" style="text-transform: capitalize;">${user.address_country || 'N/A'}</div></div>
-                <div class="detail-row"><div class="detail-label">Attendance Mode</div><div class="detail-value" style="text-transform: capitalize;">${user.attendance_mode}</div></div>
-                ${conditionalFields}
-                <div class="detail-row"><div class="detail-label">Registered At</div><div class="detail-value">${user.created_at || 'N/A'}</div></div>
+                <div id="tab-overview" class="tab-content active">
+                    <div class="detail-grid">
+                        <div class="detail-row"><div class="detail-label">Prefix</div><div class="detail-value" style="text-transform: capitalize;">${user.prefix || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Full Name</div><div class="detail-value">${user.full_name || (user.first_name + ' ' + user.last_name)}</div></div>
+                        <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${user.email}</div></div>
+                        <div class="detail-row"><div class="detail-label">Mobile Number</div><div class="detail-value">${user.phone || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Nationality</div><div class="detail-value" style="text-transform: capitalize;">${user.nationality || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Company / Affiliation</div><div class="detail-value">${user.company || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Designation</div><div class="detail-value">${user.designation || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Country of Affiliation</div><div class="detail-value" style="text-transform: capitalize;">${user.address_country || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Registration Type</div><div class="detail-value" style="text-transform: capitalize;">${user.registration_type}</div></div>
+                    </div>
+                </div>
+                <div id="tab-attendance" class="tab-content">
+                    <div class="detail-grid">
+                        <div class="detail-row"><div class="detail-label">Attendance Mode</div><div class="detail-value" style="text-transform: capitalize;">${user.attendance_mode}</div></div>
+                        <div class="detail-row"><div class="detail-label">Attendance Days</div><div class="detail-value">${user.attendance_days || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Speaker Type</div><div class="detail-value" style="text-transform: capitalize;">${user.speaker_type || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Zoom Meeting ID(s)</div><div class="detail-value">${user.zoom_meeting_id || 'N/A'}</div></div>
+                    </div>
+                </div>
+                <div id="tab-logistics" class="tab-content">
+                    <div class="detail-grid">
+                        <div class="detail-row"><div class="detail-label">Dietary Preference</div><div class="detail-value" style="text-transform: capitalize;">${user.dietary || 'N/A'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Dietary Details</div><div class="detail-value">${user.dietary_details || 'None'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Visa Assistance Required</div><div class="detail-value">${user.visa_assistance == '1' || user.visa_assistance === true ? 'Yes' : 'No'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Field Trip Selection</div><div class="detail-value">${user.field_trip || 'None'}</div></div>
+                        <div class="detail-row"><div class="detail-label">Registered At</div><div class="detail-value">${user.created_at || 'N/A'}</div></div>
+                    </div>
+                </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = content;
+            // Activate first tab
+            const tabBtns = document.querySelectorAll('.modal-tab-btn');
+            if (tabBtns.length > 0) {
+                tabBtns.forEach(btn => btn.classList.remove('active'));
+                tabBtns[0].classList.add('active');
+            }
             document.getElementById('detailsModal').classList.remove('hidden');
         };
 
         const handleApprove = async (e) => {
             const id = parseInt(e.currentTarget.dataset.id);
-            if (!confirm('Approve this registration?')) return;
+            const confirmed = await showConfirm('Approve Registration', 'Are you sure you want to approve this registration?', 'Approve', 'confirm');
+            if (!confirmed) return;
             await updateStatus(id, 1);
         };
 
         const handleReject = async (e) => {
             const id = parseInt(e.currentTarget.dataset.id);
-            if (!confirm('Reject this registration?')) return;
+            const confirmed = await showConfirm('Reject Registration', 'Are you sure you want to reject this registration?', 'Reject', 'warning');
+            if (!confirmed) return;
             await updateStatus(id, -1);
         };
 
         const handleDelete = async (e) => {
             const id = parseInt(e.currentTarget.dataset.id);
-            if (!confirm('Are you sure you want to permanently delete this registration?')) return;
+            const confirmed = await showConfirm('Delete Registration', 'Are you sure you want to permanently delete this registration?', 'Delete', 'critical');
+            if (!confirmed) return;
             
             try {
                 const res = await fetch(`${API_BASE}/registrations/${id}`, {
@@ -533,9 +774,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.ok) {
                     allRegistrations = allRegistrations.filter(r => r.id !== id);
                     loadDashboard(); // Refresh stats
+                    showToast('Registration deleted successfully.', 'success');
+                } else {
+                    showToast('Error deleting registration', 'error');
                 }
             } catch (err) {
-                alert('Error deleting registration');
+                showToast('Error deleting registration', 'error');
             }
         };
 
@@ -550,9 +794,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const idx = allRegistrations.findIndex(r => r.id === id);
                     if (idx > -1) allRegistrations[idx].approval_status = status;
                     loadDashboard(); // Refresh stats
+                    showToast('Status updated successfully.', 'success');
+                } else {
+                    showToast('Error updating status', 'error');
                 }
             } catch (err) {
-                alert('Error updating status');
+                showToast('Error updating status', 'error');
             }
         };
 
@@ -717,9 +964,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 is_active
                             })
                         });
-                        if (res.ok) loadConfigMeetings();
+                        if (res.ok) {
+                            loadConfigMeetings();
+                            showToast(`Session ${is_active ? 'activated' : 'deactivated'} successfully.`, 'success');
+                        } else {
+                            showToast('Error toggling session status', 'error');
+                        }
                     } catch (err) {
-                        alert('Error toggling session status');
+                        showToast('Error toggling session status', 'error');
                     }
                 });
             });
@@ -727,15 +979,26 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.delete-config-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const meetingId = e.target.dataset.id;
-                    if (!confirm('Are you sure you want to remove this session from the registration form?')) return;
+                    const confirmed = await showConfirm(
+                        'Remove Zoom Session',
+                        'Are you sure you want to remove this session from the registration form?',
+                        'Remove',
+                        'critical'
+                    );
+                    if (!confirmed) return;
                     try {
                         const res = await fetch(`${API_BASE}/zoom/config/${meetingId}`, {
                             method: 'DELETE',
                             headers: authHeaders
                         });
-                        if (res.ok) loadConfigMeetings();
+                        if (res.ok) {
+                            loadConfigMeetings();
+                            showToast('Session removed from registration form.', 'success');
+                        } else {
+                            showToast('Error deleting session', 'error');
+                        }
                     } catch (err) {
-                        alert('Error deleting session');
+                        showToast('Error deleting session', 'error');
                     }
                 });
             });
@@ -764,11 +1027,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('configPasscode').value = '';
                     document.getElementById('configImage').selectedIndex = 0;
                     loadConfigMeetings();
+                    showToast('Zoom session added/updated successfully.', 'success');
                 } else {
-                    alert(data.message || 'Error saving session config');
+                    showToast(data.message || 'Error saving session config', 'error');
                 }
             } catch (err) {
-                alert('Connection error');
+                showToast('Connection error', 'error');
             }
         });
 

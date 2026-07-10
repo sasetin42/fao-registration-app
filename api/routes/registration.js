@@ -169,6 +169,42 @@ router.get('/zoom-meetings/:meetingId', async (req, res) => {
   }
 });
 
+// Organization Normalization Rules
+function normalizeOrganization(org) {
+  if (!org) return null;
+  let clean = org.trim().replace(/\s+/g, ' ');
+  const lower = clean.toLowerCase();
+  
+  // FAO variations
+  if (
+    lower === 'fao' ||
+    lower === 'f.a.o.' ||
+    lower === 'fao un' ||
+    lower === 'fao-un' ||
+    lower.includes('food and agriculture organization')
+  ) {
+    return 'FAO';
+  }
+  
+  // United Nations variations
+  if (
+    lower === 'un' ||
+    lower === 'u.n.' ||
+    lower === 'united nations' ||
+    lower.includes('united nations')
+  ) {
+    return 'United Nations';
+  }
+
+  // Capitalize first letter of each word as a general fallback for normalization
+  return clean.split(' ').map(word => {
+    if (word.length === 0) return '';
+    // Check if it's already an acronym (all caps, length <= 4)
+    if (word === word.toUpperCase() && word.length > 1 && word.length <= 4) return word;
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+}
+
 // ── POST /v1/register ────────────────────────────────────────
 router.post('/register', upload.none(), async (req, res) => {
   const body = req.body || {};
@@ -199,14 +235,38 @@ router.post('/register', upload.none(), async (req, res) => {
     return res.status(400).json({ success: false, message: 'Email address is required.' });
   }
 
+  const normalizedEmail = data.email.toLowerCase();
+
   try {
-    // Check duplicate
-    const existing = await supabase.select('registration_list', { email: data.email }, 'id');
-    if (existing && existing.length > 0) {
+    // Check duplicate email (case-insensitive) and similar name
+    const allRegs = await supabase.select('registration_list');
+    
+    const duplicateEmail = allRegs.find(r => (r.email || '').trim().toLowerCase() === normalizedEmail);
+    if (duplicateEmail) {
       return res.status(400).json({ success: false, message: 'This email address is already registered. Please use a different email.' });
     }
 
+    const duplicateName = allRegs.find(r => {
+      const exFirst = (r.first_name || '').trim().toLowerCase();
+      const exLast = (r.last_name || '').trim().toLowerCase();
+      const newFirst = (data.first_name || '').trim().toLowerCase();
+      const newLast = (data.last_name || '').trim().toLowerCase();
+      return exFirst && exLast && newFirst && newLast && exFirst === newFirst && exLast === newLast;
+    });
+    if (duplicateName) {
+      return res.status(400).json({ success: false, message: 'A registration with this name already exists. If this is a mistake, please contact the Administrator.' });
+    }
+
+    // Apply organization normalization rules
+    if (data.company) {
+      data.company = normalizeOrganization(data.company);
+    }
+    if (data.affiliation) {
+      data.affiliation = normalizeOrganization(data.affiliation);
+    }
+
     data.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    
     // Insert into Supabase
     const inserted = await supabase.insert('registration_list', data);
     if (!inserted || inserted.length === 0) {
@@ -214,48 +274,58 @@ router.post('/register', upload.none(), async (req, res) => {
     }
 
     const userId = inserted[0].id;
-    const visitorCode = generateVisitorCode(userId, 'FAO');
-    const attendanceKey = generateAttendanceKey(userId);
 
-    // Insert attendance keys
-    await supabase.insert('attendance_keys', {
-      participant_id: userId,
-      visitor_code: visitorCode,
-      attendance_key: attendanceKey
-    });
+    // Use try-catch to rollback insertion if any post-insert setup fails (prevents orphaned records/corruption)
+    try {
+      const visitorCode = generateVisitorCode(userId, 'FAO');
+      const attendanceKey = generateAttendanceKey(userId);
 
-    let joinUrl = null;
-    if (data.attendance_mode === 'online' && data.zoom_meeting_id) {
-      const meetingIds = String(data.zoom_meeting_id).split(',');
-      const joinUrls = [];
-      for (let mId of meetingIds) {
-        mId = mId.trim();
-        if (!mId) continue;
-        const jUrl = await zoom.registerParticipant(mId, data.email, data.first_name, data.last_name);
-        if (jUrl) {
-          await supabase.saveZoomDetails(userId, jUrl);
-          joinUrls.push(jUrl);
+      // Insert attendance keys
+      await supabase.insert('attendance_keys', {
+        participant_id: userId,
+        visitor_code: visitorCode,
+        attendance_key: attendanceKey
+      });
+
+      let joinUrl = null;
+      if (data.attendance_mode === 'online' && data.zoom_meeting_id) {
+        const meetingIds = String(data.zoom_meeting_id).split(',');
+        const joinUrls = [];
+        for (let mId of meetingIds) {
+          mId = mId.trim();
+          if (!mId) continue;
+          const jUrl = await zoom.registerParticipant(mId, data.email, data.first_name, data.last_name);
+          if (jUrl) {
+            await supabase.saveZoomDetails(userId, jUrl);
+            joinUrls.push(jUrl);
+          }
+        }
+        if (joinUrls.length > 0) {
+          joinUrl = joinUrls.join(', ');
         }
       }
-      if (joinUrls.length > 0) {
-        joinUrl = joinUrls.join(', ');
+
+      const tokenPayload = {
+        ...data,
+        user_id: userId,
+        attendance_key: attendanceKey
+      };
+      if (joinUrl) {
+        tokenPayload.zoom_join_url = joinUrl;
       }
+      const token = generateJWT(tokenPayload);
+
+      // Broadcast new registration to admin panel realtime table
+      broadcastToAdmins('new_registration', { ...data, id: userId, visitor_code: visitorCode, attendance_key: attendanceKey, zoom_join_url: joinUrl });
+
+      return res.json({ status: 'success', success: true, message: 'Registration successful', data: { token } });
+
+    } catch (innerErr) {
+      console.error('Post-insert setup failed, rolling back registration:', innerErr);
+      // Rollback inserted registration row to preserve database transactions integrity
+      await supabase.remove('registration_list', { id: userId });
+      throw innerErr;
     }
-
-    const tokenPayload = {
-      ...data,
-      user_id: userId,
-      attendance_key: attendanceKey
-    };
-    if (joinUrl) {
-      tokenPayload.zoom_join_url = joinUrl;
-    }
-    const token = generateJWT(tokenPayload);
-
-    // Broadcast new registration to admin panel realtime table
-    broadcastToAdmins('new_registration', { ...data, id: userId, visitor_code: visitorCode, attendance_key: attendanceKey, zoom_join_url: joinUrl });
-
-    return res.json({ status: 'success', success: true, message: 'Registration successful', data: { token } });
 
   } catch (err) {
     console.error('Registration API error:', err);

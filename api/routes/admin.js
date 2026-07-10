@@ -90,12 +90,62 @@ router.put('/registrations/batch-status', async (req, res) => {
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({ success: false, message: 'Invalid payload' });
   }
+
+  // Securely validate status
+  let finalStatus;
+  let statusName;
+  if (status === 1 || status === '1' || status === 'approved') {
+    finalStatus = '1';
+    statusName = 'Approved';
+  } else if (status === -1 || status === '-1' || status === 'rejected') {
+    finalStatus = '-1';
+    statusName = 'Rejected';
+  } else if (status === 0 || status === '0' || status === 'pending') {
+    finalStatus = 'pending';
+    statusName = 'Pending';
+  } else {
+    return res.status(400).json({ success: false, message: 'Invalid status value' });
+  }
+
   try {
-    await supabase.updateBatch('registration_list', { approval_status: status }, 'id', ids);
-    // Broadcast updates to SSE
+    // Retrieve currently existing records to check transitions and find names
+    const allParticipants = await supabase.select('registration_list');
+    const participantsToUpdate = allParticipants.filter(p => ids.map(Number).includes(Number(p.id)));
+
+    // Execute batch update in database
+    await supabase.updateBatch('registration_list', { approval_status: finalStatus }, 'id', ids);
+
+    // Build timeline logs for status changes
+    const logsToInsert = [];
+    const nowStr = new Date().toISOString();
+    
+    for (const p of participantsToUpdate) {
+      const oldStatus = p.approval_status;
+      if (String(oldStatus) !== String(finalStatus)) {
+        const oldStatusName = oldStatus === '1' ? 'Approved' : (oldStatus === '-1' ? 'Rejected' : 'Pending');
+        logsToInsert.push({
+          participant_id: p.id,
+          scanned_at: nowStr,
+          scanned_by: `Status changed from ${oldStatusName} to ${statusName} (Admin)`
+        });
+      }
+    }
+
+    // Insert audit logs as a batch transaction to prevent corruption
+    if (logsToInsert.length > 0) {
+      await supabase.insert('attendance_logs', logsToInsert);
+    }
+
+    // Broadcast status updates to SSE
     ids.forEach(id => {
-      broadcastToAdmins('status_update', { id, approval_status: status });
+      broadcastToAdmins('status_update', { id, approval_status: finalStatus });
     });
+    
+    // Broadcast check-in reload if logs changed
+    if (logsToInsert.length > 0) {
+      broadcastToAdmins('attendance_checkin', { id: Date.now() });
+    }
+
     return res.json({ success: true });
   } catch (err) {
     console.error('Batch status update error:', err);
@@ -125,9 +175,59 @@ router.post('/registrations/batch-delete', async (req, res) => {
 router.put('/registrations/:id/status', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { status } = req.body || {};
+
+  if (isNaN(id)) {
+    return res.status(400).json({ success: false, message: 'Invalid registration ID' });
+  }
+
+  // Securely validate status
+  let finalStatus;
+  let statusName;
+  if (status === 1 || status === '1' || status === 'approved') {
+    finalStatus = '1';
+    statusName = 'Approved';
+  } else if (status === -1 || status === '-1' || status === 'rejected') {
+    finalStatus = '-1';
+    statusName = 'Rejected';
+  } else if (status === 0 || status === '0' || status === 'pending') {
+    finalStatus = 'pending';
+    statusName = 'Pending';
+  } else {
+    return res.status(400).json({ success: false, message: 'Invalid status value' });
+  }
+
   try {
-    await supabase.update('registration_list', { approval_status: status }, { id });
-    broadcastToAdmins('status_update', { id, approval_status: status });
+    const participants = await supabase.select('registration_list', { id });
+    if (!participants || participants.length === 0) {
+      return res.status(404).json({ success: false, message: 'Participant not found' });
+    }
+    const participant = participants[0];
+    const oldStatus = participant.approval_status;
+
+    // Only update and log if status actually changed
+    if (String(oldStatus) !== String(finalStatus)) {
+      await supabase.update('registration_list', { approval_status: finalStatus }, { id });
+
+      // Log status change transition
+      const oldStatusName = oldStatus === '1' ? 'Approved' : (oldStatus === '-1' ? 'Rejected' : 'Pending');
+      const logData = {
+        participant_id: id,
+        scanned_at: new Date().toISOString(),
+        scanned_by: `Status changed from ${oldStatusName} to ${statusName} (Admin)`
+      };
+      await supabase.insert('attendance_logs', logData);
+      
+      broadcastToAdmins('status_update', { id, approval_status: finalStatus });
+      // Broadcast check-in reload
+      broadcastToAdmins('attendance_checkin', {
+        id: Date.now(),
+        participant_id: id,
+        full_name: participant.full_name || `${participant.first_name} ${participant.last_name}`,
+        email: participant.email,
+        scanned_at: logData.scanned_at
+      });
+    }
+
     return res.json({ success: true });
   } catch (err) {
     console.error('Single status update error:', err);
@@ -266,17 +366,54 @@ router.get('/zoom/settings', async (req, res) => {
       secret_token: process.env.ZOOM_SECRET_TOKEN || ''
     };
   }
-  return res.json({ success: true, data: settings });
+
+  // Mask sensitive technical credentials
+  const maskedSettings = {
+    account_id: settings.account_id || '',
+    client_id: settings.client_id || '',
+    client_secret: settings.client_secret ? '●●●●●●●●' : '',
+    secret_token: settings.secret_token ? '●●●●●●●●' : ''
+  };
+
+  return res.json({ success: true, data: maskedSettings });
 });
 
 router.post('/zoom/settings', async (req, res) => {
   const { account_id, client_id, client_secret, secret_token } = req.body || {};
+
+  // Read existing settings to preserve masked fields if not updated
+  let existingSettings = {};
+  if (fs.existsSync(settingsFilePath)) {
+    try {
+      existingSettings = JSON.parse(await fs.promises.readFile(settingsFilePath, 'utf8')) || {};
+    } catch (e) {
+      // Ignore
+    }
+  }
+  if (Object.keys(existingSettings).length === 0) {
+    existingSettings = {
+      account_id: process.env.ZOOM_ACCOUNT_ID || '',
+      client_id: process.env.ZOOM_CLIENT_ID || '',
+      client_secret: process.env.ZOOM_CLIENT_SECRET || '',
+      secret_token: process.env.ZOOM_SECRET_TOKEN || ''
+    };
+  }
+
+  const final_client_secret = (client_secret === '●●●●●●●●' || !client_secret)
+    ? (existingSettings.client_secret || '')
+    : client_secret.trim();
+
+  const final_secret_token = (secret_token === '●●●●●●●●' || !secret_token)
+    ? (existingSettings.secret_token || '')
+    : secret_token.trim();
+
   const settings = {
     account_id: (account_id || '').trim(),
     client_id: (client_id || '').trim(),
-    client_secret: (client_secret || '').trim(),
-    secret_token: (secret_token || '').trim()
+    client_secret: final_client_secret,
+    secret_token: final_secret_token
   };
+
   try {
     await fs.promises.mkdir(path.dirname(settingsFilePath), { recursive: true });
     await fs.promises.writeFile(settingsFilePath, JSON.stringify(settings, null, 2), 'utf8');

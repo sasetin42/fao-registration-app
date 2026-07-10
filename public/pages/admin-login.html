@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAO Registration - Admin Login</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/admin.css">
 </head>
 <body class="login-body">
     <div class="login-wrapper-split">
-        <!-- Left Hero Panel (Visual & Branding) -->
+        <!-- Left Hero Panel (Agricultural Metrology Graphic Treatment & FAO Branding) -->
         <div class="login-hero-panel">
             <div class="hero-overlay"></div>
             <div class="hero-content">
@@ -20,22 +17,38 @@
                     <img src="/assets/fao-logo.svg" alt="FAO Logo" class="hero-fao-logo">
                 </div>
                 <div class="hero-text">
-                    <span class="hero-subtitle">FAO APSAM 2026</span>
+                    <span class="hero-subtitle">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Secure Gateway
+                    </span>
                     <h1 class="hero-title">Asia-Pacific Symposium on Agricultural Metrology</h1>
-                    <p class="hero-desc">Secure Administrator Gateway. Manage event registrations, configure virtual Zoom sessions, export datasets, and monitor analytics in real-time.</p>
+                    <p class="hero-desc">FAO APSAM 2026 Admin Panel. Oversee and coordinate event registrations, manage virtual sessions, inspect participant records, and monitor live metrics.</p>
+                    
+                    <!-- Decorative Graphic Visual Treatment for Metrology -->
+                    <div class="metrology-widget" style="margin-top: 2rem; background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(8px); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; gap: 1rem; align-items: center; max-width: 440px;">
+                        <div style="background: var(--fao-accent); color: white; border-radius: 8px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em;">Agricultural Metrology Analytics</div>
+                            <div style="font-size: 0.85rem; color: var(--border-color); margin-top: 2px;">Visualizing climate impact & crop yield measurement frameworks.</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="hero-footer">
-                    <span>© 2026 FAO Event Management Portal</span>
+                    <span>© 2026 Food and Agriculture Organization of the United Nations (FAO)</span>
                 </div>
             </div>
         </div>
 
         <!-- Right Form Panel -->
         <div class="login-form-panel">
-            <div class="login-form-container glass-card">
+            <div class="login-form-container glass-panel">
                 <div class="form-header">
-                    <h2>Admin Portal</h2>
-                    <p>Enter your credentials to access the dashboard.</p>
+                    <h2>Admin Login</h2>
+                    <p>Enter your credentials to access the Event Command Center.</p>
                 </div>
 
                 <form id="adminLoginForm" class="admin-login-form">
