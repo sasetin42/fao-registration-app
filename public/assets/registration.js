@@ -813,32 +813,36 @@ const navToggle = document.getElementById("navToggle");
 const mobileNav = document.getElementById("mobileNav");
 
 function closeMobileNav() {
-  navToggle.classList.remove("is-open");
-  mobileNav.classList.remove("is-open");
-  navToggle.setAttribute("aria-expanded", "false");
-  navToggle.setAttribute("aria-label", "Open navigation menu");
-  mobileNav.setAttribute("hidden", "");
+  if (navToggle && mobileNav) {
+    navToggle.classList.remove("is-open");
+    mobileNav.classList.remove("is-open");
+    navToggle.setAttribute("aria-expanded", "false");
+    navToggle.setAttribute("aria-label", "Open navigation menu");
+    mobileNav.setAttribute("hidden", "");
+  }
 }
 
-navToggle.addEventListener("click", () => {
-  const isOpen = navToggle.classList.toggle("is-open");
-  mobileNav.classList.toggle("is-open", isOpen);
-  navToggle.setAttribute("aria-expanded", String(isOpen));
-  navToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
-  if (isOpen) mobileNav.removeAttribute("hidden");
-  else mobileNav.setAttribute("hidden", "");
-});
+if (navToggle && mobileNav) {
+  navToggle.addEventListener("click", () => {
+    const isOpen = navToggle.classList.toggle("is-open");
+    mobileNav.classList.toggle("is-open", isOpen);
+    navToggle.setAttribute("aria-expanded", String(isOpen));
+    navToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+    if (isOpen) mobileNav.removeAttribute("hidden");
+    else mobileNav.setAttribute("hidden", "");
+  });
 
-document.addEventListener("click", (e) => {
-  if (!navToggle.contains(e.target) && !mobileNav.contains(e.target)) closeMobileNav();
-});
+  document.addEventListener("click", (e) => {
+    if (!navToggle.contains(e.target) && !mobileNav.contains(e.target)) closeMobileNav();
+  });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && navToggle.classList.contains("is-open")) {
-    closeMobileNav();
-    navToggle.focus();
-  }
-});
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && navToggle.classList.contains("is-open")) {
+      closeMobileNav();
+      navToggle.focus();
+    }
+  });
+}
 
 const desktopMQ = window.matchMedia("(min-width: 769px)");
 function onBreakpoint(e) {

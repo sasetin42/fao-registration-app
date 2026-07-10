@@ -2,10 +2,10 @@
     --bg-color: #f7f8f9; /* FAO background gray */
     --surface-color: #ffffff; /* White card surface */
     --surface-border: #dddddd; /* FAO border gray */
-    --primary-color: #A94A4A; /* Brand Primary Red */
-    --primary-hover: #8A3D3D;
-    --primary-light: #FFF6DB;
-    --primary-dark: #5C2828;
+    --primary-color: #232323; /* Brand Primary Gray */
+    --primary-hover: #565656;
+    --primary-light: #F5F5F5;
+    --primary-dark: #151515;
     --success-color: #2e7d32; /* FAO Success green */
     --warning-color: #f58320; /* FAO Warning orange */
     --danger-color: #980000; /* FAO Danger red */

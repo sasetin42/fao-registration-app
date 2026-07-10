@@ -334,7 +334,7 @@ function renderOnlineSessions(meetings) {
           <div>
             <p class="sp-dl">Zoom Passcode</p>
             <p class="sp-dv" style="display:flex;align-items:center;gap:6px;">
-              <code class="zoom-passcode-val" style="background:#E8EDF2;padding:2px 7px;border-radius:4px;font-family:monospace;color:#A94A4A;font-weight:700;">
+              <code class="zoom-passcode-val" style="background:#E8EDF2;padding:2px 7px;border-radius:4px;font-family:monospace;color:#565656;font-weight:700;">
                 ${escapeHTML(m.passcode || 'FAO2026')}
               </code>
               <button type="button" class="btn-copy-passcode sp-btn sp-btn--copy" data-passcode="${escapeHTML(m.passcode || 'FAO2026')}" style="font-size:10px;padding:2px 6px;display:inline-flex;align-items:center;height:18px;">
@@ -461,7 +461,7 @@ function renderInPersonContent() {
             23–26 November 2026
           </p>
           <p style="font-size:12px;color:#545454;margin:0;display:flex;align-items:center;gap:5px;">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A94A4A"
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#565656"
                  stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
               <circle cx="12" cy="9" r="2.5"/>
