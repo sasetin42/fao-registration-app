@@ -483,7 +483,6 @@ function initEventCountdown() {
   const hoursEl = document.getElementById("countdown-hours");
   const minsEl = document.getElementById("countdown-mins");
   const secsEl = document.getElementById("countdown-secs");
-  const gridEl = document.querySelector(".countdown-grid");
   
   if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
   
@@ -493,9 +492,10 @@ function initEventCountdown() {
     
     if (difference <= 0) {
       clearInterval(timerInterval);
-      if (gridEl) {
-        gridEl.innerHTML = '<div style="grid-column: span 4; text-align: center; font-weight: 600; font-size: 15px; color: #ffffff; padding: 10px 0;">Event has started!</div>';
-      }
+      daysEl.textContent = "00";
+      hoursEl.textContent = "00";
+      minsEl.textContent = "00";
+      secsEl.textContent = "00";
       return;
     }
     

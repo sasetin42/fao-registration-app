@@ -3043,18 +3043,61 @@ body {
 }
 
 /* Event Countdown Timer */
+.sidebar-countdown-container {
+  position: relative;
+  margin-top: 28px;
+  padding: 2px;
+  border-radius: 12px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+@keyframes rotateBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.sidebar-countdown-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, #10B981, #06B6D4, #3B82F6, #10B981);
+  animation: rotateBorder 5s linear infinite;
+  z-index: -2;
+}
+
+.sidebar-countdown-container::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: #181c26; /* Dark sidebar matching tone */
+  border-radius: 10px;
+  z-index: -1;
+}
+
 .sidebar-countdown {
-  margin-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
+  padding: 16px 12px;
+  border-radius: 10px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
 }
 
 .countdown-title {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   margin-bottom: 12px;
+  text-align: center;
+  font-weight: 700;
 }
 
 .countdown-grid {
@@ -3067,18 +3110,19 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 4px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .countdown-card:hover {
   transform: translateY(-2px);
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .countdown-val {
@@ -3086,12 +3130,15 @@ body {
   font-weight: 700;
   color: #ffffff;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  line-height: 1.2;
 }
 
 .countdown-label {
-  font-size: 10px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   color: rgba(255, 255, 255, 0.5);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 
