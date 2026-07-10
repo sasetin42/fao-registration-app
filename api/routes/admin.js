@@ -309,6 +309,12 @@ router.post('/attendance/scan', async (req, res) => {
 
   } catch (err) {
     console.error('Attendance scan error:', err);
+    if (err.response?.data?.code === 'PGRST205') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Scan failed: The attendance_logs table is missing from your Supabase database. Please create it in your Supabase SQL Editor.' 
+      });
+    }
     return res.status(500).json({ success: false, message: 'Server error processing check-in' });
   }
 });
@@ -343,6 +349,13 @@ router.get('/attendance/logs', async (req, res) => {
     return res.json({ success: true, data: mappedLogs });
   } catch (err) {
     console.error('Attendance logs error:', err);
+    if (err.response?.data?.code === 'PGRST205') {
+      return res.json({ 
+        success: true, 
+        data: [], 
+        warning: 'The attendance_logs table is missing from your Supabase database. Please run the SQL from schema.sql to configure it.' 
+      });
+    }
     return res.status(500).json({ success: false, message: 'Server error fetching attendance logs' });
   }
 });
