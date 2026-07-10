@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Onsite Registration — FAO Event</title>
+  <title>Zoom Meeting Sessions</title>
 
   <!-- FAO Primary Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -59,12 +59,11 @@
     <!-- Right Column: Content Form -->
     <main class="split-content" id="main-content">
       <div class="registration-card" role="region" aria-label="Registration form">
-  
-        <!-- Card Header -->
+          <!-- Card Header -->
         <div class="registration-card__header">
-          <h2 class="registration-card__title" style="font-size: 24px;">Conference Registration</h2>
+          <h2 class="registration-card__title" style="font-size: 24px;">Zoom Meeting Sessions</h2>
           <p class="registration-card__desc">
-            All information is used for event coordination and badge preparation only.
+            Select one or more Zoom meeting sessions you wish to attend and complete your registration.
           </p>
         </div>
 
@@ -73,757 +72,83 @@
         <div class="form-fields">
 
           <div class="form-group">
-            <label class="form-label" for="registrationType">
-              <svg class="label-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Registration Type <span class="required" aria-hidden="true">*</span>
+            <label class="form-label" for="completeName">
+              <svg class="label-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Complete Name <span class="required" aria-hidden="true">*</span>
             </label>
-            <select
-              id="registrationType"
-              name="registrationType"
-              class="form-select"
+            <input
+              type="text"
+              id="completeName"
+              name="completeName"
+              class="form-input"
+              required
+              placeholder="Enter your complete name"
+              autocomplete="name"
               aria-required="true"
-              aria-describedby="registrationType-error"
-            >
-              <option value="" disabled selected>Select registration type</option>
-              <option value="participant">Participant</option>
-              <option value="speaker">Speaker</option>
-              <option value="moderator">Moderator</option>
-              <option value="exhibitor">Exhibitor</option>
-              <option value="media">Media</option>
-              <option value="working-committee">Working Committee</option>
-            </select>
-            <div class="form-error" id="registrationType-error" role="alert" aria-live="polite">
+              aria-describedby="completeName-error"
+            />
+            <div class="form-error" id="completeName-error" role="alert" aria-live="polite">
               <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please select your registration type.
-            </div>
-          </div>
-
-          <!-- Working Committee redirect notice -->
-          <div class="wc-notice" id="workingCommitteeNotice" hidden>
-            <div class="wc-notice__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <h3 class="wc-notice__title">Working Committee Registration</h3>
-            <p class="wc-notice__body">Working Committee members are registered through a dedicated process managed directly by the <strong>APSAM Secretariat</strong>. To ensure proper coordination and access, please complete your registration via the official Working Committee portal.</p>
-            <a href="#" class="wc-notice__btn" target="_blank" rel="noopener noreferrer">
-              Proceed to Working Committee Registration
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </a>
-            <p class="wc-notice__note">If you believe you have received this message in error, please select a different registration type above or contact the APSAM Secretariat.</p>
-          </div>
-
-          <div id="mainFormFields">
-
-          <div class="form-group" id="speakerTypeGroup" hidden>
-            <label class="form-label" for="speakerType">
-              Type of Speaker <span class="required" aria-hidden="true">*</span>
-            </label>
-            <select
-              id="speakerType"
-              name="speakerType"
-              class="form-select"
-              aria-required="false"
-              aria-describedby="speakerType-error"
-            >
-              <option value="" disabled selected>Select speaker type</option>
-              <option value="plenary-speaker">Plenary Speaker</option>
-              <option value="poster-presenter">Poster Presenter</option>
-              <option value="paper-presenter">Paper Presenter</option>
-            </select>
-            <div class="form-error" id="speakerType-error" role="alert" aria-live="polite">
-              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please select the type of speaker.
-            </div>
-          </div>
-
-          <div id="mediaSection" hidden>
-            <p class="media-note" id="mediaNote">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              Media have limited access within the premises and are only permitted during the specific date and time provided by the FAO Admin.
-            </p>
-
-            <div class="form-group" id="mediaQueriesGroup">
-              <label class="form-label" for="mediaQueries">
-                Media Queries for Press Conference
-              </label>
-              <textarea
-                id="mediaQueries"
-                name="mediaQueries"
-                class="form-textarea"
-                rows="4"
-                placeholder="Please share any questions or topics you would like to raise during the press conference."
-                aria-required="false"
-                aria-describedby="mediaQueries-error"
-              ></textarea>
-              <div class="form-error" id="mediaQueries-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please enter your media queries.
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group" id="attendanceModeSection">
-            <p class="form-label" id="attendanceMode-label">
-              <svg class="label-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Attendance Mode <span class="required" aria-hidden="true">*</span>
-            </p>
-            <div class="form-radio-group" id="attendanceModeGroup" role="radiogroup" aria-labelledby="attendanceMode-label" aria-describedby="attendanceMode-error">
-              <label class="form-radio">
-                <input type="radio" name="attendanceMode" value="in-person" class="form-radio__input" />
-                <span class="form-radio__mark"></span>
-                In-Person
-              </label>
-              <label class="form-radio">
-                <input type="radio" name="attendanceMode" value="online" class="form-radio__input" />
-                <span class="form-radio__mark"></span>
-                Online / Virtual
-              </label>
-            </div>
-            <div class="form-error" id="attendanceMode-error" role="alert" aria-live="polite">
-              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please select your attendance mode.
-            </div>
-          </div>
-
-          <div class="form-group" id="attendanceDaysSection">
-            <p class="form-label" id="attendanceDays-label">
-              <svg class="label-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              Attendance Days <span class="required" aria-hidden="true">*</span>
-            </p>
-            <div class="form-check-group" id="attendanceDaysGroup" role="group" aria-labelledby="attendanceDays-label" aria-describedby="attendanceDays-error">
-              <label class="form-check-item">
-                <input type="checkbox" id="attendanceAllDays" name="attendanceDays[]" value="all-days" class="form-check-item__input" />
-                <span>All Days</span>
-              </label>
-              <label class="form-check-item">
-                <input type="checkbox" name="attendanceDays[]" value="day-1" class="form-check-item__input attendance-day" />
-                <span>Day 1</span>
-              </label>
-              <label class="form-check-item">
-                <input type="checkbox" name="attendanceDays[]" value="day-2" class="form-check-item__input attendance-day" />
-                <span>Day 2</span>
-              </label>
-              <label class="form-check-item">
-                <input type="checkbox" name="attendanceDays[]" value="day-3" class="form-check-item__input attendance-day" />
-                <span>Day 3</span>
-              </label>
-            </div>
-            <div class="form-error" id="attendanceDays-error" role="alert" aria-live="polite">
-              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please select at least one attendance day.
+              Please enter your complete name.
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="prefix">
-              <svg class="label-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-              Prefix
+            <label class="form-label" for="email">
+              <svg class="label-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Email Address <span class="required" aria-hidden="true">*</span>
             </label>
-            <select
-              id="prefix"
-              name="prefix"
-              class="form-select"
-              aria-required="false"
-              autocomplete="honorific-prefix"
-            >
-              <option value="">None</option>
-              <option value="mr">Mr.</option>
-              <option value="mrs">Mrs.</option>
-              <option value="ms">Ms.</option>
-              <option value="dr">Dr.</option>
-              <option value="prof">Prof.</option>
-              <option value="he">H.E.</option>
-              <option value="engr">Engr.</option>
-            </select>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="firstName">
-                <svg class="label-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                First Name <span class="required" aria-hidden="true">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                class="form-input"
-                placeholder="e.g. Juan"
-                autocomplete="given-name"
-                aria-required="true"
-                aria-describedby="firstName-error"
-              />
-              <div class="form-error" id="firstName-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please enter your first name.
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="middleInitial">Middle Initial</label>
-              <input
-                type="text"
-                id="middleInitial"
-                name="middleInitial"
-                class="form-input"
-                placeholder="e.g. B."
-                maxlength="3"
-                autocomplete="additional-name"
-                aria-required="false"
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="lastName">
-                <svg class="label-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Last Name <span class="required" aria-hidden="true">*</span>
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                class="form-input"
-                placeholder="e.g. Dela Cruz"
-                autocomplete="family-name"
-                aria-required="true"
-                aria-describedby="lastName-error"
-              />
-              <div class="form-error" id="lastName-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please enter your last name.
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="suffix">Suffix</label>
-              <input
-                type="text"
-                id="suffix"
-                name="suffix"
-                class="form-input"
-                placeholder="e.g. Jr., Sr., III"
-                maxlength="20"
-                autocomplete="honorific-suffix"
-                aria-required="false"
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="email">
-                <svg class="label-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                Email Address <span class="required" aria-hidden="true">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                class="form-input"
-                placeholder="e.g. juan@example.com"
-                autocomplete="email"
-                aria-required="true"
-                aria-describedby="email-error"
-              />
-              <div class="form-error" id="email-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please enter a valid email address.
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="emailConfirm">
-                Confirm Email <span class="required" aria-hidden="true">*</span>
-              </label>
-              <input
-                type="email"
-                id="emailConfirm"
-                name="emailConfirm"
-                class="form-input"
-                placeholder="Re-enter your email address"
-                autocomplete="off"
-                aria-required="true"
-                aria-describedby="emailConfirm-error"
-              />
-              <div class="form-error" id="emailConfirm-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Email addresses do not match.
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="phone">
-                <svg class="label-icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                Mobile Number <span class="required" aria-hidden="true">*</span>
-              </label>
-              <div class="phone-wrapper" id="phoneWrapper">
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  class="form-input"
-                  placeholder="e.g. 917 123 4567"
-                  autocomplete="tel"
-                  aria-required="true"
-                  aria-describedby="phone-error phone-helper"
-                />
-              </div>
-              <div class="form-error" id="phone-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please enter a valid mobile number for the selected country.
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="ageRange">
-                <svg class="label-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Age <span class="required" aria-hidden="true">*</span>
-              </label>
-              <select
-                id="ageRange"
-                name="ageRange"
-                class="form-select"
-                aria-required="true"
-                aria-describedby="ageRange-error"
-              >
-                <option value="" disabled selected>Select age range</option>
-                <option value="18-35">18-35</option>
-                <option value="36-45">36-45</option>
-                <option value="46-59">46-59</option>
-                <option value="60-above">60 and above</option>
-              </select>
-              <div class="form-error" id="ageRange-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please select your age range.
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="gender">
-                <svg class="label-icon" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><circle cx="12" cy="10" r="3"/></svg>
-                Gender <span class="required" aria-hidden="true">*</span>
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                class="form-select"
-                aria-required="true"
-                aria-describedby="gender-error"
-              >
-                <option value="" disabled selected>Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="prefer-not-to-say">Prefer not to say</option>
-              </select>
-              <div class="form-error" id="gender-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please select your gender.
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="nationality">
-                <svg class="label-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20"/></svg>
-                Country of Nationality <span class="required" aria-hidden="true">*</span>
-              </label>
-              <select
-                id="nationality"
-                name="nationality"
-                class="form-select"
-                aria-required="true"
-                aria-describedby="nationality-error"
-              >
-                <option value="" disabled selected>Select nationality</option>
-              </select>
-              <div class="form-error" id="nationality-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please select your nationality.
-              </div>
-            </div>
-          </div>
-
-          <div class="form-address">
-            <p class="form-label form-label--group">
-              <svg class="label-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              Affiliation <span class="required" aria-hidden="true">*</span>
-            </p>
-
-            <div class="form-group">
-              <label class="form-label form-label--sub" for="affiliation">Affiliation Type</label>
-              <select
-                id="affiliation"
-                name="affiliation"
-                class="form-select"
-                aria-required="true"
-                aria-describedby="affiliation-error"
-              >
-                <option value="" disabled selected>Select affiliation</option>
-                <option value="government">Government</option>
-                <option value="academe">Academe</option>
-                <option value="non-government-organization">Non Government Organization</option>
-                <option value="private-industries">Private Industries</option>
-                <option value="farmers-organization">Farmers Organization</option>
-                <option value="international-organization">International Organization</option>
-              </select>
-              <div class="form-error" id="affiliation-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please select your affiliation.
-              </div>
-            </div>
-
-            <div class="form-group" id="affiliationSubGroup" hidden>
-              <label class="form-label form-label--sub" for="affiliationSub">Affiliation Category</label>
-              <select
-                id="affiliationSub"
-                name="affiliationSub"
-                class="form-select"
-                aria-required="false"
-                aria-describedby="affiliationSub-error"
-              >
-                <option value="" disabled selected>Select category</option>
-              </select>
-              <div class="form-error" id="affiliationSub-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please select an affiliation category.
-              </div>
-            </div>
-
-            <div class="form-group" id="designationGroup" hidden>
-              <label class="form-label form-label--sub" for="designation">
-                Designation <span class="required" aria-hidden="true">*</span>
-              </label>
-              <input
-                type="text"
-                id="designation"
-                name="designation"
-                class="form-input"
-                placeholder="e.g. Director, Senior Officer"
-                aria-required="false"
-                aria-describedby="designation-error"
-              />
-              <div class="form-error" id="designation-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please enter your designation.
-              </div>
-            </div>
-
-            <div class="form-group" id="affiliationSpecifyGroup" hidden>
-              <label class="form-label form-label--sub" for="affiliationSpecify">Please specify</label>
-              <input
-                type="text"
-                id="affiliationSpecify"
-                name="affiliationSpecify"
-                class="form-input"
-                placeholder="Enter organization or details"
-                autocomplete="organization"
-                aria-required="false"
-                aria-describedby="affiliationSpecify-error"
-              />
-              <div class="form-error" id="affiliationSpecify-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please specify your affiliation.
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label form-label--sub" for="addrCountry">Country of Affiliation</label>
-              <select
-                id="addrCountry"
-                name="addrCountry"
-                class="form-select"
-                autocomplete="country-name"
-                aria-required="true"
-                aria-describedby="addrCountry-error"
-              >
-                <option value="" disabled selected>Select country</option>
-              </select>
-              <div class="form-error" id="addrCountry-error" role="alert" aria-live="polite">
-                <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-                Please select your country of affiliation.
-              </div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              required
+              placeholder="Enter your email address"
+              autocomplete="email"
+              aria-required="true"
+              aria-describedby="email-error"
+            />
+            <div class="form-error" id="email-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please enter a valid email address.
             </div>
           </div>
 
           <div class="form-group">
-            <div class="form-checkbox">
+            <label class="form-label" for="phone">
+              <svg class="label-icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              Phone Number <span class="required" aria-hidden="true">*</span>
+            </label>
+            <div class="phone-wrapper" id="phoneWrapper">
               <input
-                type="checkbox"
-                id="visaAssistance"
-                name="visaAssistance"
-                class="form-checkbox__input"
-                aria-describedby="visa-helper"
+                type="tel"
+                id="phone"
+                name="phone"
+                class="form-input"
+                required
+                autocomplete="tel"
+                aria-required="true"
+                aria-describedby="phone-error"
               />
-              <label class="form-checkbox__label" for="visaAssistance">I need visa assistance</label>
             </div>
-            <p class="form-helper" id="visa-helper">
-              Assistance is available only within 60 days before the event. After this deadline, assistance is no longer available.
-            </p>
+            <div class="form-error" id="phone-error" role="alert" aria-live="polite">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
+              Please enter a valid phone number.
+            </div>
           </div>
 
-          <div class="form-group" id="zoomMeetingGroup" hidden>
-            <p class="form-label" id="zoomMeeting-label">
+          <div class="form-group">
+            <p class="form-label">
               Zoom Meeting Sessions <span class="required" aria-hidden="true">*</span>
             </p>
-            <p class="form-helper" style="margin-bottom: 0.75rem;">Select one or more online sessions to attend:</p>
-
-            <div class="conference-select" id="zoomSelect">
-              <button
-                type="button"
-                class="conference-select__trigger"
-                id="zoomToggle"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-                aria-controls="zoomPanel"
-              >
-                <span class="conference-select__summary" id="zoomSummary">Select one or more sessions</span>
-                <span class="conference-select__meta">
-                  <span class="conference-select__count" id="zoomCount" hidden>0 selected</span>
-                  <span class="conference-select__chevron" aria-hidden="true"></span>
-                </span>
-              </button>
-
-              <div class="conference-select__panel" id="zoomPanel" hidden>
-                <div class="conference-select__search-wrap">
-                  <input
-                    type="search"
-                    id="zoomSearch"
-                    class="form-input conference-select__search"
-                    placeholder="Search sessions"
-                    autocomplete="off"
-                  />
-                </div>
-                <div class="conference-select__selected" id="zoomSelected" hidden></div>
-
-                <div class="form-check-group conference-select__options zoom-options-grid" id="zoomSessionsContainer">
-                  <!-- Dynamically populated options -->
-                </div>
-              </div>
-            </div>
-
-            <input type="hidden" id="zoomMeetingId" name="zoomMeetingId" value="" />
+            
+            <div class="zoom-cards-grid" id="zoomSessionsContainer"></div>
+            
+            <input type="hidden" id="zoomMeetingId" name="zoomMeetingId" />
             <div class="form-error" id="zoomMeetingId-error" role="alert" aria-live="polite">
               <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
               Please select at least one Zoom session.
-            </div>
-          </div>
-
-          <div class="form-group" id="conferenceGroup" hidden>
-            <p class="form-label" id="conference-label">
-              Session Selection <span class="required" aria-hidden="true">*</span>
-            </p>
-            <div class="conference-select" id="conferenceSelect">
-              <button
-                type="button"
-                class="conference-select__trigger"
-                id="conferenceToggle"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-                aria-controls="conferencePanel"
-                aria-describedby="conference-error"
-              >
-                <span class="conference-select__summary" id="conferenceSummary">Select one or more sessions</span>
-                <span class="conference-select__meta">
-                  <span class="conference-select__count" id="conferenceCount" hidden>0 selected</span>
-                  <span class="conference-select__chevron" aria-hidden="true"></span>
-                </span>
-              </button>
-
-              <div class="conference-select__panel" id="conferencePanel" hidden>
-                <div class="conference-select__search-wrap">
-                  <input
-                    type="search"
-                    id="conferenceSearch"
-                    class="form-input conference-select__search"
-                    placeholder="Search sessions"
-                    autocomplete="off"
-                    aria-label="Search sessions"
-                  />
-                </div>
-
-                <div class="conference-select__selected" id="conferenceSelected" hidden></div>
-
-                <div class="form-check-group conference-select__options" id="conferenceCheckGroup" role="group" aria-labelledby="conference-label" aria-describedby="conference-error">
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="food-security-nutrition" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #FFF3E0; color: #E65100;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12h18A9 9 0 0 1 12 21A9 9 0 0 1 3 12z"/>
-                        <path d="M8 7c.5-1.5 1-1.5 1.5 0M12 6c.5-1.5 1-1.5 1.5 0M16 7c.5-1.5 1-1.5 1.5 0"/>
-                      </svg>
-                    </i>
-                    <span>Food Security and Nutrition</span>
-                  </label>
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="sustainable-agriculture" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #E8F8F5; color: #16A085;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22V12m0 0c-2-2-4-2-6-2s-4 2-4 2c0 0 2 2 4 2s4-2 6-2zm0 0c2-2 4-2 6-2s4 2 4 2c0 0-2 2-4 2s-4-2-6-2z"/>
-                      </svg>
-                    </i>
-                    <span>Sustainable Agriculture Practices</span>
-                  </label>
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="climate-smart-farming" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #EAF2F8; color: #2471A3;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v2m0 16v2m-8-8H2m20 0h-2m-2.8-5.7l-1.4 1.4M6.3 17.7l-1.4 1.4m12.8 0l1.4-1.4M6.3 6.3L4.9 4.9"/>
-                        <circle cx="12" cy="12" r="4"/>
-                      </svg>
-                    </i>
-                    <span>Climate-Smart Farming</span>
-                  </label>
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="digital-agriculture" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #E8EAF6; color: #3F51B5;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="5" y="5" width="14" height="14" rx="2"/>
-                        <path d="M9 1v4M15 1v4M9 19v4M15 19v4M20 9h3M20 15h3M1 9h3M1 15h3"/>
-                      </svg>
-                    </i>
-                    <span>Digital Agriculture and Innovation</span>
-                  </label>
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="rural-development" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #FDF2E9; color: #A04000;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9 22 9 12 15 12 15 22"/>
-                      </svg>
-                    </i>
-                    <span>Rural Development and Livelihoods</span>
-                  </label>
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="water-land-management" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #E1F5FE; color: #0288D1;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z"/>
-                      </svg>
-                    </i>
-                    <span>Water and Land Management</span>
-                  </label>
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="agroforestry" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #E8F5E9; color: #2E7D32;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L3 9h4v13h10V9h4L12 2z"/>
-                      </svg>
-                    </i>
-                    <span>Agroforestry and Biodiversity</span>
-                  </label>
-                  <label class="form-check-item">
-                    <input type="checkbox" name="conference[]" value="fisheries-aquaculture" class="form-check-item__input" />
-                    <i class="session-icon" style="background-color: #E0F7FA; color: #00838F;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 12c-4-4-10-4-14-2C6 9 3 9 2 10c2 1 2 3 0 4 1 1 4 1 6 0 4 2 10 2 14-2z"/>
-                      </svg>
-                    </i>
-                    <span>Fisheries and Aquaculture</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-error" id="conference-error" role="alert" aria-live="polite">
-              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please select at least one session.
-            </div>
-          </div>
-
-          <div class="form-group" id="dietaryGroup" hidden>
-            <label class="form-label" for="dietary">
-              Dietary Preference <span class="required" aria-hidden="true">*</span>
-            </label>
-            <select
-              id="dietary"
-              name="dietary"
-              class="form-select"
-              aria-required="true"
-              aria-describedby="dietary-error"
-            >
-              <option value="" disabled selected>Select dietary preference</option>
-              <option value="no-restriction">No restriction</option>
-              <option value="vegetarian">Vegetarian</option>
-              <option value="vegan">Vegan</option>
-              <option value="halal">Halal</option>
-              <option value="with-allergy">With allergy</option>
-              <option value="other">Other</option>
-            </select>
-            <div class="form-error" id="dietary-error" role="alert" aria-live="polite">
-              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please select your dietary preference.
-            </div>
-          </div>
-
-          <div class="form-group" id="dietarySpecifyGroup" hidden>
-            <label class="form-label" for="dietarySpecify">Please specify</label>
-            <textarea
-              id="dietarySpecify"
-              name="dietarySpecify"
-              class="form-textarea"
-              rows="3"
-              placeholder="Share the allergy or preference we should note."
-              aria-required="false"
-              aria-describedby="dietarySpecify-error"
-            ></textarea>
-            <div class="form-error" id="dietarySpecify-error" role="alert" aria-live="polite">
-              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please provide the requested dietary details.
-            </div>
-          </div>
-
-          <div class="form-group" id="fieldTripGroup" hidden>
-            <p class="form-label" id="fieldTrip-label">
-              Field Trip / Visit <span class="required" aria-hidden="true">*</span>
-            </p>
-            <p class="form-helper">Are you joining the field visit on day 4 (Nov 26)?</p>
-            <select
-              id="fieldTrip"
-              name="fieldTrip"
-              class="form-select"
-              aria-required="false"
-              aria-describedby="fieldTrip-error"
-              hidden
-              aria-hidden="true"
-              tabindex="-1"
-            >
-              <option value="" disabled selected>Are you joining the field visit on Day 4 (Nov 26)?</option>
-              <option value="option-1">Option 1</option>
-              <option value="option-2">Option 2</option>
-              <option value="option-3">Option 3</option>
-              <option value="not-joining">I am not joining</option>
-            </select>
-            <div class="form-check-group" id="fieldTripCheckGroup" role="group" aria-labelledby="fieldTrip-label" aria-describedby="fieldTrip-error">
-              <label class="form-check-item">
-                <input type="checkbox" name="fieldTrip[]" value="option-1" class="form-check-item__input" />
-                <span>Option 1</span>
-              </label>
-              <label class="form-check-item">
-                <input type="checkbox" name="fieldTrip[]" value="option-2" class="form-check-item__input" />
-                <span>Option 2</span>
-              </label>
-              <label class="form-check-item">
-                <input type="checkbox" name="fieldTrip[]" value="option-3" class="form-check-item__input" />
-                <span>Option 3</span>
-              </label>
-              <label class="form-check-item">
-                <input type="checkbox" name="fieldTrip[]" value="not-joining" class="form-check-item__input" />
-                <span>I am not joining</span>
-              </label>
-            </div>
-            <div class="form-error" id="fieldTrip-error" role="alert" aria-live="polite">
-              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 4v4m0 2v1"/></svg>
-              Please confirm your field visit preference.
             </div>
           </div>
 
@@ -845,8 +170,6 @@
               Please read and accept the Data Privacy Notice to continue.
             </div>
           </div>
-
-          </div><!-- /mainFormFields -->
 
         </div><!-- /form-fields -->
 
