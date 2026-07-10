@@ -25,10 +25,10 @@ app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
 
 // ── Page Routes (serve HTML directly — preserves query strings) ─
 app.get('/', (_req, res) =>
-  res.redirect('/fao_registration'));
+  res.sendFile(path.join(__dirname, '../public/pages/registration.html')));
 
 app.get('/fao_registration', (_req, res) =>
-  res.sendFile(path.join(__dirname, '../public/pages/registration.html')));
+  res.redirect(301, '/'));
 
 // Confirmation page — preserves ?token= so confirmation.js can decode the JWT
 app.get('/confirmation', (_req, res) =>
@@ -54,7 +54,7 @@ app.use((_req, res) => res.status(404).json({ success: false, message: 'Not foun
 if (process.env.NODE_ENV !== 'production' || process.env.LOCAL_DEV === 'true') {
   app.listen(PORT, () => {
     console.log(`\n🚀 FAO APSAM 2026 App running at http://localhost:${PORT}`);
-    console.log(`   Registration : http://localhost:${PORT}/fao_registration`);
+    console.log(`   Registration : http://localhost:${PORT}/`);
     console.log(`   Admin Panel  : http://localhost:${PORT}/admin/dashboard`);
     console.log(`   Environment  : ${process.env.APP_ENV || 'development'}\n`);
   });

@@ -34,12 +34,12 @@ function parseJWT(token) {
 /* ── Guard: no token or invalid → back to registration ── */
 const rawToken = new URLSearchParams(window.location.search).get("token");
 if (!rawToken) {
-  window.location.replace("/fao_registration");
+  window.location.replace("/");
   throw new Error("Redirecting: token not found");
 }
 const data = parseJWT(rawToken);
 if (!data) {
-  window.location.replace("/fao_registration");
+  window.location.replace("/");
   throw new Error("Redirecting: invalid token payload");
 }
 
