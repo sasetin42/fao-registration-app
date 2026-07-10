@@ -1278,6 +1278,10 @@ body:has(.sidebar.collapsed) .main-content {
     to { transform: translateY(0); opacity: 1; }
 }
 
+.hidden {
+    display: none !important;
+}
+
 @media (max-width: 850px) {
     .login-hero-panel {
         display: none !important;
