@@ -241,11 +241,18 @@ async function fetchZoomMeetings() {
         card.dataset.label = m.display_name;
 
         card.innerHTML = `
-          <div class="zoom-card-banner" style="background-image: url('${imgUrl}')"></div>
+          <span class="zoom-card-badge">Webinar Session</span>
+          <div class="zoom-card-banner" style="background-image: url('${imgUrl}')">
+            <div class="zoom-card-tick">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+          </div>
           <div class="zoom-card-body">
             <h4 class="zoom-card-title">${m.display_name}</h4>
             <p class="zoom-card-meta">Session ID: ${m.meeting_id}</p>
-            <div class="zoom-card-checkbox-wrap">
+            <div class="zoom-card-checkbox-wrap" style="display: none;">
               <input type="checkbox" class="zoom-card-checkbox" value="${m.meeting_id}" data-label="${m.display_name}">
             </div>
           </div>

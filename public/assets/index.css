@@ -496,6 +496,8 @@ body {
   color: var(--color-label);
   text-transform: uppercase;
   letter-spacing: 0.6px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .form-label .required {
@@ -2469,6 +2471,7 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   min-height: 240px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  isolation: isolate;
 }
 
 .zoom-session-card:hover {
@@ -2478,8 +2481,47 @@ body {
 }
 
 .zoom-session-card.is-selected {
-  border-color: var(--color-primary);
-  background-color: rgba(35, 35, 35, 0.03);
+  border-color: transparent;
+  background-color: transparent;
+}
+
+@keyframes rotateBorder {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.zoom-session-card.is-selected::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 250%;
+  height: 250%;
+  background: conic-gradient(
+    from 0deg,
+    #0B5FA5,
+    #168DD1,
+    #2E7D32,
+    #F58320,
+    transparent,
+    #0B5FA5
+  );
+  animation: rotateBorder 4s linear infinite;
+  z-index: -2;
+  transform-origin: center center;
+}
+
+.zoom-session-card.is-selected::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background-color: var(--color-card);
+  border-radius: calc(var(--radius-md) - 2px);
+  z-index: -1;
 }
 
 .zoom-card-banner {
@@ -2489,6 +2531,8 @@ body {
   background-position: center;
   background-color: var(--color-border-light);
   border-bottom: 1px solid var(--color-border-light);
+  position: relative;
+  z-index: 2;
 }
 
 .zoom-card-body {
@@ -2498,6 +2542,7 @@ body {
   flex-grow: 1;
   gap: 8px;
   position: relative;
+  z-index: 2;
 }
 
 .zoom-card-title {
@@ -2515,13 +2560,47 @@ body {
   margin-top: auto;
 }
 
-.zoom-card-checkbox-wrap {
+.zoom-card-badge {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 12px;
+  left: 12px;
+  background-color: rgba(11, 95, 165, 0.85); /* FAO brand blue semi-transparent */
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.zoom-card-tick {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #0B5FA5; /* primary FAO brand color */
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 3;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+  transform: scale(0);
+  opacity: 0;
+}
+
+.zoom-session-card.is-selected .zoom-card-tick {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.zoom-card-checkbox-wrap {
+  display: none;
 }
 
 .zoom-card-checkbox {
@@ -2938,6 +3017,29 @@ body {
   stroke: var(--color-secondary);
   stroke-width: 2.2;
   fill: none;
+}
+
+/* Detail Form Field Icons */
+.detail-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.detail-icon svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 
