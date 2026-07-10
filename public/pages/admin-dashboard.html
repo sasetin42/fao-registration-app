@@ -27,6 +27,10 @@
                 <svg class="nav-icon color-warning" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7a2 2 0 0 0-2-2h-4v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7z"></path><path d="M17 11H3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14v-8z"></path><path d="M3 7h10V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2z"></path></svg>
                 <span>Zoom Settings & Live</span>
             </li>
+            <li data-target="scanner-section">
+                <svg class="nav-icon color-primary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                <span>Attendance Scanner</span>
+            </li>
         </ul>
         <div class="sidebar-footer">
             <button id="logoutBtn" class="btn-ghost">
@@ -289,6 +293,64 @@
                 </div>
             </div>
         </section>
+        
+        <!-- Attendance Scanner Section -->
+        <section id="scanner-section" class="content-section">
+            <div class="zoom-grid">
+                
+                <!-- Left Side: Scanner Viewport -->
+                <div class="glass-panel zoom-card">
+                    <div class="card-header">
+                        <h2>Attendance QR Scanner</h2>
+                        <p class="subtitle-text">Scan attendee badge QR codes using your device camera</p>
+                    </div>
+                    
+                    <div class="scanner-viewport-wrapper" style="padding: 20px 0; text-align: center;">
+                        <div id="qr-reader" style="width: 100%; max-width: 480px; margin: 0 auto; border-radius: 8px; overflow: hidden; border: 1px solid var(--surface-border); background: #1a1a1a;"></div>
+                    </div>
+                    
+                    <div class="scanner-controls" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 15px;">
+                        <div style="display: flex; gap: 10px;">
+                            <button id="startScanBtn" class="btn-primary" type="button">Start Camera</button>
+                            <button id="stopScanBtn" class="btn-danger hidden" type="button" style="background:#980000; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:600; cursor:pointer;">Stop Camera</button>
+                        </div>
+                        <select id="cameraSelect" class="filter-select" style="display:none; width: 100%; max-width: 480px;"></select>
+                    </div>
+                    
+                    <!-- Scan Feedback Notification -->
+                    <div id="scanFeedback" class="hidden" style="margin-top: 20px; padding: 15px; border-radius: 8px; border: 1px solid transparent; text-align: center;">
+                        <h4 id="feedbackTitle" style="margin-bottom: 5px; font-weight: 700;">Checking Code...</h4>
+                        <p id="feedbackMessage" style="margin: 0; font-size: 0.9rem;">Initializing validation...</p>
+                    </div>
+                </div>
+
+                <!-- Right Side: Check-in Details & Logs -->
+                <div class="glass-panel table-container">
+                    <div class="card-header">
+                        <h2>Recent Checked-In Logs</h2>
+                        <p class="subtitle-text">Realtime logs of attendees scanned and validated today</p>
+                    </div>
+                    
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
+                        <table class="data-table" id="attendanceLogsTable">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Mode</th>
+                                    <th>Method</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceLogsBody">
+                                <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No scan logs recorded today.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
     </main>
 
     <!-- Modal for viewing details -->
@@ -323,6 +385,7 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="/assets/dropdown.js"></script>
     <script src="/assets/admin.js"></script>
 </body>

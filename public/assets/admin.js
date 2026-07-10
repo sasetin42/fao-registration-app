@@ -1053,6 +1053,176 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize
         loadDashboard();
 
+        // --- Attendance Scanner Logic ---
+        let html5QrCode = null;
+        let selectedCameraId = null;
+
+        const loadAttendanceLogs = async () => {
+            const tbody = document.getElementById('attendanceLogsBody');
+            if (!tbody) return;
+            try {
+                const res = await fetch(`${API_BASE}/attendance/logs`, { headers: authHeaders });
+                const resData = await res.json();
+                if (resData.success && resData.data.length > 0) {
+                    tbody.innerHTML = resData.data.map(l => {
+                        const time = new Date(l.scanned_at).toLocaleTimeString();
+                        return `
+                            <tr>
+                                <td>${escapeHTML(time)}</td>
+                                <td style="font-weight: 600; color: var(--primary-color);">${escapeHTML(l.full_name)}</td>
+                                <td>${escapeHTML(l.email)}</td>
+                                <td><span class="badge ${l.attendance_mode === 'in-person' ? 'badge-success' : 'badge-info'}">${escapeHTML(l.attendance_mode)}</span></td>
+                                <td style="font-size:0.8rem; color:var(--text-muted);">${escapeHTML(l.scanned_by)}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No scan logs recorded today.</td></tr>`;
+                }
+            } catch (err) {
+                console.error('Error loading attendance logs:', err);
+            }
+        };
+
+        const showFeedback = (title, message, type) => {
+            const feedbackEl = document.getElementById('scanFeedback');
+            const titleEl = document.getElementById('feedbackTitle');
+            const msgEl = document.getElementById('feedbackMessage');
+            if (!feedbackEl) return;
+            
+            feedbackEl.classList.remove('hidden');
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+            
+            feedbackEl.style.backgroundColor = '#FFF6DB';
+            feedbackEl.style.borderColor = '#FFE082';
+            feedbackEl.style.color = '#5D4037';
+            
+            if (type === 'success') {
+                feedbackEl.style.backgroundColor = '#E8F5E9';
+                feedbackEl.style.borderColor = '#A5D6A7';
+                feedbackEl.style.color = '#1B5E20';
+            } else if (type === 'error') {
+                feedbackEl.style.backgroundColor = '#FDEFEF';
+                feedbackEl.style.borderColor = '#F8D7DA';
+                feedbackEl.style.color = '#A94A4A';
+            } else if (type === 'info') {
+                feedbackEl.style.backgroundColor = '#E3F2FD';
+                feedbackEl.style.borderColor = '#90CAF9';
+                feedbackEl.style.color = '#0D47A1';
+            }
+        };
+
+        const validateCheckin = async (attendanceKey) => {
+            if (window.isProcessingScan) return;
+            window.isProcessingScan = true;
+            
+            showFeedback('Validating...', 'Checking ticket/code details in database...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/attendance/scan`, {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify({ attendance_key: attendanceKey })
+                });
+                const resData = await response.json();
+                if (resData.success) {
+                    showFeedback(
+                        'Access Granted!', 
+                        `Welcome, ${resData.data.participant.full_name} (${resData.data.participant.company || 'Participant'}). Checked in successfully.`,
+                        'success'
+                    );
+                    loadAttendanceLogs();
+                } else {
+                    showFeedback('Access Denied', resData.message || 'Verification failed.', 'error');
+                }
+            } catch (err) {
+                console.error('Scan validation error:', err);
+                showFeedback('Server Error', 'Failed to communicate with database server.', 'error');
+            } finally {
+                setTimeout(() => {
+                    window.isProcessingScan = false;
+                }, 3000);
+            }
+        };
+
+        const startScanner = (cameraId) => {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("qr-reader");
+            }
+            html5QrCode.start(
+                cameraId,
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                async (decodedText) => {
+                    await validateCheckin(decodedText);
+                },
+                (errorMessage) => {
+                    // Non-critical scan noise
+                }
+            ).then(() => {
+                document.getElementById('startScanBtn').classList.add('hidden');
+                document.getElementById('stopScanBtn').classList.remove('hidden');
+                document.getElementById('cameraSelect').style.display = 'block';
+            }).catch(err => {
+                console.error('Camera start error:', err);
+                showFeedback('Camera Start Failed', 'Unable to start camera feed. Please check permissions.', 'error');
+            });
+        };
+
+        const stopScanner = () => {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('startScanBtn').classList.remove('hidden');
+                    document.getElementById('stopScanBtn').classList.add('hidden');
+                    document.getElementById('cameraSelect').style.display = 'none';
+                    document.getElementById('scanFeedback').classList.add('hidden');
+                }).catch(err => {
+                    console.error('Camera stop error:', err);
+                });
+            }
+        };
+
+        const initCameraScanner = async () => {
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                    const select = document.getElementById('cameraSelect');
+                    select.innerHTML = devices.map(d => `<option value="${d.id}">${escapeHTML(d.label || `Camera ${d.id}`)}</option>`).join('');
+                    selectedCameraId = devices[0].id;
+                    select.addEventListener('change', (e) => {
+                        selectedCameraId = e.target.value;
+                        if (html5QrCode && html5QrCode.isScanning) {
+                            html5QrCode.stop().then(() => startScanner(selectedCameraId));
+                        }
+                    });
+                    startScanner(selectedCameraId);
+                } else {
+                    showFeedback('No Cameras Found', 'Please connect a webcam/camera device.', 'error');
+                }
+            } catch (err) {
+                console.error('Camera access error:', err);
+                showFeedback('Camera Access Denied', 'Please grant camera permissions to this page.', 'error');
+            }
+        };
+
+        document.getElementById('startScanBtn')?.addEventListener('click', initCameraScanner);
+        document.getElementById('stopScanBtn')?.addEventListener('click', stopScanner);
+
+        // Load logs initially
+        loadAttendanceLogs();
+
+        // Stop scanner if switching to other tabs
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (link.dataset.target !== 'scanner-section') {
+                    stopScanner();
+                }
+            });
+        });
+
         // --- Realtime Event Stream via SSE ---
         const setupSSE = () => {
             const token = getToken();
@@ -1130,6 +1300,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                 } catch (err) {
                     console.error('SSE registration_deleted error:', err);
+                }
+            });
+
+            es.addEventListener('attendance_checkin', (e) => {
+                try {
+                    loadAttendanceLogs();
+                } catch (err) {
+                    console.error('SSE attendance_checkin error:', err);
                 }
             });
 

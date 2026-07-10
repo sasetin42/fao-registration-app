@@ -22,107 +22,51 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════
-       HEADER
-  ═══════════════════════════════════════ -->
-  <header class="fao-header" role="banner">
-    <div class="fao-header__inner">
-      <a href="#" class="fao-header__logo" aria-label="FAO Home">
-        <span class="fao-logo-emblem-crop" aria-hidden="true">
-          <img src="/assets/fao-logo.svg" alt="" class="fao-logo-img" />
-        </span>
-        <div class="fao-logo-text">
-          <span class="fao-logo-text__title">FAO</span>
-          <span class="fao-logo-text__subtitle">Food and Agriculture Organization</span>
+  <div class="split-wrapper">
+    <!-- Left Column: Sidebar Visual -->
+    <aside class="split-sidebar">
+      <div class="sidebar-banner">
+        <img src="/assets/01-apsam-main-visual-landscape.jpg" alt="APSAM 2026 Visual" class="sidebar-banner-img">
+      </div>
+      
+      <div class="sidebar-info">
+        <span class="info-tag">APSAM 2026</span>
+        <h1 class="info-title">Asia-Pacific Conference on Sustainable Agricultural Mechanization</h1>
+        <div class="info-divider"></div>
+        <p class="info-theme">Modernize. Scale. Sustain.</p>
+        
+        <div class="info-meta">
+          <div class="info-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>23–26 November 2026</span>
+          </div>
+          <div class="info-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            <span>Manila, Philippines</span>
+          </div>
         </div>
-      </a>
-      <nav class="fao-header__nav" aria-label="Main navigation">
-        <a href="#">About</a>
-        <a href="#">Events</a>
-        <a href="#">Publications</a>
-        <a href="#">Contact</a>
-      </nav>
-      <!-- Hamburger (mobile only) -->
-      <button
-        class="nav-toggle"
-        id="navToggle"
-        aria-label="Open navigation menu"
-        aria-expanded="false"
-        aria-controls="mobileNav"
-      >
-        <span class="nav-toggle__bar"></span>
-        <span class="nav-toggle__bar"></span>
-        <span class="nav-toggle__bar"></span>
-      </button>
-    </div>
-    <!-- Mobile nav drawer -->
-    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" hidden>
-      <a href="#" class="mobile-nav__link">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        About
-      </a>
-      <a href="#" class="mobile-nav__link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        Events
-      </a>
-      <a href="#" class="mobile-nav__link">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Publications
-      </a>
-      <a href="#" class="mobile-nav__link">
-        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.03 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-        Contact
-      </a>
-    </nav>
-  </header>
-
-  <!-- ═══════════════════════════════════════
-       PAGE HERO
-  ═══════════════════════════════════════ -->
-  <section class="page-hero" aria-label="Page header">
-    <div class="page-hero__inner">
-      <span class="page-hero__label">Event Registration</span>
-      <div class="page-hero__rule" aria-hidden="true"></div>
-      <h1 class="page-hero__title">Asia-Pacific Conference on Sustainable Agricultural Mechanization</h1>
-      <p class="page-hero__theme">Modernize. Scale. Sustain.</p>
-      <div class="page-hero__meta" aria-label="Conference details">
-        <span class="page-hero__meta-item page-hero__meta-item--venue">
-          <svg class="page-hero__meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-          </svg>
-          Manila, Philippines
-        </span>
-        <span class="page-hero__meta-item">
-          <svg class="page-hero__meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-          </svg>
-          23-26 November 2026
-        </span>
+        
+        <div class="sidebar-hashtags">
+          #AgriculturalMechanization #APSAM2026
+        </div>
       </div>
-      <div class="page-hero__about">
-        <p>The Food and Agriculture Organization of the United Nations and the Philippines Department of Agriculture is organizing the Asia-Pacific Conference on Sustainable Agricultural Mechanization (APSAM) to take place from 23 to 26 November 2026 in Manila, Philippines, in hybrid format. <a href="#">Read more</a></p>
-        <p>This conference will serve as a platform bringing together FAO members, government officials, farmers, academia, development partners, civil society, and private sector for dialogues, knowledge exchange to ensure fit-for-purpose agricultural mechanization contributing to agrifood systems transformation.</p>
-      </div>
-      <p class="page-hero__subtitle">
-        By completing this registration form, you are confirming your participation in the 1st&nbsp;APSAM&nbsp;2026.
-      </p>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════
-       MAIN CONTENT
-  ═══════════════════════════════════════ -->
-  <main class="page-main" id="main-content">
-    <div class="registration-card" role="region" aria-label="Registration form">
-
-      <!-- Card Header -->
-      <div class="registration-card__header">
-        <h2 class="registration-card__title">Participant Information</h2>
-        <p class="registration-card__desc">
-          Your information will be used for event coordination and badge preparation only.
-          Please ensure all details are accurate.
-        </p>
-      </div>
+    </aside>
+    
+    <!-- Right Column: Content Form -->
+    <main class="split-content" id="main-content">
+      <div class="registration-card" role="region" aria-label="Registration form">
+  
+        <!-- Card Header -->
+        <div class="registration-card__header">
+          <h2 class="registration-card__title" style="font-size: 24px;">Conference Registration</h2>
+          <p class="registration-card__desc">
+            All information is used for event coordination and badge preparation only.
+          </p>
+        </div>
 
       <!-- ─── REGISTRATION FORM ─── -->
       <form id="registrationForm" novalidate aria-label="Registration form">
@@ -926,17 +870,16 @@
 
     </div><!-- /registration-card -->
   </main>
+  </div><!-- /split-wrapper -->
 
   <!-- ═══════════════════════════════════════
-       FOOTER
-  ═══════════════════════════════════════ -->
+       FOOTER (Hidden for split registration layout)
+  ═══════════════════════════════════════ 
   <footer class="fao-footer" role="contentinfo">
     <div class="fao-footer__inner">
 
-      <!-- ── Main grid ── -->
       <div class="fao-footer__grid">
 
-        <!-- Brand column -->
         <div class="fao-footer__brand">
           <a href="#" class="fao-footer__brand-logo" aria-label="FAO Home">
             <span class="fao-logo-emblem-crop fao-logo-emblem-crop--footer" aria-hidden="true">
@@ -952,36 +895,28 @@
             Working towards zero hunger by fostering sustainable food systems,
             agriculture, and equitable rural development worldwide.
           </p>
-          <!-- Social media icons -->
           <div class="fao-footer__social" role="list" aria-label="FAO on social media">
             <a href="#" class="fao-footer__social-link" aria-label="FAO on X (Twitter)" role="listitem">
-              <!-- X / Twitter -->
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.632 5.905-5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
             <a href="#" class="fao-footer__social-link" aria-label="FAO on Facebook" role="listitem">
-              <!-- Facebook -->
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
             </a>
             <a href="#" class="fao-footer__social-link" aria-label="FAO on YouTube" role="listitem">
-              <!-- YouTube -->
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="var(--color-primary-dark)"/></svg>
             </a>
             <a href="#" class="fao-footer__social-link" aria-label="FAO on LinkedIn" role="listitem">
-              <!-- LinkedIn -->
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
             </a>
             <a href="#" class="fao-footer__social-link" aria-label="FAO on Instagram" role="listitem">
-              <!-- Instagram -->
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="var(--color-primary-dark)"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="var(--color-primary-dark)" stroke-width="2"/></svg>
             </a>
             <a href="#" class="fao-footer__social-link" aria-label="FAO on Flickr" role="listitem">
-              <!-- Flickr -->
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="12" r="4.5"/><circle cx="16.5" cy="12" r="4.5"/></svg>
             </a>
           </div>
         </div>
 
-        <!-- Quick Links column -->
         <div>
           <h3 class="fao-footer__col-title">Quick Links</h3>
           <ul class="fao-footer__links">
@@ -993,7 +928,6 @@
           </ul>
         </div>
 
-        <!-- Resources column -->
         <div>
           <h3 class="fao-footer__col-title">Resources</h3>
           <ul class="fao-footer__links">
@@ -1005,7 +939,6 @@
           </ul>
         </div>
 
-        <!-- Connect column -->
         <div>
           <h3 class="fao-footer__col-title">Visit FAO</h3>
           <p class="fao-footer__connect-text">
@@ -1021,22 +954,17 @@
           </a>
         </div>
 
-      </div><!-- /grid -->
+      </div>
 
-      <!-- ── Bottom bar ── -->
       <div class="fao-footer__bottom">
         <p class="fao-footer__copyright">
           &copy; 2026 Food and Agriculture Organization of the United Nations. All rights reserved.
         </p>
-        <!--<p class="fao-footer__powered">-->
-          <!-- Lightning bolt icon -->
-        <!--  <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>-->
-        <!--  Powered by <a href="#" rel="noopener noreferrer">ProximaTech</a>-->
-        <!--</p>-->
       </div>
 
-    </div><!-- /inner -->
+    </div>
   </footer>
+  -->
 
   <!-- ═══════════════════════════════════════
        DATA PRIVACY NOTICE MODAL

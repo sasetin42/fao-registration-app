@@ -148,6 +148,106 @@ router.delete('/registrations/:id', async (req, res) => {
   }
 });
 
+// --- Attendance Scan ---
+router.post('/attendance/scan', async (req, res) => {
+  const { attendance_key } = req.body || {};
+  if (!attendance_key) {
+    return res.status(400).json({ success: false, message: 'Attendance key is required' });
+  }
+
+  try {
+    const keys = await supabase.select('attendance_keys', { attendance_key });
+    if (!keys || keys.length === 0) {
+      return res.status(404).json({ success: false, message: 'Invalid QR Code / Attendance Key' });
+    }
+
+    const participantId = keys[0].participant_id;
+    const participants = await supabase.select('registration_list', { id: participantId });
+    if (!participants || participants.length === 0) {
+      return res.status(404).json({ success: false, message: 'Participant not found' });
+    }
+
+    const participant = participants[0];
+
+    if (participant.approval_status !== '1' && participant.approval_status !== 1) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Check-in denied: registration status is '${participant.approval_status}' (not approved).` 
+      });
+    }
+
+    const logData = {
+      participant_id: participantId,
+      scanned_at: new Date().toISOString(),
+      scanned_by: 'Admin Panel'
+    };
+
+    const inserted = await supabase.insert('attendance_logs', logData);
+    
+    broadcastToAdmins('attendance_checkin', {
+      id: inserted?.[0]?.id || Date.now(),
+      participant_id: participantId,
+      full_name: participant.full_name || `${participant.first_name} ${participant.last_name}`,
+      email: participant.email,
+      scanned_at: logData.scanned_at
+    });
+
+    return res.json({
+      success: true,
+      message: 'Attendance recorded successfully',
+      data: {
+        participant: {
+          id: participant.id,
+          full_name: participant.full_name || `${participant.first_name} ${participant.last_name}`,
+          email: participant.email,
+          attendance_mode: participant.attendance_mode,
+          company: participant.company
+        },
+        scanned_at: logData.scanned_at
+      }
+    });
+
+  } catch (err) {
+    console.error('Attendance scan error:', err);
+    return res.status(500).json({ success: false, message: 'Server error processing check-in' });
+  }
+});
+
+// --- Attendance Logs ---
+router.get('/attendance/logs', async (req, res) => {
+  try {
+    const logs = await supabase.select('attendance_logs', {}, '*', { order: 'scanned_at.desc' });
+    if (!logs || logs.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const participants = await supabase.select('registration_list');
+    const participantMap = {};
+    for (const p of participants) {
+      participantMap[p.id] = p;
+    }
+
+    const mappedLogs = logs.map(l => {
+      const p = participantMap[l.participant_id] || {};
+      return {
+        id: l.id,
+        participant_id: l.participant_id,
+        full_name: p.full_name || `${p.first_name || 'N/A'} ${p.last_name || ''}`.trim(),
+        email: p.email || 'N/A',
+        attendance_mode: p.attendance_mode || 'N/A',
+        scanned_at: l.scanned_at,
+        scanned_by: l.scanned_by
+      };
+    });
+
+    return res.json({ success: true, data: mappedLogs });
+  } catch (err) {
+    console.error('Attendance logs error:', err);
+    return res.status(500).json({ success: false, message: 'Server error fetching attendance logs' });
+  }
+});
+
+
 // --- Zoom Settings ---
 router.get('/zoom/settings', async (req, res) => {
   let settings = {};
