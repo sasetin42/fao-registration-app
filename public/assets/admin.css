@@ -899,7 +899,7 @@ body:has(.sidebar.collapsed) .main-content {
 .table-responsive {
     overflow-x: auto;
     overflow-y: visible !important;
-    min-height: 240px;
+    min-height: 280px;
 }
 .data-table {
     width: 100%;
