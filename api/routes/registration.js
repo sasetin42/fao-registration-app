@@ -6,6 +6,7 @@ import * as zoom from '../services/zoom.js';
 import { generate as generateJWT } from '../services/jwt.js';
 import { generateVisitorCode, generateAttendanceKey } from '../services/codegen.js';
 import { generate as generateQR } from '../services/qr.js';
+import * as settingsService from '../services/settings.js';
 
 const router = express.Router();
 const upload = multer();
@@ -207,6 +208,15 @@ function normalizeOrganization(org) {
 
 // ── POST /v1/register ────────────────────────────────────────
 router.post('/register', upload.none(), async (req, res) => {
+  try {
+    const settings = await settingsService.loadSettings();
+    if (!settings.registration_enabled) {
+      return res.status(403).json({ success: false, message: 'Registration is currently closed.' });
+    }
+  } catch (err) {
+    console.error('Settings load error in registration:', err);
+  }
+
   const body = req.body || {};
   const fields = [
     'registration_type', 'prefix', 'speaker_type',
@@ -318,6 +328,9 @@ router.post('/register', upload.none(), async (req, res) => {
       // Broadcast new registration to admin panel realtime table
       broadcastToAdmins('new_registration', { ...data, id: userId, visitor_code: visitorCode, attendance_key: attendanceKey, zoom_join_url: joinUrl });
 
+      // Trigger webhook
+      settingsService.triggerWebhook('new_registration', { ...data, id: userId, visitor_code: visitorCode, attendance_key: attendanceKey, zoom_join_url: joinUrl });
+
       return res.json({ status: 'success', success: true, message: 'Registration successful', data: { token } });
 
     } catch (innerErr) {
@@ -330,6 +343,24 @@ router.post('/register', upload.none(), async (req, res) => {
   } catch (err) {
     console.error('Registration API error:', err);
     return res.status(500).json({ success: false, message: "There's a problem submitting your form. Please try again or contact the Administrator." });
+  }
+});
+
+// ── GET /v1/settings ─────────────────────────────────────────
+router.get('/settings', async (req, res) => {
+  try {
+    const settings = await settingsService.loadSettings();
+    return res.json({
+      success: true,
+      data: {
+        site_name: settings.site_name,
+        site_subtitle: settings.site_subtitle,
+        registration_enabled: settings.registration_enabled
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching settings:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

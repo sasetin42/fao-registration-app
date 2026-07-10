@@ -439,5 +439,80 @@ window.resetForm = function() {
   cards.forEach(c => c.classList.remove("is-selected"));
 };
 
+async function loadSystemSettings() {
+  try {
+    const res = await fetch('/v1/settings');
+    const resData = await res.json();
+    if (resData.success && resData.data) {
+      const { site_name, site_subtitle, registration_enabled } = resData.data;
+
+      // Update titles
+      if (site_name) {
+        document.title = `${site_name} Registration`;
+        const siteNameTag = document.getElementById('siteNameTag');
+        if (siteNameTag) siteNameTag.textContent = site_name;
+      }
+      if (site_subtitle) {
+        const siteSubtitleText = document.getElementById('siteSubtitleText');
+        if (siteSubtitleText) siteSubtitleText.textContent = site_subtitle;
+      }
+
+      // Check if registration is enabled
+      if (!registration_enabled) {
+        const form = document.getElementById('registrationForm');
+        const closedNotice = document.getElementById('registrationClosedNotice');
+        if (form) form.style.display = 'none';
+        if (closedNotice) closedNotice.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    console.error('Error loading public settings:', err);
+  }
+}
+
 // Initial Call
+loadSystemSettings();
 fetchZoomMeetings();
+initEventCountdown();
+
+/* ----- Event Countdown Timer ----- */
+function initEventCountdown() {
+  const targetDate = new Date("2026-11-23T09:00:00+08:00").getTime();
+  
+  const daysEl = document.getElementById("countdown-days");
+  const hoursEl = document.getElementById("countdown-hours");
+  const minsEl = document.getElementById("countdown-mins");
+  const secsEl = document.getElementById("countdown-secs");
+  const gridEl = document.querySelector(".countdown-grid");
+  
+  if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
+  
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const difference = targetDate - now;
+    
+    if (difference <= 0) {
+      clearInterval(timerInterval);
+      if (gridEl) {
+        gridEl.innerHTML = '<div style="grid-column: span 4; text-align: center; font-weight: 600; font-size: 15px; color: #ffffff; padding: 10px 0;">Event has started!</div>';
+      }
+      return;
+    }
+    
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+    
+    daysEl.textContent = days.toString().padStart(2, '0');
+    hoursEl.textContent = hours.toString().padStart(2, '0');
+    minsEl.textContent = minutes.toString().padStart(2, '0');
+    secsEl.textContent = seconds.toString().padStart(2, '0');
+  }
+  
+  // Run immediately to avoid layout flashing
+  updateCountdown();
+  
+  const timerInterval = setInterval(updateCountdown, 1000);
+}
+

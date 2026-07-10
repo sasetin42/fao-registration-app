@@ -30,10 +30,10 @@
       </div>
       
       <div class="sidebar-info">
-        <span class="info-tag">APSAM 2026</span>
-        <h1 class="info-title">Asia-Pacific Conference on Sustainable Agricultural Mechanization</h1>
+        <span class="info-tag" id="siteNameTag">APSAM 2026</span>
+        <h1 class="info-title" id="siteNameTitle">Asia-Pacific Conference on Sustainable Agricultural Mechanization</h1>
         <div class="info-divider"></div>
-        <p class="info-theme">Modernize. Scale. Sustain.</p>
+        <p class="info-theme" id="siteSubtitleText">Modernize. Scale. Sustain.</p>
         
         <div class="info-meta">
           <div class="info-meta-item">
@@ -47,6 +47,28 @@
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
             </svg>
             <span>Manila, Philippines</span>
+          </div>
+          
+          <div class="sidebar-countdown" id="eventCountdown" aria-live="off" aria-label="Event countdown timer">
+            <p class="countdown-title">Event Starts In</p>
+            <div class="countdown-grid">
+              <div class="countdown-card">
+                <span class="countdown-val" id="countdown-days">00</span>
+                <span class="countdown-label">Days</span>
+              </div>
+              <div class="countdown-card">
+                <span class="countdown-val" id="countdown-hours">00</span>
+                <span class="countdown-label">Hours</span>
+              </div>
+              <div class="countdown-card">
+                <span class="countdown-val" id="countdown-mins">00</span>
+                <span class="countdown-label">Mins</span>
+              </div>
+              <div class="countdown-card">
+                <span class="countdown-val" id="countdown-secs">00</span>
+                <span class="countdown-label">Secs</span>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -64,6 +86,15 @@
           <h2 class="registration-card__title" style="font-size: 24px;">Zoom Meeting Sessions</h2>
           <p class="registration-card__desc">
             Select one or more Zoom meeting sessions you wish to attend and complete your registration.
+          </p>
+        </div>
+
+        <!-- Registration Closed Notice -->
+        <div id="registrationClosedNotice" style="display: none; padding: 3rem 2rem; text-align: center; background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 12px; margin: 2rem 0;">
+          <div style="font-size: 3.5rem; margin-bottom: 1rem; line-height: 1;">🚫</div>
+          <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 0.75rem; color: #DC2626;">Registration is Closed</h3>
+          <p style="color: #4B5563; max-width: 420px; margin: 0 auto; line-height: 1.6; font-size: 15px;">
+            We are sorry, but registrations for this event are currently closed. Please contact the event administrator or support team if you require assistance.
           </p>
         </div>
 

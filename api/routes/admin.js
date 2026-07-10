@@ -7,6 +7,8 @@ import * as supabase from '../services/supabase.js';
 import * as zoom from '../services/zoom.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { sseClients, broadcastToAdmins } from './registration.js';
+import { loadSettings, saveSettings } from '../services/settings.js';
+import * as settingsService from '../services/settings.js';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -645,6 +647,36 @@ router.delete('/zoom/config/:meetingId', async (req, res) => {
   } catch (err) {
     console.error('Delete config meeting error:', err);
     return res.status(500).json({ success: false, message: 'Server error deleting config meeting' });
+  }
+});
+
+// --- General Settings ---
+router.get('/settings', async (req, res) => {
+  try {
+    const settings = await settingsService.loadSettings();
+    // Mask sensitive fields
+    const masked = {
+      ...settings,
+      zoom_client_secret: settings.zoom_client_secret ? '●●●●●●●●' : ''
+    };
+    return res.json({ success: true, data: masked });
+  } catch (err) {
+    console.error('Get system settings error:', err);
+    return res.status(500).json({ success: false, message: 'Server error loading settings' });
+  }
+});
+
+router.post('/settings', async (req, res) => {
+  try {
+    const saved = await settingsService.saveSettings(req.body || {});
+    const masked = {
+      ...saved,
+      zoom_client_secret: saved.zoom_client_secret ? '●●●●●●●●' : ''
+    };
+    return res.json({ success: true, data: masked });
+  } catch (err) {
+    console.error('Save system settings error:', err);
+    return res.status(500).json({ success: false, message: 'Server error saving settings' });
   }
 });
 

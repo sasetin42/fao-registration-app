@@ -1294,6 +1294,99 @@ document.addEventListener('DOMContentLoaded', () => {
             zoomTab.addEventListener('click', initZoomSection);
         }
 
+        // === SYSTEM & SITE CONFIGURATION ===
+        const systemSettingsForm = document.getElementById('systemSettingsForm');
+        const systemSettingsSaveStatus = document.getElementById('systemSettingsSaveStatus');
+
+        const loadSystemSettings = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/settings`, { headers: authHeaders });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('settingsSiteName').value = data.data.site_name || '';
+                    document.getElementById('settingsSiteSubtitle').value = data.data.site_subtitle || '';
+                    document.getElementById('settingsRegistrationEnabled').checked = !!data.data.registration_enabled;
+                    document.getElementById('settingsWebhookUrl').value = data.data.webhook_url || '';
+                    document.getElementById('settingsZoomAccountId').value = data.data.zoom_account_id || '';
+                    document.getElementById('settingsZoomClientId').value = data.data.zoom_client_id || '';
+                    document.getElementById('settingsZoomClientSecret').value = data.data.zoom_client_secret || '';
+                    
+                    // Bind dynamic titles to the DOM
+                    updateDynamicTitles(data.data.site_name, data.data.site_subtitle);
+                }
+            } catch (err) {
+                console.error('Error loading system settings', err);
+            }
+        };
+
+        const updateDynamicTitles = (siteName, siteSubtitle) => {
+            if (siteName) {
+                const navSiteName = document.getElementById('navSiteName');
+                if (navSiteName) navSiteName.textContent = siteName;
+                document.title = `${siteName} - Admin Dashboard`;
+            }
+            if (siteSubtitle) {
+                const navSiteSubtitle = document.getElementById('navSiteSubtitle');
+                if (navSiteSubtitle) navSiteSubtitle.textContent = siteSubtitle;
+            }
+        };
+
+        if (systemSettingsForm) {
+            systemSettingsForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (systemSettingsSaveStatus) {
+                    systemSettingsSaveStatus.className = 'status-indicator';
+                    systemSettingsSaveStatus.textContent = 'Saving...';
+                }
+
+                const payload = {
+                    site_name: document.getElementById('settingsSiteName').value,
+                    site_subtitle: document.getElementById('settingsSiteSubtitle').value,
+                    registration_enabled: document.getElementById('settingsRegistrationEnabled').checked,
+                    webhook_url: document.getElementById('settingsWebhookUrl').value,
+                    zoom_account_id: document.getElementById('settingsZoomAccountId').value,
+                    zoom_client_id: document.getElementById('settingsZoomClientId').value,
+                    zoom_client_secret: document.getElementById('settingsZoomClientSecret').value
+                };
+
+                try {
+                    const res = await fetch(`${API_BASE}/settings`, {
+                        method: 'POST',
+                        headers: authHeaders,
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (systemSettingsSaveStatus) {
+                            systemSettingsSaveStatus.className = 'status-indicator success';
+                            systemSettingsSaveStatus.textContent = 'Settings saved successfully!';
+                        }
+                        updateDynamicTitles(payload.site_name, payload.site_subtitle);
+                        setTimeout(() => { if (systemSettingsSaveStatus) systemSettingsSaveStatus.textContent = ''; }, 3000);
+                    } else {
+                        if (systemSettingsSaveStatus) {
+                            systemSettingsSaveStatus.className = 'status-indicator error';
+                            systemSettingsSaveStatus.textContent = 'Failed to save settings.';
+                        }
+                    }
+                } catch (err) {
+                    if (systemSettingsSaveStatus) {
+                        systemSettingsSaveStatus.className = 'status-indicator error';
+                        systemSettingsSaveStatus.textContent = 'Connection error.';
+                    }
+                }
+            });
+        }
+
+        // Hook into sidebar tab load for Settings
+        const settingsTab = document.querySelector('[data-target="settings-section"]');
+        if (settingsTab) {
+            settingsTab.addEventListener('click', loadSystemSettings);
+        }
+
+        // Load settings on startup to bind titles
+        loadSystemSettings();
+
         // Realtime Clock
         const updateClock = () => {
             const clockEl = document.getElementById('realtimeClock');

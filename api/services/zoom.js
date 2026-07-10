@@ -9,26 +9,13 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SETTINGS_PATH = path.join(__dirname, '../../config/zoom_settings.json');
 
-function loadCredentials() {
-  if (fs.existsSync(SETTINGS_PATH)) {
-    try {
-      const s = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
-      return {
-        accountId    : s.account_id    || process.env.ZOOM_ACCOUNT_ID,
-        clientId     : s.client_id     || process.env.ZOOM_CLIENT_ID,
-        clientSecret : s.client_secret || process.env.ZOOM_CLIENT_SECRET,
-      };
-    } catch { /* fall through */ }
-  }
-  return {
-    accountId    : process.env.ZOOM_ACCOUNT_ID,
-    clientId     : process.env.ZOOM_CLIENT_ID,
-    clientSecret : process.env.ZOOM_CLIENT_SECRET,
-  };
-}
+import { loadSettings } from './settings.js';
 
 async function getAccessToken() {
-  const { accountId, clientId, clientSecret } = loadCredentials();
+  const settings = await loadSettings();
+  const accountId = settings.zoom_account_id;
+  const clientId = settings.zoom_client_id;
+  const clientSecret = settings.zoom_client_secret;
   if (!accountId || !clientId || !clientSecret) return null;
 
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
