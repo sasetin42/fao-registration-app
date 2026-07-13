@@ -9,6 +9,7 @@ import { authMiddleware } from '../middleware/auth.js';
 import { sseClients, broadcastToAdmins } from './registration.js';
 import { loadSettings, saveSettings } from '../services/settings.js';
 import * as settingsService from '../services/settings.js';
+import axios from 'axios';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -35,11 +36,35 @@ router.post('/login', async (req, res) => {
   const adminUser = process.env.ADMIN_USER || 'admin';
   const adminPass = process.env.ADMIN_PASS || 'admin123';
 
+  if (username === 'admin@gmail.com') {
+    try {
+      const response = await axios.post(
+        `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=password`,
+        { email: username, password },
+        {
+          headers: {
+            apikey: process.env.SUPABASE_KEY,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      const user = response.data?.user;
+      if (user && (user.id === '6ef5eb76-57f4-48bd-a20e-9445a4e5564e' && user.email === 'admin@gmail.com')) {
+        return res.json({ success: true, token: response.data.access_token });
+      }
+      return res.status(401).json({ success: false, message: 'Unauthorized user ID or email' });
+    } catch (err) {
+      console.error('Supabase login fallback error:', err.response?.data || err.message);
+      return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
+    }
+  }
+
   if (username === adminUser && password === adminPass) {
     const token = generateAdmin();
     return res.json({ success: true, token });
   }
   return res.status(401).json({ success: false, message: 'Invalid credentials' });
+
 });
 
 // Use authorization middleware for all subsequent routes
