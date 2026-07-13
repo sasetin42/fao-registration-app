@@ -3,13 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { generateAdmin } from '../services/jwt.js';
-import * as supabase from '../services/supabase.js';
+import * as supabase from '../services/firebase.js';
 import * as zoom from '../services/zoom.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { sseClients, broadcastToAdmins } from './registration.js';
 import { loadSettings, saveSettings } from '../services/settings.js';
 import * as settingsService from '../services/settings.js';
-import axios from 'axios';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,26 +36,12 @@ router.post('/login', async (req, res) => {
   const adminPass = process.env.ADMIN_PASS || 'admin123';
 
   if (username === 'admin@gmail.com') {
-    try {
-      const response = await axios.post(
-        `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=password`,
-        { email: username, password },
-        {
-          headers: {
-            apikey: process.env.SUPABASE_KEY,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      const user = response.data?.user;
-      if (user && (user.id === '6ef5eb76-57f4-48bd-a20e-9445a4e5564e' && user.email === 'admin@gmail.com')) {
-        return res.json({ success: true, token: response.data.access_token });
-      }
-      return res.status(401).json({ success: false, message: 'Unauthorized user ID or email' });
-    } catch (err) {
-      console.error('Supabase login fallback error:', err.response?.data || err.message);
-      return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
+    // If username is admin@gmail.com, verify against admin credentials.
+    if (password === adminPass) {
+      const token = generateAdmin();
+      return res.json({ success: true, token });
     }
+    return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
   }
 
   if (username === adminUser && password === adminPass) {
@@ -137,7 +122,7 @@ router.put('/registrations/batch-status', async (req, res) => {
   try {
     // Retrieve currently existing records to check transitions and find names
     const allParticipants = await supabase.select('registration_list');
-    const participantsToUpdate = allParticipants.filter(p => ids.map(Number).includes(Number(p.id)));
+    const participantsToUpdate = allParticipants.filter(p => ids.map(String).includes(String(p.id)));
 
     // Execute batch update in database
     await supabase.updateBatch('registration_list', { approval_status: finalStatus }, 'id', ids);
@@ -151,16 +136,16 @@ router.put('/registrations/batch-status', async (req, res) => {
       if (String(oldStatus) !== String(finalStatus)) {
         const oldStatusName = oldStatus === '1' ? 'Approved' : (oldStatus === '-1' ? 'Rejected' : 'Pending');
         logsToInsert.push({
-          participant_id: p.id,
+          participant_id: String(p.id),
           scanned_at: nowStr,
           scanned_by: `Status changed from ${oldStatusName} to ${statusName} (Admin)`
         });
       }
     }
 
-    // Insert audit logs as a batch transaction to prevent corruption
-    if (logsToInsert.length > 0) {
-      await supabase.insert('attendance_logs', logsToInsert);
+    // Insert audit logs
+    for (const log of logsToInsert) {
+      await supabase.insert('attendance_logs', log);
     }
 
     // Broadcast status updates to SSE
@@ -200,10 +185,10 @@ router.post('/registrations/batch-delete', async (req, res) => {
 
 // --- Single Status Update ---
 router.put('/registrations/:id/status', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const id = String(req.params.id).trim();
   const { status } = req.body || {};
 
-  if (isNaN(id)) {
+  if (!id) {
     return res.status(400).json({ success: false, message: 'Invalid registration ID' });
   }
 
@@ -238,7 +223,7 @@ router.put('/registrations/:id/status', async (req, res) => {
       // Log status change transition
       const oldStatusName = oldStatus === '1' ? 'Approved' : (oldStatus === '-1' ? 'Rejected' : 'Pending');
       const logData = {
-        participant_id: id,
+        participant_id: String(id),
         scanned_at: new Date().toISOString(),
         scanned_by: `Status changed from ${oldStatusName} to ${statusName} (Admin)`
       };
@@ -264,7 +249,7 @@ router.put('/registrations/:id/status', async (req, res) => {
 
 // --- Single Delete ---
 router.delete('/registrations/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const id = String(req.params.id).trim();
   try {
     await supabase.remove('registration_list', { id });
     broadcastToAdmins('registration_deleted', { id });
@@ -304,7 +289,7 @@ router.post('/attendance/scan', async (req, res) => {
     }
 
     const logData = {
-      participant_id: participantId,
+      participant_id: String(participantId),
       scanned_at: new Date().toISOString(),
       scanned_by: 'Admin Panel'
     };
@@ -336,12 +321,6 @@ router.post('/attendance/scan', async (req, res) => {
 
   } catch (err) {
     console.error('Attendance scan error:', err);
-    if (err.response?.data?.code === 'PGRST205') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Scan failed: The attendance_logs table is missing from your Supabase database. Please create it in your Supabase SQL Editor.' 
-      });
-    }
     return res.status(500).json({ success: false, message: 'Server error processing check-in' });
   }
 });
@@ -376,13 +355,6 @@ router.get('/attendance/logs', async (req, res) => {
     return res.json({ success: true, data: mappedLogs });
   } catch (err) {
     console.error('Attendance logs error:', err);
-    if (err.response?.data?.code === 'PGRST205') {
-      return res.json({ 
-        success: true, 
-        data: [], 
-        warning: 'The attendance_logs table is missing from your Supabase database. Please run the SQL from schema.sql to configure it.' 
-      });
-    }
     return res.status(500).json({ success: false, message: 'Server error fetching attendance logs' });
   }
 });

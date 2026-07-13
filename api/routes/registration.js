@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import multer from 'multer';
-import * as supabase from '../services/supabase.js';
+import * as supabase from '../services/firebase.js';
 import * as zoom from '../services/zoom.js';
 import { generate as generateJWT } from '../services/jwt.js';
 import { generateVisitorCode, generateAttendanceKey } from '../services/codegen.js';
@@ -61,7 +61,7 @@ router.post('/validate-email', async (req, res) => {
 
 // ── POST /v1/refresh-status ──────────────────────────────────
 router.post('/refresh-status', async (req, res) => {
-  const userId = parseInt(req.body.user_id || 0, 10);
+  const userId = req.body.user_id ? String(req.body.user_id).trim() : '';
   if (!userId) {
     return res.status(400).json({ success: false, message: 'User ID is required' });
   }
