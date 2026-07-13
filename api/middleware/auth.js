@@ -1,5 +1,6 @@
 import { decode } from '../services/jwt.js';
 import axios from 'axios';
+import { firebaseConfig } from '../services/firebase.js';
 
 export async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -23,32 +24,28 @@ export async function authMiddleware(req, res, next) {
       return next();
     }
   } catch (err) {
-    // Local verification failed, fallback to Supabase verification below
+    // Local verification failed, fallback to Firebase verification below
   }
 
   if (!localVerifySuccess) {
     try {
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_KEY;
+      const response = await axios.post(
+        `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseConfig.apiKey}`,
+        { idToken: token },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
-      const response = await axios.get(`${supabaseUrl}/auth/v1/user`, {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const userData = response.data;
-      if (userData && (userData.id === 'gL3USbzAy3ftjvWK2uzbXYiYxDy1' || userData.email === 'admin@gmail.com')) {
+      const userData = response.data?.users?.[0];
+      if (userData && (userData.localId === 'gL3USbzAy3ftjvWK2uzbXYiYxDy1' || userData.email === 'admin@gmail.com')) {
         req.user = {
-          id: userData.id,
+          id: userData.localId,
           email: userData.email,
           role: 'admin'
         };
         return next();
       }
     } catch (err) {
-      console.error('Supabase token verification fallback error:', err.message);
+      console.error('Firebase token verification fallback error:', err.response?.data || err.message);
     }
   }
 

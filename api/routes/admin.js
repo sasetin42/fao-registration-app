@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 import axios from 'axios';
 import { generateAdmin } from '../services/jwt.js';
 import * as supabase from '../services/firebase.js';
+import { auth } from '../services/firebase.js';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import * as zoom from '../services/zoom.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { sseClients, broadcastToAdmins } from './registration.js';
@@ -39,29 +41,16 @@ router.post('/login', async (req, res) => {
 
   if (username === 'admin@gmail.com') {
     try {
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_KEY;
+      const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      const user = userCredential.user;
+      const accessToken = await user.getIdToken();
 
-      const response = await axios.post(
-        `${supabaseUrl}/auth/v1/token?grant_type=password`,
-        { email: username, password },
-        {
-          headers: {
-            apikey: supabaseKey,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      const userData = response.data?.user;
-      const accessToken = response.data?.access_token;
-
-      if (accessToken && (userData?.id === 'gL3USbzAy3ftjvWK2uzbXYiYxDy1' || userData?.email === 'admin@gmail.com')) {
+      if (accessToken && (user.uid === 'gL3USbzAy3ftjvWK2uzbXYiYxDy1' || user.email === 'admin@gmail.com')) {
         return res.json({ success: true, token: accessToken });
       }
       return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
     } catch (err) {
-      console.error('Supabase admin login error:', err.response?.data || err.message);
+      console.error('Firebase admin login error:', err.message);
       return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
     }
   }
@@ -91,6 +80,11 @@ router.post('/registrations/sync-online', async (req, res) => {
 // --- Stats ---
 router.get('/stats', async (req, res) => {
   try {
+    try {
+      await syncOnlineRegistrations();
+    } catch (err) {
+      console.warn("Auto-sync failed, using cached records: " + err.message);
+    }
     const registrations = await supabase.select('registration_list');
     const stats = {
       total: registrations.length,
@@ -121,6 +115,11 @@ router.get('/stats', async (req, res) => {
 // --- Registrations ---
 router.get('/registrations', async (req, res) => {
   try {
+    try {
+      await syncOnlineRegistrations();
+    } catch (err) {
+      console.warn("Auto-sync failed, using cached records: " + err.message);
+    }
     const registrations = await supabase.select('registration_list', {}, '*', { order: 'created_at.desc' });
     return res.json({ success: true, data: registrations });
   } catch (err) {

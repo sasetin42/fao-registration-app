@@ -14,8 +14,9 @@ import {
   limit
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyCQGKtLCvaegq1cu20BzMvDSA6w06iBsZk",
   authDomain: "fao-registration.firebaseapp.com",
   projectId: "fao-registration",
@@ -26,8 +27,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = getFirestore(app, "fao-online");
 export const storage = getStorage(app, "gs://fao-registration.firebasestorage.app");
+export const auth = getAuth(app);
 
 // Helper to convert Firestore document to a plain object containing its id
 const convertDoc = (docSnap) => {
