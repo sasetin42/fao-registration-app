@@ -10,6 +10,7 @@ import cors    from 'cors';
 
 import registrationRoutes from './routes/registration.js';
 import adminRoutes        from './routes/admin.js';
+import { syncOnlineRegistrations } from './services/onlineSync.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
@@ -59,5 +60,17 @@ if (process.env.NODE_ENV !== 'production' || process.env.LOCAL_DEV === 'true') {
     console.log(`   Environment  : ${process.env.APP_ENV || 'development'}\n`);
   });
 }
+
+// ── Background Sync Job ──────────────────────────────────────
+setInterval(async () => {
+  try {
+    const count = await syncOnlineRegistrations();
+    if (count > 0) {
+      console.log(`[Sync Service] Automatically synced ${count} registrations.`);
+    }
+  } catch (err) {
+    console.error('[Sync Service] Background sync failed:', err.message);
+  }
+}, 60000);
 
 export default app;

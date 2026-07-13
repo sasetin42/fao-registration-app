@@ -2,6 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
 import { generateAdmin } from '../services/jwt.js';
 import * as supabase from '../services/firebase.js';
 import * as zoom from '../services/zoom.js';
@@ -9,6 +10,7 @@ import { authMiddleware } from '../middleware/auth.js';
 import { sseClients, broadcastToAdmins } from './registration.js';
 import { loadSettings, saveSettings } from '../services/settings.js';
 import * as settingsService from '../services/settings.js';
+import { syncOnlineRegistrations } from '../services/onlineSync.js';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,12 +38,32 @@ router.post('/login', async (req, res) => {
   const adminPass = process.env.ADMIN_PASS || 'admin123';
 
   if (username === 'admin@gmail.com') {
-    // If username is admin@gmail.com, verify against admin credentials.
-    if (password === adminPass) {
-      const token = generateAdmin();
-      return res.json({ success: true, token });
+    try {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_KEY;
+
+      const response = await axios.post(
+        `${supabaseUrl}/auth/v1/token?grant_type=password`,
+        { email: username, password },
+        {
+          headers: {
+            apikey: supabaseKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const userData = response.data?.user;
+      const accessToken = response.data?.access_token;
+
+      if (accessToken && (userData?.id === 'gL3USbzAy3ftjvWK2uzbXYiYxDy1' || userData?.email === 'admin@gmail.com')) {
+        return res.json({ success: true, token: accessToken });
+      }
+      return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
+    } catch (err) {
+      console.error('Supabase admin login error:', err.response?.data || err.message);
+      return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
     }
-    return res.status(401).json({ success: false, message: 'Invalid credentials or login failed' });
   }
 
   if (username === adminUser && password === adminPass) {
@@ -54,6 +76,17 @@ router.post('/login', async (req, res) => {
 
 // Use authorization middleware for all subsequent routes
 router.use(authMiddleware);
+
+// --- Sync Online Registrations ---
+router.post('/registrations/sync-online', async (req, res) => {
+  try {
+    const count = await syncOnlineRegistrations();
+    return res.json({ success: true, count });
+  } catch (err) {
+    console.error('Manual online sync error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to sync online registrations' });
+  }
+});
 
 // --- Stats ---
 router.get('/stats', async (req, res) => {

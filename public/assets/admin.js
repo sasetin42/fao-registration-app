@@ -699,6 +699,40 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // --- Sync Online ---
+        const syncOnlineBtn = document.getElementById('syncOnlineBtn');
+        if (syncOnlineBtn) {
+            syncOnlineBtn.addEventListener('click', async () => {
+                const originalHTML = syncOnlineBtn.innerHTML;
+                syncOnlineBtn.disabled = true;
+                syncOnlineBtn.innerHTML = `
+                    <svg class="animate-spin" style="animation: spin 1s linear infinite; margin-right: 4px; display: inline-block; vertical-align: middle;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    Syncing...
+                `;
+                
+                try {
+                    const res = await fetch(`${API_BASE}/registrations/sync-online`, {
+                        method: 'POST',
+                        headers: authHeaders
+                    });
+                    const data = await res.json();
+                    
+                    if (res.ok && data.success) {
+                        showToast(`Synced successfully! ${data.count ?? 0} registrations updated/added.`, 'success');
+                        await loadDashboard();
+                    } else {
+                        showToast('Failed to sync online registrations.', 'error');
+                    }
+                } catch (err) {
+                    console.error('Error syncing online registrations:', err);
+                    showToast('Failed to sync online registrations.', 'error');
+                } finally {
+                    syncOnlineBtn.disabled = false;
+                    syncOnlineBtn.innerHTML = originalHTML;
+                }
+            });
+        }
+
         // --- Actions ---
         const handleView = (e) => {
             const id = parseInt(e.currentTarget.dataset.id);

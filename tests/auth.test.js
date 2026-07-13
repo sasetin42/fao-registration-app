@@ -111,7 +111,7 @@ test.describe('Authentication and API Error Audit', () => {
             data: {
               access_token: 'valid-supabase-token-xyz',
               user: {
-                id: '6ef5eb76-57f4-48bd-a20e-9445a4e5564e',
+                id: 'gL3USbzAy3ftjvWK2uzbXYiYxDy1',
                 email: 'admin@gmail.com'
               }
             }
@@ -165,7 +165,7 @@ test.describe('Authentication and API Error Audit', () => {
           assert.strictEqual(config.headers.Authorization, 'Bearer valid-supabase-token-xyz');
           return {
             data: {
-              id: '6ef5eb76-57f4-48bd-a20e-9445a4e5564e',
+              id: 'gL3USbzAy3ftjvWK2uzbXYiYxDy1',
               email: 'admin@gmail.com'
             }
           };
