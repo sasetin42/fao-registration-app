@@ -322,6 +322,39 @@ document.addEventListener('DOMContentLoaded', () => {
             'Content-Type': 'application/json'
         };
 
+        const getInitials = (firstName, lastName) => {
+            const f = (firstName || '').trim().charAt(0).toUpperCase();
+            const l = (lastName || '').trim().charAt(0).toUpperCase();
+            return `${f}${l}` || '?';
+        };
+
+        const formatDateTime = (dateStr) => {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        };
+
+        const populateCountryFilter = (regs) => {
+            const select = document.getElementById('filterCountry');
+            if (!select) return;
+            const currentVal = select.value;
+            const countries = [...new Set(regs.map(r => r.address_country || r.nationality).filter(Boolean))].sort();
+            select.innerHTML = '<option value="all">All Countries</option>' + 
+                countries.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (countries.includes(currentVal)) {
+                select.value = currentVal;
+            } else {
+                select.value = 'all';
+            }
+        };
+
         const loadDashboard = async () => {
             try {
                 // Fetch Stats
@@ -343,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (regData.success) {
                     allRegistrations = regData.data;
+                    populateCountryFilter(allRegistrations);
                     renderTable();
                     renderCharts();
                 }
@@ -431,9 +465,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render Table
         const renderTable = () => {
             const tbody = document.getElementById('registrationsBody');
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const filterMode = document.getElementById('filterMode').value;
-            const filterStatus = document.getElementById('filterStatus').value;
+            if (!tbody) return;
+            const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+            const filterType = document.getElementById('filterType')?.value || 'all';
+            const filterCountry = document.getElementById('filterCountry')?.value || 'all';
 
             tbody.innerHTML = '';
             
@@ -447,14 +482,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 const email = (r.email || '').toLowerCase();
                 const matchSearch = name.includes(search) || email.includes(search);
                 
-                const rMode = r.attendance_mode || 'none';
-                const matchMode = filterMode === 'all' || rMode === filterMode;
+                const rType = (r.registration_type || '').toLowerCase();
+                const matchType = filterType === 'all' || rType === filterType.toLowerCase();
 
-                const rStatus = r.approval_status !== undefined ? String(r.approval_status) : "0";
-                const matchStatus = filterStatus === 'all' || rStatus === filterStatus;
+                const rCountry = r.address_country || r.nationality || '';
+                const matchCountry = filterCountry === 'all' || rCountry === filterCountry;
 
-                return matchSearch && matchMode && matchStatus;
+                return matchSearch && matchType && matchCountry;
             });
+
+            // Update record count text
+            const recordCountText = document.getElementById('recordCountText');
+            if (recordCountText) {
+                recordCountText.textContent = `${filtered.length} record${filtered.length !== 1 ? 's' : ''}`;
+            }
+
+            // Update live timestamp
+            const liveTimestamp = document.getElementById('liveTimestamp');
+            if (liveTimestamp) {
+                const now = new Date();
+                liveTimestamp.textContent = now.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+            }
 
             if (filtered.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No records found.</td></tr>';
@@ -464,27 +517,39 @@ document.addEventListener('DOMContentLoaded', () => {
             filtered.forEach(r => {
                 const tr = document.createElement('tr');
                 
-                let statusBadge = '';
-                if (r.approval_status === 1) statusBadge = '<span class="badge badge-success">Approved</span>';
-                else if (r.approval_status === -1) statusBadge = '<span class="badge badge-danger">Rejected</span>';
-                else statusBadge = '<span class="badge badge-warning">Pending</span>';
+                // Get initials & color
+                const initials = getInitials(r.first_name, r.last_name);
+                const charCode = initials.charCodeAt(0) || 65;
+                const initialsColors = ['#0B5FA5', '#168DD1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
+                const bgCol = initialsColors[charCode % initialsColors.length];
 
-                let modeBadge = r.attendance_mode === 'in-person' 
-                                ? '<span class="badge badge-info">In-Person</span>' 
-                                : '<span class="badge badge-info">Virtual</span>';
+                // Badges
+                const typeClass = `badge-type-${(r.registration_type || 'participant').toLowerCase()}`;
+                const typeBadge = `<span class="badge ${typeClass}" style="text-transform: capitalize;">${r.registration_type || 'participant'}</span>`;
 
                 tr.innerHTML = `
                     <td><input type="checkbox" class="row-checkbox" data-id="${r.id}"></td>
-                    <td>${r.first_name} ${r.last_name}</td>
-                    <td>${r.email}</td>
-                    <td><span style="text-transform: capitalize;">${r.registration_type}</span></td>
-                    <td>${modeBadge}</td>
-                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="name-email-cell">
+                            <div class="avatar-circle" style="background-color: ${bgCol};">${initials}</div>
+                            <div class="name-email-info">
+                                <span class="name-text">${r.first_name || ''} ${r.last_name || ''}</span>
+                                <span class="email-text">${r.email || ''}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${typeBadge}</td>
+                    <td>${r.address_country || r.nationality || 'N/A'}</td>
+                    <td>${r.company || r.affiliation || 'N/A'}</td>
+                    <td>${formatDateTime(r.created_at)}</td>
                     <td>
                         <div class="action-dropdown">
-                            <button class="dropdown-trigger" data-id="${r.id}">
-                                Actions
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            <button class="three-dots-btn dropdown-trigger" data-id="${r.id}" aria-label="Actions">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="5" r="1"></circle>
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="12" cy="19" r="1"></circle>
+                                </svg>
                             </button>
                             <div class="dropdown-menu" id="dropdown-${r.id}">
                                 <button class="dropdown-item view-btn" data-id="${r.id}">View Details</button>
@@ -646,19 +711,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Get currently filtered list or fallback to all
-                const search = document.getElementById('searchInput').value.toLowerCase();
-                const filterMode = document.getElementById('filterMode').value;
-                const filterStatus = document.getElementById('filterStatus').value;
+                const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+                const filterType = document.getElementById('filterType')?.value || 'all';
+                const filterCountry = document.getElementById('filterCountry')?.value || 'all';
 
                 const filtered = allRegistrations.filter(r => {
                     const name = `${r.first_name || ''} ${r.last_name || ''}`.toLowerCase();
                     const email = (r.email || '').toLowerCase();
                     const matchSearch = name.includes(search) || email.includes(search);
-                    const rMode = r.attendance_mode || 'none';
-                    const matchMode = filterMode === 'all' || rMode === filterMode;
-                    const rStatus = r.approval_status !== undefined ? String(r.approval_status) : "0";
-                    const matchStatus = filterStatus === 'all' || rStatus === filterStatus;
-                    return matchSearch && matchMode && matchStatus;
+                    
+                    const rType = (r.registration_type || '').toLowerCase();
+                    const matchType = filterType === 'all' || rType === filterType.toLowerCase();
+
+                    const rCountry = r.address_country || r.nationality || '';
+                    const matchCountry = filterCountry === 'all' || rCountry === filterCountry;
+
+                    return matchSearch && matchType && matchCountry;
                 });
 
                 const headers = ['ID', 'Full Name', 'Email', 'Phone', 'Registration Type', 'Speaker Type', 'Attendance Mode', 'Attendance Days', 'Nationality', 'Company/Affiliation', 'Designation', 'Status', 'Registered At'];
@@ -696,6 +764,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.click();
                 document.body.removeChild(link);
                 showToast('CSV export downloaded successfully.', 'success');
+            });
+        }
+
+        // Filter and Refresh Event Listeners
+        const searchInput = document.getElementById('searchInput');
+        const filterType = document.getElementById('filterType');
+        const filterCountry = document.getElementById('filterCountry');
+        const refreshBtn = document.getElementById('refreshBtn');
+
+        if (searchInput) searchInput.addEventListener('input', renderTable);
+        if (filterType) filterType.addEventListener('change', renderTable);
+        if (filterCountry) filterCountry.addEventListener('change', renderTable);
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async () => {
+                const originalHTML = refreshBtn.innerHTML;
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = `
+                    <svg class="animate-spin" style="animation: spin 1s linear infinite;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    Refreshed...
+                `;
+                try {
+                    await loadDashboard();
+                    showToast('Data refreshed successfully', 'success');
+                } catch (err) {
+                    showToast('Failed to refresh data', 'error');
+                } finally {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = originalHTML;
+                }
             });
         }
 

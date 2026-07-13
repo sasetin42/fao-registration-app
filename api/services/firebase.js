@@ -26,7 +26,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, "fao-online");
+export const db = getFirestore(app);
 export const storage = getStorage(app, "gs://fao-registration.firebasestorage.app");
 
 // Helper to convert Firestore document to a plain object containing its id

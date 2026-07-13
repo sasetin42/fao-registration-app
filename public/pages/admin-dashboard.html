@@ -219,20 +219,37 @@
         <section id="registrations-section" class="content-section">
             <div class="table-container">
                 <div class="table-header">
-                    <h2>Manage Registrations</h2>
-                    <div class="table-actions">
-                        <input type="text" id="searchInput" placeholder="Search by name or email..." class="search-input">
-                        <select id="filterMode" class="filter-select">
-                            <option value="all">All Modes</option>
-                            <option value="in-person">In-Person</option>
-                            <option value="online">Virtual</option>
+                    <div class="header-title-group">
+                        <h2>Manage Registrations</h2>
+                        <span class="section-subtitle" id="recordCountText">0 records</span>
+                    </div>
+                    <div class="header-right-group">
+                        <span class="live-indicator"><span class="pulse-dot"></span>Live <span id="liveTimestamp">12:00:00 AM</span></span>
+                        <button class="refresh-btn" id="refreshBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters Toolbar -->
+                <div class="table-filters-toolbar">
+                    <div class="filters-left">
+                        <input type="text" id="searchInput" placeholder="Search name or email..." class="search-input">
+                        <select id="filterType" class="filter-select">
+                            <option value="all">All Types</option>
+                            <option value="participant">Participant</option>
+                            <option value="speaker">Speaker</option>
+                            <option value="exhibitor">Exhibitor</option>
+                            <option value="vip">VIP</option>
+                            <option value="staff">Staff</option>
+                            <option value="media">Media</option>
                         </select>
-                        <select id="filterStatus" class="filter-select">
-                            <option value="all">All Status</option>
-                            <option value="1">Approved</option>
-                            <option value="0">Pending</option>
-                            <option value="-1">Rejected</option>
+                        <select id="filterCountry" class="filter-select">
+                            <option value="all">All Countries</option>
                         </select>
+                    </div>
+                    <div class="filters-right">
                         <button id="exportCsvBtn" class="btn-primary">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             Export CSV
@@ -259,12 +276,12 @@
                         <thead>
                             <tr>
                                 <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" aria-label="Select all registrations"></th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Type</th>
-                                <th>Mode</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th>NAME / EMAIL</th>
+                                <th>TYPE</th>
+                                <th>COUNTRY</th>
+                                <th>AFFILIATION</th>
+                                <th>REGISTERED AT</th>
+                                <th>ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody id="registrationsBody">
