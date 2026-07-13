@@ -4,6 +4,9 @@
   "description": "FAO APSAM 2026 Registration Application - Node.js/Express",
   "type": "module",
   "main": "api/index.js",
+  "engines": {
+    "node": "20"
+  },
   "scripts": {
     "dev": "nodemon api/index.js",
     "start": "node api/index.js",
@@ -15,6 +18,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "firebase": "^10.12.0",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^7.2.5",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "qrcode": "^1.5.3"

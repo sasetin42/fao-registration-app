@@ -7,6 +7,7 @@ import express from 'express';
 import path    from 'path';
 import { fileURLToPath } from 'url';
 import cors    from 'cors';
+import { onRequest } from 'firebase-functions/v2/https';
 
 import registrationRoutes from './routes/registration.js';
 import adminRoutes        from './routes/admin.js';
@@ -52,7 +53,7 @@ app.use('/v1/admin', adminRoutes);
 app.use((_req, res) => res.status(404).json({ success: false, message: 'Not found' }));
 
 // ── Start Server (only if run directly, not in Vercel Serverless environment) ──
-if (process.env.NODE_ENV !== 'production' || process.env.LOCAL_DEV === 'true') {
+if ((process.env.NODE_ENV !== 'production' || process.env.LOCAL_DEV === 'true') && !process.env.FIREBASE_CONFIG && !process.env.FUNCTIONS_EMULATOR) {
   app.listen(PORT, () => {
     console.log(`\n🚀 FAO APSAM 2026 App running at http://localhost:${PORT}`);
     console.log(`   Registration : http://localhost:${PORT}/`);
@@ -74,3 +75,4 @@ setInterval(async () => {
 }, 60000);
 
 export default app;
+export const api = onRequest({ cors: true }, app);
