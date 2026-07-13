@@ -533,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="name-email-cell">
                             <div class="avatar-circle" style="background-color: ${bgCol};">${initials}</div>
                             <div class="name-email-info">
-                                <span class="name-text">${r.first_name || ''} ${r.last_name || ''}</span>
+                                <a href="#" class="name-text dropdown-trigger" data-id="${r.id}" style="cursor: pointer; text-decoration: none;">${r.first_name || ''} ${r.last_name || ''}</a>
                                 <span class="email-text">${r.email || ''}</span>
                             </div>
                         </div>
@@ -567,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
                 trigger.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     const id = trigger.dataset.id;
                     const menu = document.getElementById(`dropdown-${id}`);
                     

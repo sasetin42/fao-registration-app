@@ -276,6 +276,7 @@ router.post('/register', upload.none(), async (req, res) => {
     }
 
     data.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    data.approval_status = 1;
     
     // Insert into Supabase
     const inserted = await supabase.insert('registration_list', data);

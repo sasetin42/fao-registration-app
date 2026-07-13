@@ -1428,7 +1428,15 @@ body:has(.sidebar.collapsed) .main-content {
 
 .name-email-info .name-text {
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-blue);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--transition-fast) ease;
+}
+
+.name-email-info .name-text:hover {
+    color: var(--fao-accent);
+    text-decoration: underline;
 }
 
 .name-email-info .email-text {

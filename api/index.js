@@ -63,16 +63,18 @@ if ((process.env.NODE_ENV !== 'production' || process.env.LOCAL_DEV === 'true') 
 }
 
 // ── Background Sync Job ──────────────────────────────────────
-setInterval(async () => {
-  try {
-    const count = await syncOnlineRegistrations();
-    if (count > 0) {
-      console.log(`[Sync Service] Automatically synced ${count} registrations.`);
+if (!process.env.FIREBASE_CONFIG && !process.env.FUNCTIONS_EMULATOR) {
+  setInterval(async () => {
+    try {
+      const count = await syncOnlineRegistrations();
+      if (count > 0) {
+        console.log(`[Sync Service] Automatically synced ${count} registrations.`);
+      }
+    } catch (err) {
+      console.error('[Sync Service] Background sync failed:', err.message);
     }
-  } catch (err) {
-    console.error('[Sync Service] Background sync failed:', err.message);
-  }
-}, 60000);
+  }, 60000);
+}
 
 export default app;
 export const api = onRequest({ cors: true }, app);
