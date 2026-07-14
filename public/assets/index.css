@@ -2482,7 +2482,9 @@ body {
 
 .zoom-session-card.is-selected {
   border-color: transparent;
+  padding: 1px;
   background-color: transparent;
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.25), 0 0 8px rgba(11, 95, 165, 0.15);
 }
 
 @keyframes rotateBorder {
@@ -2503,16 +2505,15 @@ body {
   height: 250%;
   background: conic-gradient(
     from 0deg,
-    #0B5FA5,
-    #168DD1,
-    #2E7D32,
-    #F58320,
-    transparent,
-    #0B5FA5
+    #00F2FE 0%,
+    #0B5FA5 10%,
+    transparent 35%,
+    transparent 100%
   );
-  animation: rotateBorder 4s linear infinite;
+  animation: rotateBorder 3s linear infinite;
   z-index: -2;
   transform-origin: center center;
+  will-change: transform;
 }
 
 .zoom-session-card.is-selected::after {
@@ -2523,6 +2524,17 @@ body {
   border-radius: calc(var(--radius-md) - 2px);
   z-index: -1;
 }
+
+.zoom-session-card.is-selected .zoom-card-banner {
+  border-top-left-radius: calc(var(--radius-md) - 2px);
+  border-top-right-radius: calc(var(--radius-md) - 2px);
+}
+
+.zoom-session-card.is-selected .zoom-card-body {
+  border-bottom-left-radius: calc(var(--radius-md) - 2px);
+  border-bottom-right-radius: calc(var(--radius-md) - 2px);
+}
+
 
 .zoom-card-banner {
   width: 100%;
@@ -2729,9 +2741,11 @@ body {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
   z-index: 1000;
   opacity: 0;
+  visibility: hidden;
   transform: translateY(-8px) scale(0.98);
   pointer-events: none;
   transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              visibility 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
               transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
@@ -2780,6 +2794,7 @@ body {
 
 .custom-select-wrapper.is-open .custom-select-options {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0) scale(1);
   pointer-events: auto;
 }
@@ -2814,15 +2829,15 @@ body {
 }
 
 /* Custom Scrollbar */
-.custom-select-options::-webkit-scrollbar {
+.custom-select-options-list::-webkit-scrollbar {
   width: 6px;
 }
 
-.custom-select-options::-webkit-scrollbar-track {
+.custom-select-options-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.custom-select-options::-webkit-scrollbar-thumb {
+.custom-select-options-list::-webkit-scrollbar-thumb {
   background-color: var(--color-border);
   border-radius: 3px;
 }

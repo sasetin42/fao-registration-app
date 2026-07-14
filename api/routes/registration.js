@@ -176,7 +176,7 @@ router.get('/zoom-meetings/:meetingId', async (req, res) => {
 // ── GET /v1/members ──────────────────────────────────────────
 router.get('/members', async (req, res) => {
   try {
-    const records = await supabase.select('registration_list');
+    const records = await supabase.select('registration_list', { registration_source: 'tiny_comet' });
     const mapped = (records || []).map(r => ({
       id: r.id,
       full_name: r.full_name,

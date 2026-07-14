@@ -39,7 +39,12 @@ function getOptionIcon(selectId, value, text) {
   let iconColor = "#116AAB";
   let svgPath = "";
   
-  if (selectId === "registrationType") {
+  if (selectId === "completeName") {
+    bgColor = "#E8EAF6";
+    iconColor = "#3F51B5";
+    svgPath = '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>';
+  }
+  else if (selectId === "registrationType") {
     switch (val) {
       case "participant":
         bgColor = "#E0F2F1"; iconColor = "#00695C";
@@ -206,6 +211,86 @@ function getOptionIcon(selectId, value, text) {
   return { bgColor, iconColor, svgPath };
 }
 
+function buildCustomOptionsList(select, listContainer, trigger, wrapper, menu, isCountrySelect, noResults) {
+  // Remove existing custom options
+  const existingOptions = listContainer.querySelectorAll(".custom-select-option");
+  existingOptions.forEach(opt => opt.remove());
+
+  // Invalidate cached options
+  listContainer._optionCache = null;
+
+  const options = Array.from(select.options);
+  options.forEach((option, index) => {
+    const customOption = document.createElement("div");
+    customOption.className = "custom-select-option";
+    customOption.setAttribute("role", "option");
+    customOption.setAttribute("data-value", option.value);
+    if (select.id) {
+      customOption.id = `${select.id}-opt-${index}`;
+    }
+    
+    // Set Option Content (with Flag or custom icon if applicable)
+    if (isCountrySelect && option.value && countryToIso[option.value]) {
+      const iso = countryToIso[option.value];
+      const flagImg = document.createElement("img");
+      flagImg.src = `https://flagcdn.com/w20/${iso}.png`;
+      flagImg.srcset = `https://flagcdn.com/w40/${iso}.png 2x`;
+      flagImg.width = 20;
+      flagImg.height = 15;
+      flagImg.alt = "";
+      flagImg.className = "country-flag-icon";
+      customOption.appendChild(flagImg);
+      customOption.appendChild(document.createTextNode(" " + option.textContent));
+    } else {
+      const iconData = getOptionIcon(select.id, option.value, option.textContent);
+      if (iconData) {
+        const iconEl = document.createElement("i");
+        iconEl.className = "session-icon";
+        iconEl.style.backgroundColor = iconData.bgColor;
+        iconEl.style.color = iconData.iconColor;
+        iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${iconData.svgPath}</svg>`;
+        customOption.appendChild(iconEl);
+        customOption.appendChild(document.createTextNode(" " + option.textContent));
+      } else {
+        customOption.textContent = option.textContent;
+      }
+    }
+    
+    if (option.disabled) {
+      customOption.classList.add("is-disabled");
+      customOption.setAttribute("aria-disabled", "true");
+    }
+
+    if (option.selected) {
+      customOption.classList.add("is-selected");
+      customOption.setAttribute("aria-selected", "true");
+    }
+
+    customOption.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (option.disabled) return;
+      selectOption(select, index, trigger, wrapper, menu, isCountrySelect);
+    });
+
+    if (noResults && noResults.parentNode === listContainer) {
+      listContainer.insertBefore(customOption, noResults);
+    } else {
+      listContainer.appendChild(customOption);
+    }
+  });
+}
+
+function getOptionCache(listContainer) {
+  if (!listContainer._optionCache) {
+    listContainer._optionCache = Array.from(listContainer.querySelectorAll(".custom-select-option")).map(opt => ({
+      element: opt,
+      text: opt.textContent.toLowerCase(),
+      isDisabled: opt.classList.contains("is-disabled")
+    }));
+  }
+  return listContainer._optionCache;
+}
+
 function initCustomDropdowns() {
   const selects = document.querySelectorAll("select.form-select");
 
@@ -214,7 +299,6 @@ function initCustomDropdowns() {
     select.dataset.customDropdownInitialized = "true";
 
     const isCountrySelect = select.id === "addrCountry";
-    const options = Array.from(select.options);
 
     // 1. Create Wrapper
     const wrapper = document.createElement("div");
@@ -228,9 +312,19 @@ function initCustomDropdowns() {
     select.classList.add("custom-select-hidden");
 
     // 2. Create Trigger
-    const trigger = document.createElement("button");
-    trigger.type = "button";
+    const isCompleteName = select.id === "completeName";
+    let trigger;
+    if (isCompleteName) {
+      trigger = document.createElement("input");
+      trigger.type = "text";
+      trigger.autocomplete = "off";
+      trigger.spellcheck = false;
+    } else {
+      trigger = document.createElement("button");
+      trigger.type = "button";
+    }
     trigger.className = "custom-select-trigger";
+    trigger.setAttribute("role", "combobox");
     trigger.setAttribute("aria-haspopup", "listbox");
     trigger.setAttribute("aria-expanded", "false");
     
@@ -244,8 +338,8 @@ function initCustomDropdowns() {
     const menu = document.createElement("div");
     menu.className = "custom-select-options";
     
-    // Add Search Input if options count is > 5
-    const showSearch = options.length > 5;
+    // Add Search Input if options count is > 5 (and not completeName, which is a search input itself)
+    const showSearch = !isCompleteName && select.options.length > 5;
     let searchInput = null;
     let listContainer = menu;
 
@@ -272,58 +366,9 @@ function initCustomDropdowns() {
       menu.id = select.id ? `${select.id}-custom-menu` : "";
     }
     
-    // Populate Menu Options
-    options.forEach((option, index) => {
-      const customOption = document.createElement("div");
-      customOption.className = "custom-select-option";
-      customOption.setAttribute("role", "option");
-      customOption.setAttribute("data-value", option.value);
-      
-      // Set Option Content (with Flag or custom icon if applicable)
-      if (isCountrySelect && option.value && countryToIso[option.value]) {
-        const iso = countryToIso[option.value];
-        const flagImg = document.createElement("img");
-        flagImg.src = `https://flagcdn.com/w20/${iso}.png`;
-        flagImg.srcset = `https://flagcdn.com/w40/${iso}.png 2x`;
-        flagImg.width = 20;
-        flagImg.height = 15;
-        flagImg.alt = "";
-        flagImg.className = "country-flag-icon";
-        customOption.appendChild(flagImg);
-        customOption.appendChild(document.createTextNode(" " + option.textContent));
-      } else {
-        const iconData = getOptionIcon(select.id, option.value, option.textContent);
-        if (iconData) {
-          const iconEl = document.createElement("i");
-          iconEl.className = "session-icon";
-          iconEl.style.backgroundColor = iconData.bgColor;
-          iconEl.style.color = iconData.iconColor;
-          iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${iconData.svgPath}</svg>`;
-          customOption.appendChild(iconEl);
-          customOption.appendChild(document.createTextNode(" " + option.textContent));
-        } else {
-          customOption.textContent = option.textContent;
-        }
-      }
-      
-      if (option.disabled) {
-        customOption.classList.add("is-disabled");
-        customOption.setAttribute("aria-disabled", "true");
-      }
-
-      if (option.selected) {
-        customOption.classList.add("is-selected");
-        customOption.setAttribute("aria-selected", "true");
-      }
-
-      customOption.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (option.disabled) return;
-        selectOption(select, index, trigger, wrapper, menu, isCountrySelect);
-      });
-
-      listContainer.appendChild(customOption);
-    });
+    if (listContainer.id) {
+      trigger.setAttribute("aria-controls", listContainer.id);
+    }
 
     // Create "No Results" message element
     const noResults = document.createElement("div");
@@ -332,34 +377,48 @@ function initCustomDropdowns() {
     noResults.style.display = "none";
     listContainer.appendChild(noResults);
 
+    // Populate Menu Options
+    buildCustomOptionsList(select, listContainer, trigger, wrapper, menu, isCountrySelect, noResults);
+
     wrapper.appendChild(menu);
 
     // Search Input Filtering Listener
     if (searchInput) {
       searchInput.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        const optionEls = Array.from(listContainer.querySelectorAll(".custom-select-option"));
+        const value = e.target.value.toLowerCase();
+        const query = value.trim();
+        
+        const cached = getOptionCache(listContainer);
         let hasMatches = false;
 
-        optionEls.forEach(opt => {
-          if (opt.classList.contains("is-disabled") && opt.getAttribute("data-value") === "") {
-            opt.style.display = "none";
-            return;
-          }
-          const text = opt.textContent.toLowerCase();
-          if (text.includes(query)) {
-            opt.style.display = "";
-            hasMatches = true;
-          } else {
-            opt.style.display = "none";
-            opt.classList.remove("is-highlighted");
-          }
-        });
+        if (query.length < 2) {
+          cached.forEach(opt => {
+            opt.element.style.display = "";
+          });
+          hasMatches = true;
+        } else {
+          const hasMultipleWords = query.includes(" ");
+          const words = hasMultipleWords ? query.split(/\s+/) : null;
+
+          cached.forEach(opt => {
+            const match = hasMultipleWords
+              ? words.every(word => opt.text.includes(word))
+              : opt.text.includes(query);
+
+            if (match) {
+              opt.element.style.display = "";
+              hasMatches = true;
+            } else {
+              opt.element.style.display = "none";
+              opt.element.classList.remove("is-highlighted");
+            }
+          });
+        }
 
         noResults.style.display = hasMatches ? "none" : "";
         
-        const visibleItems = optionEls.filter(o => o.style.display !== "none" && !o.classList.contains("is-disabled"));
-        highlightOption(listContainer, visibleItems[0]);
+        const firstVisible = cached.find(o => o.element.style.display !== "none" && !o.isDisabled);
+        highlightOption(listContainer, firstVisible ? firstVisible.element : null, trigger);
       });
       
       searchInput.addEventListener("click", (e) => {
@@ -367,20 +426,78 @@ function initCustomDropdowns() {
       });
     }
 
-    // Toggle Menu
-    trigger.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = wrapper.classList.contains("is-open");
-      closeAllDropdowns();
-      if (!isOpen) {
-        openDropdown(wrapper, trigger, menu);
-      } else {
-        closeDropdown(wrapper, trigger, menu);
-      }
-    });
+    // Toggle/Open Menu
+    if (isCompleteName) {
+      const openIfNeeded = (e) => {
+        e.stopPropagation();
+        if (wrapper._blockNextOpen) {
+          return;
+        }
+        if (e.type === "focus" && e.relatedTarget && wrapper.contains(e.relatedTarget)) {
+          return;
+        }
+        if (!wrapper.classList.contains("is-open")) {
+          closeAllDropdowns();
+          openDropdown(wrapper, trigger, menu);
+        }
+      };
+      trigger.addEventListener("focus", openIfNeeded);
+      trigger.addEventListener("click", openIfNeeded);
+
+      trigger.addEventListener("input", (e) => {
+        if (!wrapper.classList.contains("is-open")) {
+          openDropdown(wrapper, trigger, menu);
+        }
+        const value = e.target.value.toLowerCase();
+        const query = value.trim();
+        
+        const cached = getOptionCache(listContainer);
+        let hasMatches = false;
+
+        const hasMultipleWords = query.includes(" ");
+        const words = hasMultipleWords ? query.split(/\s+/) : null;
+
+        cached.forEach(opt => {
+          const match = query === "" || (hasMultipleWords
+            ? words.every(word => opt.text.includes(word))
+            : opt.text.includes(query));
+
+          if (match) {
+            opt.element.style.display = "";
+            hasMatches = true;
+          } else {
+            opt.element.style.display = "none";
+            opt.element.classList.remove("is-highlighted");
+          }
+        });
+
+        noResults.style.display = hasMatches ? "none" : "";
+        
+        const firstVisible = cached.find(o => o.element.style.display !== "none" && !o.isDisabled);
+        highlightOption(listContainer, firstVisible ? firstVisible.element : null, trigger);
+      });
+    } else {
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = wrapper.classList.contains("is-open");
+        closeAllDropdowns();
+        if (!isOpen) {
+          openDropdown(wrapper, trigger, menu);
+        } else {
+          closeDropdown(wrapper, trigger, menu);
+        }
+      });
+    }
 
     // Observer for validation states and programmatic changes
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((mutations) => {
+      let rebuildNeeded = false;
+      mutations.forEach(mutation => {
+        if (mutation.type === "childList") {
+          rebuildNeeded = true;
+        }
+      });
+
       if (select.classList.contains("is-error")) {
         wrapper.classList.add("is-error");
       } else {
@@ -392,6 +509,10 @@ function initCustomDropdowns() {
         wrapper.classList.remove("is-valid");
       }
       
+      if (rebuildNeeded) {
+        buildCustomOptionsList(select, listContainer, trigger, wrapper, menu, isCountrySelect, noResults);
+      }
+
       const currOption = select.options[select.selectedIndex];
       if (currOption) {
         updateTriggerContent(trigger, currOption, isCountrySelect, select.id);
@@ -409,7 +530,26 @@ function initCustomDropdowns() {
         });
       }
     });
-    observer.observe(select, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(select, { attributes: true, attributeFilter: ["class"], childList: true });
+
+    // Sync value if select changes programmatically
+    select.addEventListener("change", () => {
+      const currOption = select.options[select.selectedIndex];
+      if (currOption) {
+        updateTriggerContent(trigger, currOption, isCountrySelect, select.id);
+        Array.from(listContainer.children).forEach((customOpt, idx) => {
+          if (customOpt.classList.contains("custom-select-option")) {
+            if (idx === select.selectedIndex) {
+              customOpt.classList.add("is-selected");
+              customOpt.setAttribute("aria-selected", "true");
+            } else {
+              customOpt.classList.remove("is-selected");
+              customOpt.setAttribute("aria-selected", "false");
+            }
+          }
+        });
+      }
+    });
 
     select.addEventListener("focus", () => {
       trigger.focus();
@@ -417,17 +557,28 @@ function initCustomDropdowns() {
 
     // Keyboard navigation
     const handleKeyDown = (e) => {
-      const items = Array.from(listContainer.querySelectorAll(".custom-select-option:not(.is-disabled)"))
-                         .filter(o => o.style.display !== "none");
-      const currentIndex = items.indexOf(listContainer.querySelector(".custom-select-option.is-highlighted"));
       const isMenuOpen = wrapper.classList.contains("is-open");
 
       if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
+        if (e.key === " " && (document.activeElement === searchInput || isCompleteName)) {
+          return; // Allow typing space in search field or completeName input
+        }
         e.preventDefault();
         
+        const cached = getOptionCache(listContainer);
+        const items = [];
+        for (let i = 0; i < cached.length; i++) {
+          const o = cached[i];
+          if (!o.isDisabled && o.element.style.display !== "none") {
+            items.push(o.element);
+          }
+        }
+
+        const currentIndex = items.indexOf(listContainer.querySelector(".custom-select-option.is-highlighted"));
+
         if (!isMenuOpen) {
           openDropdown(wrapper, trigger, menu);
-          highlightOption(listContainer, listContainer.querySelector(".custom-select-option.is-selected") || items[0]);
+          highlightOption(listContainer, listContainer.querySelector(".custom-select-option.is-selected") || items[0], trigger);
           return;
         }
 
@@ -450,7 +601,7 @@ function initCustomDropdowns() {
           nextIdx = (currentIndex - 1 + items.length) % items.length;
         }
         
-        highlightOption(listContainer, items[nextIdx]);
+        highlightOption(listContainer, items[nextIdx], trigger);
       } else if (e.key === "Escape" || e.key === "Tab") {
         if (isMenuOpen) {
           closeDropdown(wrapper, trigger, menu);
@@ -470,6 +621,10 @@ function initCustomDropdowns() {
 }
 
 function updateTriggerContent(trigger, option, isCountrySelect, selectId) {
+  if (trigger.tagName === "INPUT") {
+    trigger.value = option ? option.textContent : "";
+    return;
+  }
   trigger.innerHTML = "";
   if (!option) return;
 
@@ -518,11 +673,30 @@ function openDropdown(wrapper, trigger, menu) {
   
   const searchInput = menu.querySelector(".custom-select-search");
   if (searchInput) {
-    searchInput.value = "";
-    searchInput.dispatchEvent(new Event("input"));
+    const listContainer = menu.querySelector(".custom-select-options-list");
+    if (listContainer) {
+      listContainer._optionCache = null;
+    }
+    if (searchInput.value !== "") {
+      searchInput.value = "";
+      searchInput.dispatchEvent(new Event("input"));
+    }
     setTimeout(() => searchInput.focus(), 50);
   } else {
-    const selectedItem = menu.querySelector(".custom-select-option.is-selected");
+    const listContainer = menu.querySelector(".custom-select-options-list") || menu;
+    if (trigger.tagName === "INPUT") {
+      listContainer._optionCache = null;
+      const cached = getOptionCache(listContainer);
+      cached.forEach(opt => {
+        opt.element.style.display = "";
+      });
+      const noResults = menu.querySelector(".custom-select-no-results");
+      if (noResults) noResults.style.display = "none";
+      setTimeout(() => {
+        trigger.select();
+      }, 50);
+    }
+    const selectedItem = listContainer.querySelector(".custom-select-option.is-selected");
     if (selectedItem) {
       selectedItem.scrollIntoView({ block: "nearest" });
     }
@@ -530,12 +704,27 @@ function openDropdown(wrapper, trigger, menu) {
 }
 
 function closeDropdown(wrapper, trigger, menu) {
+  const isCompleteName = trigger.tagName === "INPUT";
+  const focusWasInside = wrapper.contains(document.activeElement);
   wrapper.classList.remove("is-open");
   trigger.setAttribute("aria-expanded", "false");
+  trigger.removeAttribute("aria-activedescendant");
   
   const listContainer = menu.querySelector(".custom-select-options-list") || menu;
   const highlighted = listContainer.querySelector(".custom-select-option.is-highlighted");
   if (highlighted) highlighted.classList.remove("is-highlighted");
+
+  if (isCompleteName) {
+    const select = wrapper.querySelector("select");
+    if (select) {
+      const selectedOption = select.options[select.selectedIndex];
+      updateTriggerContent(trigger, selectedOption, false, select.id);
+    }
+  }
+
+  if (focusWasInside) {
+    trigger.focus();
+  }
 }
 
 function closeAllDropdowns() {
@@ -546,13 +735,18 @@ function closeAllDropdowns() {
   });
 }
 
-function highlightOption(listContainer, targetOption) {
+function highlightOption(listContainer, targetOption, trigger) {
   listContainer.querySelectorAll(".custom-select-option.is-highlighted").forEach(el => {
     el.classList.remove("is-highlighted");
   });
   if (targetOption) {
     targetOption.classList.add("is-highlighted");
     targetOption.scrollIntoView({ block: "nearest" });
+    if (trigger && targetOption.id) {
+      trigger.setAttribute("aria-activedescendant", targetOption.id);
+    }
+  } else if (trigger) {
+    trigger.removeAttribute("aria-activedescendant");
   }
 }
 
@@ -576,6 +770,12 @@ function selectOption(select, index, trigger, wrapper, menu, isCountrySelect) {
     }
   });
 
+  wrapper._blockNextOpen = true;
   closeDropdown(wrapper, trigger, menu);
   trigger.focus();
+  setTimeout(() => {
+    wrapper._blockNextOpen = false;
+  }, 100);
 }
+
+

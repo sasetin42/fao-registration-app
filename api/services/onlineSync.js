@@ -24,10 +24,17 @@ export async function syncOnlineRegistrations() {
       
       let syncCount = 0;
       const allRegs = await supabase.select('registration_list') || [];
+      const processedEmails = new Set();
       
       for (const item of items) {
         const email = (item.email || '').trim().toLowerCase();
         if (!email) continue;
+        
+        if (processedEmails.has(email)) {
+          console.warn(`[Sync Service] Skipping duplicate email in current response batch: ${email}`);
+          continue;
+        }
+        processedEmails.add(email);
         
         const mappedData = {
           registration_type: item.registration_type || null,
@@ -56,7 +63,14 @@ export async function syncOnlineRegistrations() {
           registration_source: 'tiny_comet'
         };
         
-        const existing = allRegs.find(r => (r.email || '').trim().toLowerCase() === email);
+        const matches = allRegs.filter(r => (r.email || '').trim().toLowerCase() === email);
+        let existing = null;
+        if (matches.length > 0) {
+          existing = matches[0];
+          if (matches.length > 1) {
+            console.warn(`[Sync Service] Found ${matches.length} duplicate records in database for email: ${email}. Using first match (ID: ${existing.id}).`);
+          }
+        }
         
         if (existing) {
           // Update the record with any changes (e.g. name, designation, etc.) using supabase.update by ID

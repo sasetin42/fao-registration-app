@@ -11,7 +11,8 @@ import {
   deleteDoc, 
   writeBatch,
   orderBy,
-  limit
+  limit,
+  documentId
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
@@ -51,7 +52,11 @@ export async function select(collectionName, match = {}, selectCols = '*', opts 
   let constraints = [];
 
   for (const [k, v] of Object.entries(match)) {
-    constraints.push(where(k, "==", v));
+    if (k === 'id') {
+      constraints.push(where(documentId(), "==", v));
+    } else {
+      constraints.push(where(k, "==", v));
+    }
   }
 
   if (opts.order) {

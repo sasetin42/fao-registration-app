@@ -17,6 +17,14 @@ const iti = window.intlTelInput(phoneInput, {
 });
 
 /* ----- Helpers ----- */
+function toTitleCase(str) {
+  if (!str) return '';
+  return str.replace(/\b[a-zA-Z]/g, char => char.toUpperCase()).replace(/\b[a-zA-Z]+/g, word => {
+    if (word.length === 1) return word.toUpperCase();
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+}
+
 function showError(input, errorEl) {
   input.classList.remove("is-valid");
   input.classList.add("is-error");
@@ -486,9 +494,10 @@ async function fetchAndPopulateMembers() {
       }
 
       data.data.forEach(member => {
+        const formattedName = toTitleCase(member.full_name);
         const opt = document.createElement("option");
-        opt.value = member.full_name;
-        opt.textContent = member.full_name;
+        opt.value = formattedName;
+        opt.textContent = formattedName;
         opt.dataset.email = member.email || "";
         opt.dataset.phone = member.phone || "";
         completeNameSelect.appendChild(opt);
