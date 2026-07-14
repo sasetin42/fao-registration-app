@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const API_BASE = '/v1/admin';
     let allRegistrations = [];
+    let activeTab = 'all';
 
     // --- Custom Alert, Confirm & Toast Notification System ---
     const showToast = (message, type = 'success') => {
@@ -281,20 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Setup Details Tabs
-            const tabBtns = document.querySelectorAll('.modal-tab-btn');
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const tabId = btn.dataset.tab;
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    const targetContent = document.getElementById(tabId);
-                    if (targetContent) targetContent.classList.add('active');
-                });
-            });
         };
 
         initPremiumShell();
@@ -478,6 +465,11 @@ document.addEventListener('DOMContentLoaded', () => {
             updateBatchActionsBar();
 
             const filtered = allRegistrations.filter(r => {
+                // Tab Filter
+                const source = r.registration_source || 'local';
+                if (activeTab === 'local' && source !== 'local') return false;
+                if (activeTab === 'tiny_comet' && source !== 'tiny_comet') return false;
+
                 const name = `${r.first_name || ''} ${r.last_name || ''}`.toLowerCase();
                 const email = (r.email || '').toLowerCase();
                 const matchSearch = name.includes(search) || email.includes(search);
@@ -490,6 +482,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 return matchSearch && matchType && matchCountry;
             });
+
+            // Update badge counts
+            const countAll = allRegistrations.length;
+            const countLocal = allRegistrations.filter(r => (r.registration_source || 'local') === 'local').length;
+            const countSync = allRegistrations.filter(r => r.registration_source === 'tiny_comet').length;
+
+            const badgeAll = document.getElementById('badge-all');
+            const badgeLocal = document.getElementById('badge-local');
+            const badgeSync = document.getElementById('badge-tiny_comet');
+
+            if (badgeAll) badgeAll.textContent = countAll;
+            if (badgeLocal) badgeLocal.textContent = countLocal;
+            if (badgeSync) badgeSync.textContent = countSync;
 
             // Update record count text
             const recordCountText = document.getElementById('recordCountText');
@@ -553,8 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             </button>
                             <div class="dropdown-menu" id="dropdown-${r.id}">
                                 <button class="dropdown-item view-btn" data-id="${r.id}">View Details</button>
-                                ${r.approval_status !== 1 ? `<button class="dropdown-item text-success approve-btn" data-id="${r.id}">Approve</button>` : ''}
-                                ${r.approval_status !== -1 ? `<button class="dropdown-item text-warning reject-btn" data-id="${r.id}">Reject</button>` : ''}
                                 <button class="dropdown-item text-danger del-btn" data-id="${r.id}">Delete</button>
                             </div>
                         </div>
@@ -628,7 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Batch Actions ---
         const getSelectedIds = () => {
-            return Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.dataset.id));
+            return Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.dataset.id);
         };
 
         const handleBatchStatus = async (status) => {
@@ -694,12 +697,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Attach Batch buttons events
-        const batchApproveBtn = document.getElementById('batchApproveBtn');
-        const batchRejectBtn = document.getElementById('batchRejectBtn');
         const batchDeleteBtn = document.getElementById('batchDeleteBtn');
 
-        if (batchApproveBtn) batchApproveBtn.addEventListener('click', () => handleBatchStatus(1));
-        if (batchRejectBtn) batchRejectBtn.addEventListener('click', () => handleBatchStatus(-1));
         if (batchDeleteBtn) batchDeleteBtn.addEventListener('click', handleBatchDelete);
 
         // --- CSV Export ---
@@ -777,6 +776,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInput) searchInput.addEventListener('input', renderTable);
         if (filterType) filterType.addEventListener('change', renderTable);
         if (filterCountry) filterCountry.addEventListener('change', renderTable);
+
+        // Registration source tabs listeners
+        const tabButtons = document.querySelectorAll('.registration-tabs-container .tab-btn');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeTab = btn.getAttribute('data-tab') || 'all';
+                renderTable();
+            });
+        });
         if (refreshBtn) {
             refreshBtn.addEventListener('click', async () => {
                 const originalHTML = refreshBtn.innerHTML;
@@ -833,70 +843,151 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // --- Event Registration Handlers ---
+        const openRegistrationBtn = document.getElementById('openRegistrationBtn');
+        if (openRegistrationBtn) {
+            openRegistrationBtn.addEventListener('click', () => {
+                window.open('/', '_blank');
+            });
+        }
+
+        const syncRegistrationsBtn = document.getElementById('syncRegistrationsBtn');
+        if (syncRegistrationsBtn) {
+            syncRegistrationsBtn.addEventListener('click', async () => {
+                const originalHTML = syncRegistrationsBtn.innerHTML;
+                syncRegistrationsBtn.disabled = true;
+                syncRegistrationsBtn.innerHTML = `
+                    <svg class="animate-spin" style="animation: spin 1s linear infinite; margin-right: 4px; display: inline-block; vertical-align: middle;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    Syncing...
+                `;
+                
+                try {
+                    const res = await fetch(`${API_BASE}/registrations/sync-online`, {
+                        method: 'POST',
+                        headers: authHeaders
+                    });
+                    const data = await res.json();
+                    
+                    if (res.ok && data.success) {
+                        showToast(`Synced successfully! ${data.count ?? 0} registrations updated/added.`, 'success');
+                        await loadDashboard();
+                    } else {
+                        showToast('Failed to sync online registrations.', 'error');
+                    }
+                } catch (err) {
+                    console.error('Error syncing online registrations:', err);
+                    showToast('Failed to sync online registrations.', 'error');
+                } finally {
+                    syncRegistrationsBtn.disabled = false;
+                    syncRegistrationsBtn.innerHTML = originalHTML;
+                }
+            });
+        }
+
         // --- Actions ---
         const handleView = (e) => {
-            const id = parseInt(e.currentTarget.dataset.id);
+            const id = e.currentTarget.dataset.id;
             const user = allRegistrations.find(r => r.id === id);
             if (!user) return;
 
+            const initials = ((user.first_name || '').charAt(0) + (user.last_name || '').charAt(0)).toUpperCase() || '??';
+            document.getElementById('modalUserAvatar').textContent = initials;
+
+            const fullName = `${user.prefix || ''} ${user.first_name || ''} ${user.last_name || ''}`.replace(/\s+/g, ' ').trim() || user.full_name || 'N/A';
+            document.getElementById('modalUserName').textContent = fullName;
+
+            document.getElementById('modalUserBadge').textContent = user.registration_type || 'Participant';
+            document.getElementById('modalUserRegisteredAt').textContent = formatDateTime(user.created_at);
+
             const content = `
-                <div id="tab-overview" class="tab-content active">
-                    <div class="detail-grid">
-                        <div class="detail-row"><div class="detail-label">Prefix</div><div class="detail-value" style="text-transform: capitalize;">${user.prefix || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Full Name</div><div class="detail-value">${user.full_name || (user.first_name + ' ' + user.last_name)}</div></div>
-                        <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${user.email}</div></div>
-                        <div class="detail-row"><div class="detail-label">Mobile Number</div><div class="detail-value">${user.phone || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Nationality</div><div class="detail-value" style="text-transform: capitalize;">${user.nationality || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Company / Affiliation</div><div class="detail-value">${user.company || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Designation</div><div class="detail-value">${user.designation || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Country of Affiliation</div><div class="detail-value" style="text-transform: capitalize;">${user.address_country || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Registration Type</div><div class="detail-value" style="text-transform: capitalize;">${user.registration_type}</div></div>
+                <div class="modal-layout-grid">
+                    <div class="modal-two-col">
+                        <!-- Personal Info Card -->
+                        <div class="modal-card">
+                            <h3 class="modal-card-title">Personal Information</h3>
+                            <div class="modal-card-body">
+                                <div class="modal-info-row">
+                                    <span class="info-label">Age</span>
+                                    <span class="info-value">${user.age_range || 'N/A'}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="info-label">Gender</span>
+                                    <span class="info-value" style="text-transform: capitalize;">${user.gender || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Card -->
+                        <div class="modal-card">
+                            <h3 class="modal-card-title">Contact</h3>
+                            <div class="modal-card-body">
+                                <div class="modal-info-row">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value email-value">${user.email || 'N/A'}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="info-label">Mobile</span>
+                                    <span class="info-value">${user.phone || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div id="tab-attendance" class="tab-content">
-                    <div class="detail-grid">
-                        <div class="detail-row"><div class="detail-label">Attendance Mode</div><div class="detail-value" style="text-transform: capitalize;">${user.attendance_mode}</div></div>
-                        <div class="detail-row"><div class="detail-label">Attendance Days</div><div class="detail-value">${user.attendance_days || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Speaker Type</div><div class="detail-value" style="text-transform: capitalize;">${user.speaker_type || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Zoom Meeting ID(s)</div><div class="detail-value">${user.zoom_meeting_id || 'N/A'}</div></div>
+
+                    <!-- Affiliation Card -->
+                    <div class="modal-card full-width">
+                        <h3 class="modal-card-title">Affiliation</h3>
+                        <div class="modal-card-body block-layout">
+                            <div class="modal-info-row">
+                                <span class="info-label">Type</span>
+                                <span class="info-value" style="text-transform: capitalize;">${(user.affiliation || 'N/A').replace(/-/g, ' ')}</span>
+                            </div>
+                            <div class="modal-info-row">
+                                <span class="info-label">Organization</span>
+                                <span class="info-value">${user.company || 'N/A'}</span>
+                            </div>
+                            <div class="modal-info-row">
+                                <span class="info-label">Country of Affiliation</span>
+                                <span class="info-value" style="text-transform: capitalize;">${user.address_country || 'N/A'}</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div id="tab-logistics" class="tab-content">
-                    <div class="detail-grid">
-                        <div class="detail-row"><div class="detail-label">Dietary Preference</div><div class="detail-value" style="text-transform: capitalize;">${user.dietary || 'N/A'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Dietary Details</div><div class="detail-value">${user.dietary_details || 'None'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Visa Assistance Required</div><div class="detail-value">${user.visa_assistance == '1' || user.visa_assistance === true ? 'Yes' : 'No'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Field Trip Selection</div><div class="detail-value">${user.field_trip || 'None'}</div></div>
-                        <div class="detail-row"><div class="detail-label">Registered At</div><div class="detail-value">${user.created_at || 'N/A'}</div></div>
+
+                    <!-- Event Participation Card -->
+                    <div class="modal-card full-width">
+                        <h3 class="modal-card-title">Event Participation</h3>
+                        <div class="modal-card-body block-layout">
+                            <div class="modal-info-row">
+                                <span class="info-label">Country of Nationality</span>
+                                <span class="info-value" style="text-transform: capitalize;">${user.nationality || 'N/A'}</span>
+                            </div>
+                            <div class="modal-info-row">
+                                <span class="info-label">Attendance Mode</span>
+                                <span class="info-value-badge"><span class="badge badge-mode-${(user.attendance_mode || 'online').toLowerCase()}">${user.attendance_mode}</span></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
             document.getElementById('modalBodyContent').innerHTML = content;
-            // Activate first tab
-            const tabBtns = document.querySelectorAll('.modal-tab-btn');
-            if (tabBtns.length > 0) {
-                tabBtns.forEach(btn => btn.classList.remove('active'));
-                tabBtns[0].classList.add('active');
-            }
             document.getElementById('detailsModal').classList.remove('hidden');
         };
 
         const handleApprove = async (e) => {
-            const id = parseInt(e.currentTarget.dataset.id);
+            const id = e.currentTarget.dataset.id;
             const confirmed = await showConfirm('Approve Registration', 'Are you sure you want to approve this registration?', 'Approve', 'confirm');
             if (!confirmed) return;
             await updateStatus(id, 1);
         };
 
         const handleReject = async (e) => {
-            const id = parseInt(e.currentTarget.dataset.id);
+            const id = e.currentTarget.dataset.id;
             const confirmed = await showConfirm('Reject Registration', 'Are you sure you want to reject this registration?', 'Reject', 'warning');
             if (!confirmed) return;
             await updateStatus(id, -1);
         };
 
         const handleDelete = async (e) => {
-            const id = parseInt(e.currentTarget.dataset.id);
+            const id = e.currentTarget.dataset.id;
             const confirmed = await showConfirm('Delete Registration', 'Are you sure you want to permanently delete this registration?', 'Delete', 'critical');
             if (!confirmed) return;
             
@@ -939,9 +1030,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Modal close
         document.getElementById('closeModalBtn').addEventListener('click', () => {
-            document.getElementById('detailsModal').classList.add('hidden');
-        });
-        document.getElementById('modalCloseBtn').addEventListener('click', () => {
             document.getElementById('detailsModal').classList.add('hidden');
         });
 

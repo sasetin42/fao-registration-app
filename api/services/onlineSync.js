@@ -23,6 +23,7 @@ export async function syncOnlineRegistrations() {
       const items = Array.isArray(responseData) ? responseData : (responseData?.data || []);
       
       let syncCount = 0;
+      const allRegs = await supabase.select('registration_list') || [];
       
       for (const item of items) {
         const email = (item.email || '').trim().toLowerCase();
@@ -50,18 +51,19 @@ export async function syncOnlineRegistrations() {
           dietary: item.dietary_preference || null,
           dietary_details: item.dietary_details || null,
           media_queries: item.media_queries || null,
-          created_at: item.created_at || new Date().toISOString()
+          created_at: item.created_at || new Date().toISOString(),
+          approval_status: 1,
+          registration_source: 'tiny_comet'
         };
         
-        const existing = await supabase.select('registration_list', { email: email });
+        const existing = allRegs.find(r => (r.email || '').trim().toLowerCase() === email);
         
-        if (existing && existing.length > 0) {
-          // Update the record with any changes (e.g. name, designation, etc.) using supabase.update
-          await supabase.update('registration_list', mappedData, { email: email });
+        if (existing) {
+          // Update the record with any changes (e.g. name, designation, etc.) using supabase.update by ID
+          await supabase.update('registration_list', mappedData, { id: existing.id });
           syncCount++;
         } else {
-          // Insert it into registration_list with approval_status: '1' (Approved)
-          mappedData.approval_status = '1';
+          // Insert it into registration_list
           const inserted = await supabase.insert('registration_list', mappedData);
           
           if (inserted && inserted.length > 0) {

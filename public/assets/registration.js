@@ -470,9 +470,72 @@ async function loadSystemSettings() {
   }
 }
 
+/* ----- Fetch and Populate Members ----- */
+async function fetchAndPopulateMembers() {
+  const completeNameSelect = document.getElementById("completeName");
+  if (!completeNameSelect) return;
+
+  try {
+    const res = await fetch("/v1/members");
+    const data = await res.json();
+
+    if (data.success && Array.isArray(data.data)) {
+      // Clear existing options except the first one
+      while (completeNameSelect.options.length > 1) {
+        completeNameSelect.remove(1);
+      }
+
+      data.data.forEach(member => {
+        const opt = document.createElement("option");
+        opt.value = member.full_name;
+        opt.textContent = member.full_name;
+        opt.dataset.email = member.email || "";
+        opt.dataset.phone = member.phone || "";
+        completeNameSelect.appendChild(opt);
+      });
+    }
+  } catch (err) {
+    console.error("Error loading members:", err);
+  }
+}
+
+// Add change listener to completeName dropdown
+const completeNameSelect = document.getElementById("completeName");
+if (completeNameSelect) {
+  completeNameSelect.addEventListener("change", () => {
+    const selectedOption = completeNameSelect.options[completeNameSelect.selectedIndex];
+    if (selectedOption && selectedOption.value !== "") {
+      const email = selectedOption.dataset.email || "";
+      const phone = selectedOption.dataset.phone || "";
+
+      const emailInput = document.getElementById("email");
+      if (emailInput) {
+        emailInput.value = email;
+      }
+
+      if (phoneInput && phone) {
+        iti.setNumber(phone);
+      }
+
+      // Re-validate the name, email, and phone fields immediately
+      validateIfVisible("completeName");
+      validateIfVisible("email");
+
+      const phoneValid = validators.phone();
+      if (phoneInput) {
+        phoneInput.classList.toggle("is-error", !phoneValid);
+        phoneInput.classList.toggle("is-valid", phoneValid);
+      }
+      if (phoneWrapper) phoneWrapper.classList.toggle("is-error", !phoneValid);
+      if (phoneErr) phoneErr.classList.toggle("visible", !phoneValid);
+    }
+  });
+}
+
 // Initial Call
 loadSystemSettings();
 fetchZoomMeetings();
+fetchAndPopulateMembers();
 initEventCountdown();
 
 /* ----- Event Countdown Timer ----- */
